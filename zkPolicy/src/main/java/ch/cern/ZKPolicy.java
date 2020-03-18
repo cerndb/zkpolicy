@@ -3,7 +3,6 @@ package ch.cern;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.ACL;
 
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.File;
@@ -28,7 +27,7 @@ public final class ZKPolicy {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-        // first addauth for the superuser
+        // first addauth for the superuser.
         zkeeper.addAuthInfo("digest", "super:super123".getBytes());
 
         byte[] b = null;
@@ -85,30 +84,24 @@ public final class ZKPolicy {
         System.out.print(zktree.queryTree("/", queryDigest));
         System.out.print(zktree.queryFind("/", queryDigest));
 
-        System.out.println("Loading Custom jar from classpath");
-        
+        System.out.println("Loading Custom jar at runtime");
 
-File file = new File("/home/arvchristos/Documents/CERN/java_implementation/plugins/target/plugins-1.0-SNAPSHOT.jar");
+        // Import custom jar plugin that implements the ZKQuery interface
+        // jarPath and queryClass should hold values derived from args[]
+        String jarPath = "/home/arvchristos/Documents/CERN/java_implementation/pluginsecond/target/pluginsecond-1.0-SNAPSHOT.jar"; 
+        String queryClass = "org.cern.QueryChristos";
+
+        File file = new File(jarPath);
         try {
-            URLClassLoader child = new URLClassLoader(
-                new URL[] {file.toURI().toURL()},
-                ZKPolicy.class.getClassLoader()
-                );
-            Class classToLoad = Class.forName("org.cern.QueryChristos", true, child);
-            //Method method = classToLoad.getDeclaredMethod("myMethod");
+            URLClassLoader child = new URLClassLoader(new URL[] { file.toURI().toURL() },
+                    ZKPolicy.class.getClassLoader());
+            Class<?> classToLoad = Class.forName(queryClass, true, child);
             Object instance = classToLoad.newInstance();
-            
-            //Object result = method.invoke(instance);
-            System.out.print(zktree.queryTree("/", (ZKQuery)instance));
+            System.out.print(zktree.queryTree("/", (ZKQuery) instance));
         } catch (Exception e) {
             e.printStackTrace();
-            //TODO: handle exception
         }
-        
 
-
-
-    } 
+    }
 
 }
-
