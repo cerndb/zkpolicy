@@ -3,14 +3,15 @@ package ch.cern;
 import org.apache.zookeeper.data.ACL;
 
 /**
- * Class that augments ZooKeeper ACL with field checking and comparison functionality
+ * Class that augments ZooKeeper ACL with field checking and comparison
+ * functionality
  */
 public class ACLaugment {
-    private  ACL acl ;
-    
+    private ACL acl;
+
     /**
      * 
-     * @param initACL ZooKeeper ACL object 
+     * @param initACL ZooKeeper ACL object
      */
     public ACLaugment(ACL initACL) {
         this.acl = initACL;
@@ -18,6 +19,7 @@ public class ACLaugment {
 
     /**
      * Check if this ACL provides READ permission
+     * 
      * @return True if ACL has the READ bit enabled
      */
     public boolean hasRead() {
@@ -26,6 +28,7 @@ public class ACLaugment {
 
     /**
      * Check if this ACL provides WRITE permission
+     * 
      * @return True if ACL has the WRITE bit enabled
      */
     public boolean hasWrite() {
@@ -34,6 +37,7 @@ public class ACLaugment {
 
     /**
      * Check if this ACL provides CREATE permission
+     * 
      * @return True if ACL has the CREATE bit enabled
      */
     public boolean hasCreate() {
@@ -42,6 +46,7 @@ public class ACLaugment {
 
     /**
      * Check if this ACL provides DELETE permission
+     * 
      * @return True if ACL has the DELETE bit enabled
      */
     public boolean hasDelete() {
@@ -50,6 +55,7 @@ public class ACLaugment {
 
     /**
      * Check if this ACL provides ADMIN permission
+     * 
      * @return True if ACL has the ADMIN bit enabled
      */
     public boolean hasAdmin() {
@@ -58,6 +64,7 @@ public class ACLaugment {
 
     /**
      * Get scheme field of ACL
+     * 
      * @return Scheme of ACL
      */
     public String getScheme() {
@@ -66,10 +73,11 @@ public class ACLaugment {
 
     /**
      * Get id field of ACL
+     * 
      * @return ID of ACL
      */
     public String getId() {
         return this.acl.getId().getId();
     }
-   
+
 }
