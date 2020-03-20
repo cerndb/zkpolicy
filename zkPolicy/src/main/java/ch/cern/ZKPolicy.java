@@ -1,14 +1,14 @@
 package ch.cern;
 
-import org.apache.zookeeper.*;
-import org.apache.zookeeper.data.ACL;
-
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.io.File;
-//import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.data.ACL;
 
 public final class ZKPolicy {
     private ZKPolicy() {
@@ -88,7 +88,7 @@ public final class ZKPolicy {
 
         // Import custom jar plugin that implements the ZKQuery interface
         // jarPath and queryClass should hold values derived from args[]
-        String jarPath = "/home/arvchristos/Documents/CERN/java_implementation/pluginsecond/target/pluginsecond-1.0-SNAPSHOT.jar"; 
+        String jarPath = "/home/arvchristos/Documents/CERN/java_implementation/pluginsecond/target/pluginsecond-1.0-SNAPSHOT.jar";
         String queryClass = "org.cern.QueryChristos";
 
         File file = new File(jarPath);

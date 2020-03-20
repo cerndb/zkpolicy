@@ -28,8 +28,10 @@ public class ZKTree {
     }
 
     /**
-     * Function to return a tree view of the selected sub-tree with query matching nodes colored green and non matching red 
-     * @param path Path from where to start the recursive query search
+     * Function to return a tree view of the selected sub-tree with query matching
+     * nodes colored green and non matching red
+     * 
+     * @param path  Path from where to start the recursive query search
      * @param query The actual query to be executed, in lambda function form
      * @return String ready to be printed in tree format.
      * @throws KeeperException
@@ -76,14 +78,16 @@ public class ZKTree {
     }
 
     /**
-     * Function to return a list of the selected sub-tree with the full path of query matching nodes
-     * @param path path Path from where to start the recursive query search
+     * Function to return a list of the selected sub-tree with the full path of
+     * query matching nodes
+     * 
+     * @param path  path Path from where to start the recursive query search
      * @param query query The actual query to be executed, in lambda function form
      * @return String ready to be printed in list format.
      * @throws KeeperException
      * @throws InterruptedException
      */
-    public String queryFind(String path, ZKQuery query) throws KeeperException, InterruptedException{
+    public String queryFind(String path, ZKQuery query) throws KeeperException, InterruptedException {
         List<String> output = new ArrayList<String>();
         this.queryFindInt(output, path, "", "", query);
         return '\n' + String.join("", output) + '\n';
@@ -98,12 +102,12 @@ public class ZKTree {
 
         if (query.query(znodeACLList)) {
 
-            output.add(path + "\n");    
-        } 
-        if (path.equals("/")){
+            output.add(path + "\n");
+        }
+        if (path.equals("/")) {
             path = "";
         }
-        
+
         Collections.sort(children);
         for (String child : children) {
             this.queryFindInt(output, path + "/" + child, indent, child, query);
