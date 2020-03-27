@@ -2,106 +2,92 @@ package ch.cern;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Properties;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.ParseException;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
-import org.apache.zookeeper.data.ACL;
 
 public final class ZKPolicy {
-    private ZKPolicy() {
-    }
-
     /**
      * Main function of the ZK tool
-     * 
-     * @param args The arguments of the program.
+     *
+     * @param args CLI arguments.
      */
     public static void main(String[] args) throws KeeperException, InterruptedException {
-        ZKConnection zkConnection = new ZKConnection();
-        ZooKeeper zkeeper = null;
+        // Parse the command line arguments as defined in ZKPolicyCli.DefinitionStage
+        ZKPolicyCli zkpcli;
+        CommandLine cl;
+
+        zkpcli = new ZKPolicyCli(args);
         try {
-            zkeeper = zkConnection.connect("localhost");
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        // first addauth for the superuser.
-        zkeeper.addAuthInfo("digest", "super:super123".getBytes());
 
-        byte[] b = null;
-        b = zkeeper.getData("/newznode", null, null);
-        ;
-        try {
-            System.out.println(new String(b, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        ZKTree zktree = new ZKTree(zkeeper);
-
-        // Use lambda function and ZKQuery interface
-        // example, just query every node that has at least one acl entry with create
-        // permissions
-        ZKQuery query = (aclList) -> {
-            for (ACL aclElement : aclList) {
-                ACLaugment aclAugment = new ACLaugment(aclElement);
-                if (aclAugment.hasAdmin()) {
-                    return true;
+            cl = zkpcli.ParseCl(zkpcli.optionsMetadata, true);
+            // First check for -h, -v using the first options set
+            if (cl.getOptions().length != 0) {
+                if (cl.hasOption("help")) {
+                    printHelp(zkpcli);
+                } else if (cl.hasOption("version")) {
+                    System.out.println("zkPolicy v" + getPackageVersion());
                 }
-
-            }
-            return false;
-        };
-
-        // example 2, print all nodes, export ZNode tree functionality
-        ZKQuery exportAll = (aclList) -> {
-            return true;
-        };
-
-        // example 3, get all nodes that use the digest scheme
-        ZKQuery queryDigest = (aclList) -> {
-            for (ACL aclElement : aclList) {
-                ACLaugment aclAugment = new ACLaugment(aclElement);
-                if (aclAugment.getScheme().equals("digest")) {
-                    return true;
+            } else {
+                cl = zkpcli.ParseCl(zkpcli.optionsFull, false);
+                if (cl.hasOption("query")) {
+                    executeQuery(cl);
                 }
-
             }
-            return false;
-        };
-
-        System.out.println("Example 1");
-        System.out.print(zktree.queryTree("/", query));
-        System.out.print(zktree.queryFind("/", query));
-
-        System.out.println("Example 2");
-        System.out.print(zktree.queryTree("/", exportAll));
-        System.out.print(zktree.queryFind("/", exportAll));
-
-        System.out.println("Example 3");
-        System.out.print(zktree.queryTree("/", queryDigest));
-        System.out.print(zktree.queryFind("/", queryDigest));
-
-        System.out.println("Loading Custom jar at runtime");
-
-        // Import custom jar plugin that implements the ZKQuery interface
-        // jarPath and queryClass should hold values derived from args[]
-        String jarPath = "/home/arvchristos/Documents/CERN/java_implementation/pluginsecond/target/pluginsecond-1.0-SNAPSHOT.jar";
-        String queryClass = "org.cern.QueryChristos";
-
-        File file = new File(jarPath);
-        try {
-            URLClassLoader child = new URLClassLoader(new URL[] { file.toURI().toURL() },
-                    ZKPolicy.class.getClassLoader());
-            Class<?> classToLoad = Class.forName(queryClass, true, child);
-            Object instance = classToLoad.newInstance();
-            System.out.print(zktree.queryTree("/", (ZKQuery) instance));
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (ParseException | IOException e) {
+            System.out.println(e.getMessage());
+            printHelp(zkpcli);
         }
-
     }
 
+    private static void executeQuery(CommandLine cl) {
+        ZKConnection zkServer;
+        ZKTree zktree = null;
+        ZooKeeper zkClient;
+
+        zkServer = new ZKConnection();
+        ZKDefaultQuery zkDefaultQuery = new ZKDefaultQuery();
+        try {
+            if (cl.getOptionValue("query").equals("listDefaults")) {
+                zkDefaultQuery.listDefaults();
+            } else {
+                File file = new File(cl.getOptionValue("config"));
+                ObjectMapper om = new ObjectMapper(new YAMLFactory());
+                ZKConfig config = om.readValue(file, ZKConfig.class);
+                zkClient = zkServer.connect(config.getZkservers(), config.getTimeout());
+                zktree = new ZKTree(zkClient, config);
+                if (cl.hasOption("list")) {
+                    System.out.println(zktree.queryFind("/", cl.getOptionValues("query")));
+                } else {
+                    System.out.println(zktree.queryTree("/", cl.getOptionValues("query")));
+                }
+                zkServer.close();
+            }
+        } catch (NoSuchMethodException | SecurityException e) {
+            System.out.println("No such method: " + cl.getOptionValue("query"));
+            System.out.println("Please consult the list of default queries using the [-q listDefaults] parameter");
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | KeeperException
+                | InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void printHelp(ZKPolicyCli zkpcli) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("zkpolicy", zkpcli.optionsFull, true);
+    }
+
+    private static String getPackageVersion() throws IOException {
+        final Properties properties = new Properties();
+        properties.load(ZKPolicy.class.getClassLoader().getResourceAsStream("project.properties"));
+        return properties.getProperty("version");
+    }
 }

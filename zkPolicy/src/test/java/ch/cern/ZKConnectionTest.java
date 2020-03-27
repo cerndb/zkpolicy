@@ -32,15 +32,14 @@ public class ZKConnectionTest {
     @Test
     public void testConnect() throws Exception {
         ZKConnection zkConnection = new ZKConnection();
-        ZooKeeper zkeeper = zkConnection.connect("127.0.0.1:2281");
+        ZooKeeper zkeeper = zkConnection.connect("127.0.0.1:2281", 2000);
         Assertions.assertEquals(States.CONNECTED, zkeeper.getState());
     }
-
 
     @Test
     public void testClose() throws Exception {
         ZKConnection zkConnection = new ZKConnection();
-        ZooKeeper zkeeper = zkConnection.connect("127.0.0.1:2281");
+        ZooKeeper zkeeper = zkConnection.connect("127.0.0.1:2281", 2000);
         zkConnection.close();
         Assertions.assertEquals(States.CLOSED, zkeeper.getState());
     }

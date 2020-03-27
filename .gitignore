@@ -26,3 +26,12 @@ buildNumber.properties
 .project
 .vscode/
 
+#
+# Extensions
+#
+TODO
+
+#
+# Others
+#
+.factorypath
