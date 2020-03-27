@@ -33,19 +33,18 @@ public class ZKTreeTest {
     }
 
     @Test
-    public void testZKTreeQueryTree() throws Exception {
+    public void testZKTreeQueryTreePreOrder() throws Exception {
         if (cli.checkExists().forPath("/crud") != null) {
             delete(cli, "/crud");
         }
         create(cli, "/crud/a", "a is a node".getBytes());
 
-        // All nodes satisfy this query
-        ZKQuery exportAll = (aclList) -> {
-            return true;
-        };
+        ZKConfig config = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, "green", "\u001B[32m",
+                "red", "\u001B[31m");
 
-        ZKTree zktree = new ZKTree(cli.getZookeeperClient().getZooKeeper());
-        Assertions.assertEquals(-196637193, zktree.queryTree("/", exportAll).hashCode());
+        ZKTree zktree = new ZKTree(cli.getZookeeperClient().getZooKeeper(), config);
+        String[] optionArgs = { "exportAll" };
+        Assertions.assertEquals(1168456046, zktree.queryTree("/", optionArgs).hashCode());
     }
 
     @Test
@@ -54,14 +53,13 @@ public class ZKTreeTest {
             delete(cli, "/crud");
         }
         create(cli, "/crud/a", "a is a node".getBytes());
-        // All nodes satisfy this query
-        ZKQuery exportAll = (aclList) -> {
-            return true;
-        };
 
-        ZKTree zktree = new ZKTree(cli.getZookeeperClient().getZooKeeper());
+        ZKConfig config = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, "green", "\u001B[32m",
+                "red", "\u001B[31m");
 
-        Assertions.assertEquals(-315108666, zktree.queryFind("/", exportAll).hashCode());
+        ZKTree zktree = new ZKTree(cli.getZookeeperClient().getZooKeeper(), config);
+        String[] optionArgs = { "exportAll" };
+        Assertions.assertEquals(-315108666, zktree.queryFind("/", optionArgs).hashCode());
     }
 
     public static void create(CuratorFramework client, String path, byte[] payload) throws Exception {

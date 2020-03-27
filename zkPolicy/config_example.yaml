@@ -1,0 +1,9 @@
+---
+timeout: 2000
+zkservers: "127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181"
+
+# colors for tree view output
+matchcolorname: "green"
+matchcolorvalue: "\u001B[32m"
+mismatchcolorname: "red"
+mismatchcolorvalue: "\u001B[31m"
