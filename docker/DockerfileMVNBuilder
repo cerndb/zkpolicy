@@ -1,0 +1,21 @@
+#
+#
+# Docker image for building java maven-based applications.
+#
+# Based on CERN CentOS 7.
+#
+#
+FROM gitlab-registry.cern.ch/linuxsupport/cc7-base
+
+MAINTAINER CERN IT department <it-dep-db-sas.cern.ch>
+
+RUN yum -y update; yum clean all
+
+RUN yum -y install \
+maven \
+java-1.8.0-openjdk
+
+RUN mkdir /build
+WORKDIR /build
+
+ENTRYPOINT /bin/bash
