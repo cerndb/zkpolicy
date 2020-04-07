@@ -1,0 +1,128 @@
+stages:
+  - build-docker-image
+  - validate
+  - test
+  - build
+  - build-rpm
+  - deploy
+
+variables:
+  PROJECT_NAME_DIR: "zkPolicy"
+
+default:
+  before_script:
+    - cd $PROJECT_NAME_DIR
+
+build-docker:
+  stage: build-docker-image
+  when: manual
+  only:
+    refs:
+      - ITHADOOP_767 # TODO: remove after testing
+      - testing
+      - qa
+  script:
+    - echo 'Build docker image...'
+    - echo ${STAGE}
+  variables:
+    DOCKER_FILE: docker/DockerfileMVNBuilder
+    TO: $CI_REGISTRY_IMAGE:mvn-builder
+  tags:
+    - docker-image-build
+
+checkstyle:
+  stage: validate
+  image: ${CI_REGISTRY_IMAGE}:mvn-builder
+  script:
+    - mvn validate
+  artifacts:
+    paths:
+      - ${PROJECT_NAME_DIR}/target/checkstyle*
+    expire_in: 1 week
+  tags:
+    - docker
+
+clean-mvn-build:
+  stage: test
+  image: ${CI_REGISTRY_IMAGE}:mvn-builder
+  script:
+    - mvn --quiet clean compile
+  tags:
+    - docker
+
+test:
+  stage: test
+  image: ${CI_REGISTRY_IMAGE}:mvn-builder
+  script:
+    - mvn --quiet test
+  artifacts:
+    paths:
+      - ${PROJECT_NAME_DIR}/target/surefire-reports
+    expire_in: 1 week
+  tags:
+    - docker
+
+build:
+  stage: build
+  image: ${CI_REGISTRY_IMAGE}:mvn-builder
+  except:
+    - qa
+    - master
+  script:
+    - mvn --quiet package -DskipTests
+  tags:
+    - docker
+  artifacts:
+    paths:
+      - target/
+    expire_in: 8 hour
+
+.koji_deps_template: &koji_deps
+  before_script:
+    - echo $KRB_PWD_RPM | kinit ${KRB_USER_RPM}@CERN.CH
+
+build-rpm-testing:
+  <<: *koji_deps
+  stage: build-rpm
+  image: gitlab-registry.cern.ch/db/cc7-base-koji
+  when: manual
+  except:
+    - qa
+    - master
+  script:
+    - make add-testing
+    - make kbuild
+  dependencies:
+    - build
+  tags:
+    - docker
+
+tag-qa:
+  <<: *koji_deps
+  stage: deploy
+  image: gitlab-registry.cern.ch/db/cc7-base-koji
+  when: manual
+  only:
+    - qa
+  script:
+    - make add-qa
+    - make tag-qa
+  allow_failure: false
+  dependencies: []
+  tags:
+    - docker
+
+tag-stable:
+  <<: *koji_deps
+  stage: deploy
+  image: gitlab-registry.cern.ch/db/cc7-base-koji
+  when: manual
+  only:
+    - master
+  script:
+    - make add-stable
+    - make tag-stable
+  allow_failure: false
+  dependencies: []
+  tags:
+    - docker
