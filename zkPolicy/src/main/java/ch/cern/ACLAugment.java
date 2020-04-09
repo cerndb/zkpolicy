@@ -1,11 +1,14 @@
 package ch.cern;
 
 import lombok.EqualsAndHashCode;
+
+import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
 
 /**
- * Class that augments ZooKeeper ACL with field checking and comparison functionality.
+ * Class that augments ZooKeeper ACL with field checking and comparison
+ * functionality.
  */
 @EqualsAndHashCode
 public class ACLAugment {
@@ -21,51 +24,24 @@ public class ACLAugment {
   }
 
   /**
-   * Construct ACLAugment from "scheme:id:permissions" string.
+   * Construct ACLAugment from "scheme:id:permissions" string
    *
-   * @param stringACL String in scheme:id:permissions format.
+   * @param stringACL String in scheme:id:permissions format
    */
   public ACLAugment(String stringACL) throws IllegalArgumentException {
-    Id id;
-    int perms = 0;
-    String idString = "";
-    String permString = "";
     if (stringACL == null) {
       throw new IllegalArgumentException("Null stringACL provided");
     }
-    String[] stringParts = stringACL.split(":");
-    // stringParts = scheme:id:permissions
-    switch (stringParts[0]) {
-      case "world":
-      case "ip":
-        idString = stringParts[1];
-        permString = stringParts[2];
-        break;
-      case "digest":
-      case "auth":
-        idString = stringParts[1] + ":" + stringParts[2];
-        permString = stringParts[3];
-        break;
-      default:
-        break;
+
+    int firstColon = stringACL.indexOf(':');
+    int lastColon = stringACL.lastIndexOf(':');
+    if (firstColon == -1 || lastColon == -1 || firstColon == lastColon) {
+      throw new IllegalArgumentException(stringACL + " does not have the form scheme:id:perm");
     }
-    id = new Id(stringParts[0], idString);
-    if (permString.contains("r")) {
-      perms += 0b00001;
-    }
-    if (permString.contains("w")) {
-      perms += 0b00010;
-    }
-    if (permString.contains("c")) {
-      perms += 0b00100;
-    }
-    if (permString.contains("d")) {
-      perms += 0b01000;
-    }
-    if (permString.contains("a")) {
-      perms += 0b10000;
-    }
-    this.acl = new ACL(perms, id);
+    ACL newAcl = new ACL();
+    newAcl.setId(new Id(stringACL.substring(0, firstColon), stringACL.substring(firstColon + 1, lastColon)));
+    newAcl.setPerms(getPermFromString(stringACL.substring(lastColon + 1)));
+    this.acl = newAcl;
   }
 
   /**
@@ -74,7 +50,7 @@ public class ACLAugment {
    * @return True if ACL has the READ bit enabled.
    */
   public boolean hasRead() {
-    return (this.acl.getPerms() & 1) > 0;
+    return (this.acl.getPerms() & ZooDefs.Perms.READ) > 0;
   }
 
   /**
@@ -83,7 +59,7 @@ public class ACLAugment {
    * @return True if ACL has the WRITE bit enabled.
    */
   public boolean hasWrite() {
-    return (this.acl.getPerms() & 2) > 0;
+    return (this.acl.getPerms() & ZooDefs.Perms.WRITE) > 0;
   }
 
   /**
@@ -92,7 +68,7 @@ public class ACLAugment {
    * @return True if ACL has the CREATE bit enabled.
    */
   public boolean hasCreate() {
-    return (this.acl.getPerms() & 4) > 0;
+    return (this.acl.getPerms() & ZooDefs.Perms.CREATE) > 0;
   }
 
   /**
@@ -101,7 +77,7 @@ public class ACLAugment {
    * @return True if ACL has the DELETE bit enabled.
    */
   public boolean hasDelete() {
-    return (this.acl.getPerms() & 8) > 0;
+    return (this.acl.getPerms() & ZooDefs.Perms.DELETE) > 0;
   }
 
   /**
@@ -110,7 +86,7 @@ public class ACLAugment {
    * @return True if ACL has the ADMIN bit enabled.
    */
   public boolean hasAdmin() {
-    return (this.acl.getPerms() & 16) > 0;
+    return (this.acl.getPerms() & ZooDefs.Perms.ADMIN) > 0;
   }
 
   /**
@@ -147,5 +123,33 @@ public class ACLAugment {
    */
   public ACL getACL() {
     return this.acl;
+  }
+
+  // From ZK 3.5.5 org.apache.zookeeper.cli.AclParser.java, not available on ZK
+  // 3.4
+  private static int getPermFromString(String permString) {
+    int perm = 0;
+    for (int i = 0; i < permString.length(); i++) {
+      switch (permString.charAt(i)) {
+        case 'r':
+          perm |= ZooDefs.Perms.READ;
+          break;
+        case 'w':
+          perm |= ZooDefs.Perms.WRITE;
+          break;
+        case 'c':
+          perm |= ZooDefs.Perms.CREATE;
+          break;
+        case 'd':
+          perm |= ZooDefs.Perms.DELETE;
+          break;
+        case 'a':
+          perm |= ZooDefs.Perms.ADMIN;
+          break;
+        default:
+          System.err.println("Unknown perm type: " + permString.charAt(i));
+      }
+    }
+    return perm;
   }
 }
