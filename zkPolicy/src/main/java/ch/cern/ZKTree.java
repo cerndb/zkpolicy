@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -36,6 +35,7 @@ public class ZKTree {
     /**
      *
      * @param zk A ZooKeeper instance that provides access to the ZNode tree
+     * @param config ZKPolicy configuration
      */
     public ZKTree(ZooKeeper zk, ZKConfig config) {
         this.zk = zk;
@@ -49,6 +49,8 @@ public class ZKTree {
      * Function to return a tree view of the selected sub-tree with query matching
      * nodes colored green and non matching red
      *
+     * @param queryName Query to be executed
+     * @param rootPath Root path of recursive traversal
      * @param queryACLs Query ACL parameters
      * @return String ready to be printed in tree format
      * @throws KeeperException
@@ -58,29 +60,29 @@ public class ZKTree {
      * @throws InvocationTargetException
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
+     * @throws NoSuchFieldException
      */
-    public String queryTree(String queryName, String rootPath, String[] queryACLs) throws KeeperException, InterruptedException, NoSuchMethodException,
-            SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public String queryTree(String queryName, String rootPath, String[] queryACLs)
+            throws KeeperException, InterruptedException, NoSuchMethodException, SecurityException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
 
         List<String> output = new ArrayList<String>();
         ZKDefaultQuery zkDefaultQuery = new ZKDefaultQuery();
 
-        Method method = zkDefaultQuery.getClass().getMethod(queryName);
-
-        String path = rootPath;
+        ZKQuery query = zkDefaultQuery.getValueOf(queryName);
 
         if (queryName.equals("parentYesChildNo")) {
-            this.queryTreeIntParentYesChildNo(output, path, "", "", (ZKQuery) method.invoke(zkDefaultQuery), queryACLs,
-                    null, true, false, false);
+            this.queryTreeIntParentYesChildNo(output, rootPath, "", "", query, queryACLs, null, true, false, false);
         } else {
-            this.queryTreeIntPreOrder(output, path, "", "", (ZKQuery) method.invoke(zkDefaultQuery), queryACLs, true,
-                    false, false);
+            this.queryTreeIntPreOrder(output, rootPath, "", "", query, queryACLs, true, false, false);
         }
 
         return this.colorCodeExplanation() + String.join("", output) + '\n';
     }
 
-    // recursive function that constructs the full ZNode tree
+    /**
+     * recursive function that constructs the full ZNode tree
+     */
     private void queryTreeIntPreOrder(List<String> output, String path, String indent, String name, ZKQuery query,
             String[] optionArgs, boolean isQueryRoot, boolean isLast, boolean isParentLast)
             throws KeeperException, InterruptedException {
@@ -108,7 +110,7 @@ public class ZKTree {
             if (name.equals("")) {
                 name = path.substring(1, path.length());
             }
- 
+
             if (indent.length() > 0) {
                 if (isParentLast) {
                     indent = indent.substring(0, indent.length() - ZKPolicyDefs.TerminalConstants.indentStepLength)
@@ -137,6 +139,9 @@ public class ZKTree {
         }
     }
 
+    /**
+     * recursive function that constructs the full ZNode tree while passing parent ACL to child queries
+     */
     private void queryTreeIntParentYesChildNo(List<String> output, String path, String indent, String name,
             ZKQuery query, String[] optionArgs, List<ACL> parentACLList, boolean isQueryRoot, boolean isLast,
             boolean isParentLast) throws KeeperException, InterruptedException {
@@ -197,6 +202,8 @@ public class ZKTree {
      * Function to return a list of the selected sub-tree with the full path of
      * query matching nodes
      *
+     * @param queryName Query to be executed
+     * @param rootPath Root path of recursive traversal
      * @param queryACLs Query ACL parameters
      * @return String ready to be printed in list format.
      * @throws KeeperException
@@ -206,27 +213,29 @@ public class ZKTree {
      * @throws InvocationTargetException
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
+     * @throws NoSuchFieldException
      */
-    public String queryFind(String queryName, String rootPath, String[] queryACLs) throws KeeperException, InterruptedException, NoSuchMethodException,
-            SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public String queryFind(String queryName, String rootPath, String[] queryACLs)
+            throws KeeperException, InterruptedException, NoSuchMethodException, SecurityException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
 
         List<String> output = new ArrayList<String>();
 
         ZKDefaultQuery zkDefaultQuery = new ZKDefaultQuery();
-        Method method = zkDefaultQuery.getClass().getMethod(queryName);
+        ZKQuery query = zkDefaultQuery.getValueOf(queryName);
 
-        String path = rootPath;
         if (queryName.equals("parentYesChildNo")) {
-            this.queryFindIntParentYesChildNo(output, path, "", "", (ZKQuery) method.invoke(zkDefaultQuery), queryACLs,
-                    null);
+            this.queryFindIntParentYesChildNo(output, rootPath, "", "", query, queryACLs, null);
         } else {
-            this.queryFindIntPreOrder(output, path, "", "", (ZKQuery) method.invoke(zkDefaultQuery), queryACLs);
+            this.queryFindIntPreOrder(output, rootPath, "", "", query, queryACLs);
         }
 
         return '\n' + String.join("", output) + '\n';
     }
 
-    // recursive function that constructs the full ZNode tree
+    /**
+     * recursive function that constructs the full ZNode tree
+     */
     private void queryFindIntPreOrder(List<String> output, String path, String indent, String name, ZKQuery query,
             String[] optionArgs) throws KeeperException, InterruptedException {
 
@@ -253,7 +262,9 @@ public class ZKTree {
         }
     }
 
-    // recursive function that constructs the full ZNode tree
+    /**
+     * recursive function that constructs the full ZNode tree, passing parent ACL to children queries
+     */
     private void queryFindIntParentYesChildNo(List<String> output, String path, String indent, String name,
             ZKQuery query, String[] optionArgs, List<ACL> parentACLList) throws KeeperException, InterruptedException {
 
@@ -281,8 +292,14 @@ public class ZKTree {
         }
     }
 
+    /**
+     * Export a znode subtree to certain output format
+     * @param rootPath Path to start recursively exporting znodes
+     * @param format Export format
+     * @param compactMode Enable minified mode for export file
+     * @param outputFile Output file path
+     */
     public void export(String rootPath, ZKExportCli.Format format, boolean compactMode, File outputFile) {
-
         switch (format) {
             case json:
                 this.exportToJSON(outputFile, rootPath, compactMode);
@@ -292,6 +309,9 @@ public class ZKTree {
         }
     }
 
+    /**
+     * Export znode subtree to JSON
+     */
     private void exportToJSON(File outputFile, String rootPath, boolean compactMode) {
         ZKTreeNode root = new ZKTreeNode();
         Gson gson;
@@ -317,7 +337,9 @@ public class ZKTree {
         }
     }
 
-    // recursive function that constructs the full ZNode tree
+    /**
+     * recursive function that constructs the full ZNode tree
+     */
     private void toTreeStruct(String path, ZKTreeNode currentNode) throws KeeperException, InterruptedException {
 
         byte[] data;
@@ -358,12 +380,15 @@ public class ZKTree {
         currentNode.setChildren(childrenList.toArray(new ZKTreeNode[childrenList.size()]));
     }
 
+    /**
+     * Return color code explanation for command line output
+     */
     private String colorCodeExplanation() {
         String explanation = "";
         explanation += "* " + this.matchColor + config.getMatchcolor() + ":\t" + this.resetColor
                 + " znodes matching the query" + "\n";
-        explanation += "* " + this.misMatchColor + config.getMismatchcolor() + ":\t\t"
-                + this.resetColor + " znodes not matching the query" + "\n";
+        explanation += "* " + this.misMatchColor + config.getMismatchcolor() + ":\t\t" + this.resetColor
+                + " znodes not matching the query" + "\n";
         return explanation;
     }
 }

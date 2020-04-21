@@ -12,14 +12,4 @@ public class ZKPolicyCliTest {
   public void startZookeeper() throws Exception {
 
     }
-/*
-    @Test
-    public void testDefinitionStage() throws Exception {
-        String[] args = { "-h" };
-        zkpCli = new ZKPolicyCli(args);
-        CommandLine cli = zkpCli.ParseCl(zkpCli.optionsMetadata, true);
-        assertTrue(cli.hasOption("help"));
-    }
-
-    */
 }

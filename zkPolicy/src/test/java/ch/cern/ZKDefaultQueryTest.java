@@ -1,8 +1,11 @@
 package ch.cern;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryOneTime;
@@ -11,7 +14,10 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 @TestInstance(Lifecycle.PER_CLASS)
@@ -21,6 +27,7 @@ public class ZKDefaultQueryTest {
     ZooKeeper zkeeper;
     ZKConfig config;
     ZKTree zktree;
+    ZKConnection zkConnection;
 
     @BeforeAll
     public void startZookeeper() throws Exception {
@@ -28,7 +35,7 @@ public class ZKDefaultQueryTest {
         zkTestServer = new TestingServer(2281);
         cli = CuratorFrameworkFactory.newClient(zkTestServer.getConnectString(), new RetryOneTime(2000));
         cli.start();
-        ZKConnection zkConnection = new ZKConnection();
+        zkConnection = new ZKConnection();
         zkeeper = zkConnection.connect("127.0.0.1:2281", 2000);
 
         // Setup the znode tree for tests
@@ -56,8 +63,9 @@ public class ZKDefaultQueryTest {
         zkeeper.create("/b/bb", "bb".getBytes(), aclListBB, CreateMode.PERSISTENT);
 
         // c subtree
+        // auth scheme ignores the passed id and matches the current authentication
         List<ACL> aclListC = new ArrayList<ACL>();
-        aclListC.add(new ACLAugment("auth:user3:pass3:crda").getACL());
+        aclListC.add(new ACLAugment("auth:lelele:crda").getACL());
         zkeeper.create("/c", "c".getBytes(), aclListC, CreateMode.PERSISTENT);
 
         List<ACL> aclListCC = new ArrayList<ACL>();
@@ -67,58 +75,39 @@ public class ZKDefaultQueryTest {
         config = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2281", 2000, "GREEN", "RED", "", "");
 
         zktree = new ZKTree(zkeeper, config);
-
     }
 
     @AfterAll
-    public void stopZookeeper() throws IOException {
+    public void stopZookeeper() throws IOException, InterruptedException {
         cli.close();
         zkTestServer.stop();
+        this.zkConnection.close();
     }
-
-    /*
-     * @Test public void testExportAllTree() throws Exception {
-     * Assertions.assertEquals(2115520187, zktree.queryTree("exportAll", "/",
-     * null).hashCode()); }
-     * 
-     * @Test public void testExportAllFind() throws Exception {
-     * Assertions.assertEquals(1131947301, zktree.queryFind("exportAll", "/",
-     * null).hashCode()); }
-     */
 
     @Test
     public void testNoACLTree() throws Exception {
-        Assertions.assertEquals(1230689787, zktree.queryTree("noACL", "/", null).hashCode());
+        assertEquals(1230689787, zktree.queryTree("noACL", "/", null).hashCode());
     }
 
     @Test
     public void testNoACLFind() throws Exception {
-        Assertions.assertEquals(-347680801, zktree.queryFind("noACL", "/", null).hashCode());
+        assertEquals(-347680801, zktree.queryFind("noACL", "/", null).hashCode());
     }
 
-    /*
-     * @Test public void testPartialACLTree() throws Exception {
-     * Assertions.assertEquals(1194669308, zktree.queryTree("partialACL", "/", new
-     * String[] { "ip:127.0.0.3:rda" }).hashCode()); }
-     * 
-     * @Test public void testPartialACLFind() throws Exception {
-     * Assertions.assertEquals(10729885, this.zktree.queryFind("partialACL", "/",
-     * new String[] { "ip:127.0.0.3:rda" }).hashCode()); }
-     */
     @Test
     public void testParentYesChildNoTree() throws Exception {
-        Assertions.assertEquals(213120819, this.zktree.queryTree("parentYesChildNo", "/", null).hashCode());
+        assertEquals(213120819, this.zktree.queryTree("parentYesChildNo", "/", null).hashCode());
     }
 
     @Test
     public void testParentYesChildNoFind() throws Exception {
-        Assertions.assertEquals(-1662130706, this.zktree.queryFind("parentYesChildNo", "/", null).hashCode());
+        assertEquals(-1662130706, this.zktree.queryFind("parentYesChildNo", "/", null).hashCode());
     }
 
     @Test
     public void testExactACLTree() throws Exception {
         String tempDigest = DigestAuthenticationProvider.generateDigest("user2:passw2");
-        Assertions.assertEquals(874505468, this.zktree
+        assertEquals(874505468, this.zktree
                 .queryTree("exactACL", "/", new String[] { "digest:" + tempDigest + ":rcda", "ip:127.0.0.3:rda" })
                 .hashCode());
     }
@@ -126,8 +115,36 @@ public class ZKDefaultQueryTest {
     @Test
     public void testExactACLFind() throws Exception {
         String tempDigest = DigestAuthenticationProvider.generateDigest("user2:passw2");
-        Assertions.assertEquals(10729885, this.zktree
+        assertEquals(10729885, this.zktree
                 .queryFind("exactACL", "/", new String[] { "digest:" + tempDigest + ":rcda", "ip:127.0.0.3:rda" })
+                .hashCode());
+    }
+
+    @Test
+    public void testRegexMatchACLTree() throws Exception {
+        assertEquals(308385403, this.zktree
+                .queryTree("regexMatchACL", "/", new String[] { "digest:.*:.*r.*"})
+                .hashCode());
+    }
+
+    @Test
+    public void testRegexMatchACLFind() throws Exception {
+        assertEquals(-1539084560, this.zktree
+                .queryFind("regexMatchACL", "/", new String[] { "digest:.*:.*r.*"})
+                .hashCode());
+    }
+
+    @Test
+    public void testGlobMatchACLTree() throws Exception {
+        assertEquals(308385403, this.zktree
+                .queryTree("globMatchACL", "/", new String[] { "digest:*:*r*"})
+                .hashCode());
+    }
+
+    @Test
+    public void testGlobMatchACLFind() throws Exception {
+        assertEquals(-1539084560, this.zktree
+                .queryFind("globMatchACL", "/", new String[] { "digest:*:*r*"})
                 .hashCode());
     }
 

@@ -1,16 +1,9 @@
 package ch.cern;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import org.apache.zookeeper.ZooKeeper;
 
@@ -19,7 +12,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
 
-@Command(name = "query", aliases = { "q" }, description = "Query the znode tree", helpCommand = true)
+@Command(name = "query", aliases = { "q" }, description = "Query the znode tree", helpCommand = true, mixinStandardHelpOptions = true)
 public class ZKQueryCli implements Runnable {
 
     @ParentCommand
@@ -43,14 +36,11 @@ public class ZKQueryCli implements Runnable {
     }
 
     private void executeQuery() {
-        ZKConnection zkServer;
         ZKTree zktree = null;
         ZooKeeper zkClient;
 
-        zkServer = new ZKConnection();
-        try {
-
-            ZKConfig config = parseConfig(parent.configFile);
+        try (ZKConnection zkServer = new ZKConnection()){
+            ZKConfig config = new ZKConfig(parent.configFile);
             zkClient = zkServer.connect(config.getZkservers(), config.getTimeout());
             zktree = new ZKTree(zkClient, config);
             if (this.listMode) {
@@ -62,31 +52,20 @@ public class ZKQueryCli implements Runnable {
 
         } catch (NoSuchMethodException | SecurityException e) {
             System.out.println("No such method: " + this.queryName);
-            System.out.println("Please consult the list of default queries using the [-q listDefaults] parameter");
+            System.out.println("Please consult the list of default queries using query -h");
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private ZKConfig parseConfig(File configFile) throws JsonParseException, JsonMappingException, IOException {
-        ObjectMapper om = new ObjectMapper(new YAMLFactory());
-        ZKConfig config = om.readValue(configFile, ZKConfig.class);
-        config.setPropertyJaas();
-        config.setPropertyLog4j();
-        return config;
     }
 
     static class DefaultQueryCandidates extends ArrayList<String> {
         DefaultQueryCandidates() {
             super(Arrays.asList());
             Class<?> zkDefaultQueryClass = ZKDefaultQuery.class;
-            Method[] methods = zkDefaultQueryClass.getDeclaredMethods();
+            Field[] fields = zkDefaultQueryClass.getDeclaredFields();
 
-            for (Method method : methods) {
-                String methodName = method.getName();
-                if (!methodName.startsWith("lambda$")) {
-                    this.add("%n * " + methodName);
-                }
+            for (Field field : fields) {
+                this.add("%n * " + field.getName());
             }
             Collections.sort(this);
         }

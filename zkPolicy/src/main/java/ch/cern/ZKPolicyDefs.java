@@ -1,32 +1,38 @@
 package ch.cern;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 public class ZKPolicyDefs {
+
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
     static enum Colors {
         // This will call enum constructor with one
         // String argument
-        BLACK("\u001B[30m"),
-        RED("\u001B[31m"),
-        GREEN("\u001B[32m"),
-        YELLOW("\u001B[33m"),
-        BLUE("\u001B[34m"),
-        MAGENTA("\u001B[35m"),
-        CYAN("\u001B[36m"),
-        WHITE("\u001B[37m"),
-        RESET("\u001B[0m");
-
+        BLACK("\u001B[30m"), RED("\u001B[31m"), GREEN("\u001B[32m"), YELLOW("\u001B[33m"), BLUE("\u001B[34m"),
+        MAGENTA("\u001B[35m"), CYAN("\u001B[36m"), WHITE("\u001B[37m"), RESET("\u001B[0m");
 
         // declaring private variable for getting values
-        private String ansiValue;
+        @Getter
+        private String ANSIValue;
+    }
 
-        // getter method
-        public String getANSIValue() {
-            return this.ansiValue;
-        }
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    static enum Schemes {
+        WORLD("world"), AUTH("auth"), IP("ip"), SASL("sasl"), DIGEST("digest");
 
-        // enum constructor - cannot be public or protected
-        private Colors(String ansiValue)
-        {
-            this.ansiValue = ansiValue;
+        // declaring private variable for getting values
+        @Getter
+        private String schemeValue;
+
+        public static boolean includes(String value) {
+            for (ZKPolicyDefs.Schemes enumElement : values()) {
+                if (enumElement.getSchemeValue().equals(value)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -37,7 +43,4 @@ public class ZKPolicyDefs {
         static String innerParentIndent = "│     ";
         static int indentStepLength = lastChildIndent.length();
     }
-
-
-
 }

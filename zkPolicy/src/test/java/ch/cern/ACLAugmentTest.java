@@ -2,6 +2,7 @@ package ch.cern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -178,4 +179,25 @@ public class ACLAugmentTest {
         ACLAugment testObject2 = new ACLAugment(zkACL);
         assertEquals(testObject1.hashCode(), testObject2.hashCode());
     }
+
+    @Test
+    public void testInvalidACLString() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> {new ACLAugment("invalid:acl:crwd");});
+        assertThrows(IllegalArgumentException.class, () -> {new ACLAugment("invalid:acl");});
+        assertThrows(IllegalArgumentException.class, () -> {new ACLAugment("nocolon");});
+    }
+
+    @Test
+    public void testInvalidACLPermissionChar() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> {new ACLAugment("sasl:test:crwf");});
+    }
+
+    @Test
+    public void testGetStringFromACL() throws Exception {
+        ACLAugment aclAugment = new ACLAugment("world:anyone:cdrwa");
+        assertEquals("world:anyone:cdrwa", aclAugment.getStringFromACL());
+        aclAugment = new ACLAugment("world:anyone:cdrw");
+        assertEquals("world:anyone:cdrw", aclAugment.getStringFromACL());
+    }
+
 }

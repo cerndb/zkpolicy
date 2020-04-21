@@ -10,7 +10,7 @@ import org.apache.zookeeper.ZooKeeper;
 /**
  * Class used to establish connectivity with ZooKeeper server.
  */
-public class ZKConnection {
+public class ZKConnection implements AutoCloseable{
   private ZooKeeper zoo;
   private CountDownLatch connectionLatch = new CountDownLatch(1);
 
@@ -18,6 +18,9 @@ public class ZKConnection {
    * Connect to ZooKeeper server.
    *
    * @param hostList Comma seperated hosts in form of IP_ADDR:PORT.
+   * @param timeout Timeout for connection to ZooKeeper server.
+   * @exception IOException in cases of network failure
+   * @exception InterruptedException if the transaction is interrupted
    * @return ZooKeeper client object.
    */
   public ZooKeeper connect(String hostList, int timeout) throws IOException, InterruptedException {

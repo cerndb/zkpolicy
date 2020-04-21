@@ -1,12 +1,17 @@
 package ch.cern;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 
 /**
@@ -14,8 +19,26 @@ import org.apache.zookeeper.data.ACL;
  */
 public class ZKDefaultQuery {
 
-    public ZKQuery exactACL() {
-        ZKQuery query = (aclList, path, zk, queryACLs) -> {
+    // Define default queries with appropriate names
+    public exactACLDef exactACL = new exactACLDef();
+    public noACLDef noACL = new noACLDef();
+    public satisfyACLDef satisfyACL = new satisfyACLDef();
+    public parentYesChildNoDef parentYesChildNo = new parentYesChildNoDef();
+    public duplicateACLDef duplicateACL = new duplicateACLDef();
+    public regexMatchACLDef regexMatchACL = new regexMatchACLDef();
+    public globMatchACLDef globMatchACL = new globMatchACLDef();
+
+    public ZKQuery getValueOf(String lookingForValue) throws NoSuchFieldException, SecurityException,
+            IllegalArgumentException, IllegalAccessException {
+        Field field = this.getClass().getField(lookingForValue);
+        return (ZKQuery)field.get(this);
+    }
+
+    /**
+     * Match nodes that have equal ACL with the passed
+     */
+    private class exactACLDef implements ZKQuery {
+        public boolean query(List<ACL> aclList, String path, ZooKeeper zk, String[] queryACLs) {
             // If the two provided lists do not have the same length, we are sure that the
             // query should fail
             if (aclList.size() != queryACLs.length) {
@@ -41,17 +64,14 @@ public class ZKDefaultQuery {
             } else {
                 return false;
             }
-        };
-        return query;
+        }
     }
 
     /**
-     * Select all nodes that have no ACL restrictions (world:anyone:crwda)
-     *
-     * @return ZKQuery object
+     * Match nodes that have no ACL restrictions (world:anyone:crwda)
      */
-    public ZKQuery noACL() {
-        ZKQuery query = (aclList, path, zk, queryACLs) -> {
+    private class noACLDef implements ZKQuery {
+        public boolean query(List<ACL> aclList, String path, ZooKeeper zk, String[] queryACLs) {
 
             for (ACL aclElement : aclList) {
                 ACLAugment ACLAugment = new ACLAugment(aclElement);
@@ -62,12 +82,14 @@ public class ZKDefaultQuery {
                 }
             }
             return false;
-        };
-        return query;
+        }
     }
 
-    public ZKQuery satisfyACL() {
-        ZKQuery query = (aclList, path, zk, queryACLs) -> {
+    /**
+     * Match nodes that do satisfy the passed ACL (logical match)
+     */
+    private class satisfyACLDef implements ZKQuery {
+        public boolean query(List<ACL> aclList, String path, ZooKeeper zk, String[] queryACLs) {
             List<ACLAugment> aclListAugment = new ArrayList<ACLAugment>();
 
             for (ACL aclElement : aclList) {
@@ -84,12 +106,14 @@ public class ZKDefaultQuery {
             }
 
             return true;
-        };
-        return query;
+        }
     }
 
-    public ZKQuery parentYesChildNo() {
-        ZKQuery query = (parentACLList, path, zk, queryACLs) -> {
+    /**
+     * Match nodes that wave ACL not complying with their parents ACL
+     */
+    private class parentYesChildNoDef implements ZKQuery {
+        public boolean query(List<ACL> parentACLList, String path, ZooKeeper zk, String[] queryACLs) {
             List<ACL> myACLs;
             List<String> myACLsAugment = new ArrayList<String>();
             List<String> parentACLsAugment = new ArrayList<String>();
@@ -113,17 +137,14 @@ public class ZKDefaultQuery {
                 return true;
             }
             return false;
-          };
-          return query;
         }
-    /**
-     * Select all nodes that have no ACL restrictions (world:anyone:crwda)
-     *
-     * @return ZKQuery object
-     */
-    public ZKQuery duplicateACL() {
-        ZKQuery query = (aclList, path, zk, queryACLs) -> {
+    }
 
+    /**
+     * Match nodes that have no ACL restrictions (world:anyone:crwda)
+     */
+    private class duplicateACLDef implements ZKQuery {
+        public boolean query(List<ACL> aclList, String path, ZooKeeper zk, String[] queryACLs) {
             HashSet<ACLAugment> unique = new HashSet<ACLAugment>();
 
             for (ACL aclElement : aclList) {
@@ -133,8 +154,61 @@ public class ZKDefaultQuery {
                 }
             }
             return false;
-        };
-        return query;
+        }
+    }
+
+    /**
+     * Match nodes with ACLs matching the passed regular expressions
+     */
+    private class regexMatchACLDef implements ZKQuery {
+        public boolean query(List<ACL> aclList, String path, ZooKeeper zk, String[] queryACLRegexList) {
+            List<Pattern> queryPatternList = ZKPattern.createRegexPatternList(queryACLRegexList);
+
+            int queryListSentinel = queryPatternList.size();
+            for (ACL aclElement : aclList) {
+                ACLAugment currentACLAugment = new ACLAugment(aclElement);
+                String currentACLString = currentACLAugment.getStringFromACL();
+
+                for (Pattern pattern : queryPatternList) {
+                    Matcher currentMatcher = pattern.matcher(currentACLString);
+                    if (currentMatcher.matches()) {
+                        queryListSentinel--;
+                    }
+                    // If all regular expressions where matched, we can return true
+                    if (queryListSentinel == 0) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Match nodes with ACLs matching the passed glob expressions
+     */
+    private class globMatchACLDef implements ZKQuery {
+        public boolean query(List<ACL> aclList, String path, ZooKeeper zk, String[] queryACLGlobList) {
+            List<Pattern> queryPatternList = ZKPattern.createGlobPatternList(queryACLGlobList);
+
+            int queryListSentinel = queryPatternList.size();
+            for (ACL aclElement : aclList) {
+                ACLAugment currentACLAugment = new ACLAugment(aclElement);
+                String currentACLString = currentACLAugment.getStringFromACL();
+
+                for (Pattern pattern : queryPatternList) {
+                    Matcher currentMatcher = pattern.matcher(currentACLString);
+                    if (currentMatcher.matches()) {
+                        queryListSentinel--;
+                    }
+                    // If all regular expressions where matched, we can return true
+                    if (queryListSentinel == 0) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 
 }

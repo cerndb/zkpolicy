@@ -1,16 +1,11 @@
 package ch.cern;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
@@ -19,7 +14,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
-@Command(name = "tree", aliases = { "t" }, description = "tree command for ZooKeeper", helpCommand = true)
+@Command(name = "tree", aliases = { "t" }, description = "tree command for ZooKeeper", helpCommand = true, mixinStandardHelpOptions = true)
 public class ZKTreeCli implements Runnable {
 
     @ParentCommand
@@ -34,13 +29,11 @@ public class ZKTreeCli implements Runnable {
     }
 
     private void tree() {
-        ZKConnection zkServer;
         ZooKeeper zk;
         List<String> output = new ArrayList<String>();
 
-        zkServer = new ZKConnection();
-        try {
-            ZKConfig config = parseConfig(parent.configFile);
+        try (ZKConnection zkServer = new ZKConnection()){
+            ZKConfig config = new ZKConfig(parent.configFile);
             zk = zkServer.connect(config.getZkservers(), config.getTimeout());
             treeRecursive(output, zk, this.rootPath, "", "", true, false, false);
             System.out.println(String.join("\n", output));
@@ -93,11 +86,4 @@ public class ZKTreeCli implements Runnable {
         }
     }
 
-    private ZKConfig parseConfig(File configFile) throws JsonParseException, JsonMappingException, IOException {
-        ObjectMapper om = new ObjectMapper(new YAMLFactory());
-        ZKConfig config = om.readValue(configFile, ZKConfig.class);
-        config.setPropertyJaas();
-        config.setPropertyLog4j();
-        return config;
-    }
 }

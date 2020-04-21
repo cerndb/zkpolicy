@@ -38,8 +38,13 @@ public class ACLAugment {
     if (firstColon == -1 || lastColon == -1 || firstColon == lastColon) {
       throw new IllegalArgumentException(stringACL + " does not have the form scheme:id:perm");
     }
+    // validate input
+    String scheme = stringACL.substring(0, firstColon);
+    if (!ZKPolicyDefs.Schemes.includes(scheme)) {
+      throw new IllegalArgumentException(scheme + " is not a valid scheme type");
+    }
     ACL newAcl = new ACL();
-    newAcl.setId(new Id(stringACL.substring(0, firstColon), stringACL.substring(firstColon + 1, lastColon)));
+    newAcl.setId(new Id(scheme, stringACL.substring(firstColon + 1, lastColon)));
     newAcl.setPerms(getPermFromString(stringACL.substring(lastColon + 1)));
     this.acl = newAcl;
   }
@@ -127,7 +132,7 @@ public class ACLAugment {
 
   // From ZK 3.5.5 org.apache.zookeeper.cli.AclParser.java, not available on ZK
   // 3.4
-  private static int getPermFromString(String permString) {
+  private static int getPermFromString(String permString) throws IllegalArgumentException {
     int perm = 0;
     for (int i = 0; i < permString.length(); i++) {
       switch (permString.charAt(i)) {
@@ -147,9 +152,29 @@ public class ACLAugment {
           perm |= ZooDefs.Perms.ADMIN;
           break;
         default:
-          System.err.println("Unknown perm type: " + permString.charAt(i));
+        throw new IllegalArgumentException("Unknown perm type: " + permString.charAt(i));
       }
     }
     return perm;
+  }
+
+  public String getStringFromACL() {
+    String returnACL = getScheme() + ":" + getId() + ":" ;
+    if (this.hasCreate()) {
+      returnACL += "c";
+    }
+    if (this.hasDelete()) {
+      returnACL += "d";
+    }
+    if (this.hasRead()) {
+      returnACL += "r";
+    }
+    if (this.hasWrite()) {
+      returnACL += "w";
+    }
+    if (this.hasAdmin()) {
+      returnACL += "a";
+    }
+    return returnACL;
   }
 }

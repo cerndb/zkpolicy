@@ -29,6 +29,7 @@ public class ZKConnectionTest {
     ZKConnection zkConnection = new ZKConnection();
     ZooKeeper zkeeper = zkConnection.connect("127.0.0.1:2281", 2000);
     Assertions.assertEquals(States.CONNECTED, zkeeper.getState());
+    zkConnection.close();
   }
 
   @Test
