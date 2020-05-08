@@ -20,7 +20,7 @@ public class ZKTreeTest {
     @Test
     public void testColorCodeExplanation() throws Exception {
         zkTestServer = new TestingServer();
-        this.config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "", "");
+        this.config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "");
         this.zkClient = new ZKClient(config);
         this.zkTree  = new ZKTree(zkClient);
 

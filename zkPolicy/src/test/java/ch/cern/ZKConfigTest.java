@@ -34,7 +34,6 @@ public class ZKConfigTest {
     fw.write("matchcolor: \"GREEN\"\n");
     fw.write("mismatchcolor: \"RED\"\n");
     fw.write("jaas: \"/path/to/jaas.conf\"\n");
-    fw.write("log4j: \"/path/to/log4j.properties\"");
     fw.flush();
     fw.close();
 
@@ -42,22 +41,7 @@ public class ZKConfigTest {
     assertAll(() -> assertEquals("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", zkConfig.getZkservers()),
         () -> assertEquals(2000, zkConfig.getTimeout()), () -> assertEquals("GREEN", zkConfig.getMatchcolor()),
         () -> assertEquals("RED", zkConfig.getMismatchcolor()),
-        () -> assertEquals("/path/to/jaas.conf", zkConfig.getJaas()),
-        () -> assertEquals("/path/to/log4j.properties", zkConfig.getLog4j()));
-  }
-
-  @Test
-  public void testSetPropertyLog4j() throws Exception {
-    String matchcolor = "GREEN";
-    String mismatchcolor = "RED";
-    String jaas = "/path/to/jaas.conf";
-    String log4j = "/path/to/log4j.properties";
-    String defaultAudit = "/path/to/defaultAudit.yaml";
-    java.lang.System.clearProperty("log4j.configuration");
-    ZKConfig zkConfig = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor,
-        jaas, log4j, defaultAudit);
-    zkConfig.setPropertyLog4j();
-    assertEquals("file:/path/to/log4j.properties", java.lang.System.getProperty("log4j.configuration", ""));
+        () -> assertEquals("/path/to/jaas.conf", zkConfig.getJaas()));
   }
 
   @Test
@@ -65,23 +49,7 @@ public class ZKConfigTest {
     String matchcolor = "GREEN";
     String mismatchcolor = "RED";
     java.lang.System.clearProperty("log4j.configuration");
-    ZKConfig zkConfig = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor,
-        null, null, null);
-    zkConfig.setPropertyLog4j();
-    assertEquals("", java.lang.System.getProperty("log4j.configuration", ""));
-  }
-
-  @Test
-  public void testSetPropertyLog4jEmpty() throws Exception {
-    String matchcolor = "GREEN";
-    String mismatchcolor = "RED";
-    String jaas = "";
-    String log4j = "";
-    String defaultAudit = "";
-    java.lang.System.clearProperty("log4j.configuration");
-    ZKConfig zkConfig = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor,
-        jaas, log4j, defaultAudit);
-    zkConfig.setPropertyLog4j();
+    new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor, null, null);
     assertEquals("", java.lang.System.getProperty("log4j.configuration", ""));
   }
 
@@ -90,11 +58,10 @@ public class ZKConfigTest {
     String matchcolor = "GREEN";
     String mismatchcolor = "RED";
     String jaas = "/path/to/jaas.conf";
-    String log4j = "/path/to/log4j.properties";
     String defaultAudit = "/path/to/defaultAudit.yaml";
     java.lang.System.clearProperty("java.security.auth.login.config");
     ZKConfig zkConfig = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor,
-        jaas, log4j, defaultAudit);
+        jaas, defaultAudit);
     zkConfig.setPropertyJaas();
     assertEquals("/path/to/jaas.conf", java.lang.System.getProperty("java.security.auth.login.config", ""));
   }
@@ -105,7 +72,7 @@ public class ZKConfigTest {
     String mismatchcolor = "RED";
     java.lang.System.clearProperty("java.security.auth.login.config");
     ZKConfig zkConfig = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor,
-        null, null, null);
+        null, null);
     zkConfig.setPropertyJaas();
     assertEquals("", java.lang.System.getProperty("java.security.auth.login.config", ""));
   }
@@ -115,11 +82,10 @@ public class ZKConfigTest {
     String matchcolor = "GREEN";
     String mismatchcolor = "RED";
     String jaas = "";
-    String log4j = "";
     String defaultAudit = "";
     java.lang.System.clearProperty("java.security.auth.login.config");
     ZKConfig zkConfig = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor,
-        jaas, log4j, defaultAudit);
+        jaas, defaultAudit);
     zkConfig.setPropertyJaas();
     assertEquals("", java.lang.System.getProperty("java.security.auth.login.config", ""));
   }

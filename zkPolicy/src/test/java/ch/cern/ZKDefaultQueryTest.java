@@ -32,7 +32,7 @@ public class ZKDefaultQueryTest {
     public void startZookeeper() throws Exception {
         // Choose an available port
         zkTestServer = new TestingServer();
-        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "", "");
+        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "");
         this.zkClient = new ZKClient(config);
         
         // Setup the znode tree for tests

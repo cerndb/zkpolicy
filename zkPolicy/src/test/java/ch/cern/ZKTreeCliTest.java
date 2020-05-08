@@ -46,7 +46,7 @@ public class ZKTreeCliTest {
     public void startZookeeper() throws Exception {
         // Choose an available port
         zkTestServer = new TestingServer();
-        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "", "");
+        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "");
         this.zkClient = new ZKClient(config);
 
         // Setup the znode tree for tests
@@ -81,7 +81,6 @@ public class ZKTreeCliTest {
         fw.write("matchcolor: \"GREEN\"\n");
         fw.write("mismatchcolor: \"RED\"\n");
         fw.write("jaas: \"/path/to/jaas.conf\"\n");
-        fw.write("log4j: \"/path/to/log4j.properties\"");
         fw.flush();
         fw.close();
 

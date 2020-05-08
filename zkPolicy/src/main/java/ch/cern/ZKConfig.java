@@ -29,14 +29,12 @@ public class ZKConfig {
     private String matchcolor;
     private String mismatchcolor;
     private String jaas;
-    private String log4j;
     private String defaultauditpath;
 
     public ZKConfig(File configFile) throws JsonParseException, JsonMappingException, IOException {
         ObjectMapper om = new ObjectMapper(new YAMLFactory());
         om.readerForUpdating(this).readValue(configFile);
         this.setPropertyJaas();
-        this.setPropertyLog4j();
     }
 
     public void setPropertyJaas() {
@@ -44,12 +42,4 @@ public class ZKConfig {
             java.lang.System.setProperty("java.security.auth.login.config", this.jaas);
         }
     }
-
-    public void setPropertyLog4j() {
-        if (this.log4j != null && !this.log4j.isEmpty()) {
-            java.lang.System.setProperty("log4j.configuration", "file:"+this.log4j);
-        }
-    }
-
-
 }

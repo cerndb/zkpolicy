@@ -7,11 +7,15 @@ import java.util.regex.Pattern;
 
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * Class used to establish connectivity with ZooKeeper server.
  */
 public class ZKClient extends ZooKeeper {
+    private Logger logger = LoggerFactory.getLogger(ZKClient.class.getName());
     private String host;
     private int port;
     private ZKConfig zkpConfig;

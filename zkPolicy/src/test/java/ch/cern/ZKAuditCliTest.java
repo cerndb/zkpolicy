@@ -53,7 +53,7 @@ public class ZKAuditCliTest {
         
         // Choose an available port
         zkTestServer = new TestingServer(spec,true);
-        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "", "");
+        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "");
         this.zkClient = new ZKClient(config);
 
         // Setup the znode tree for tests
@@ -100,7 +100,6 @@ public class ZKAuditCliTest {
         fw.write("matchcolor: \"GREEN\"\n");
         fw.write("mismatchcolor: \"RED\"\n");
         fw.write("jaas: \"/path/to/jaas.conf\"\n");
-        fw.write("log4j: \"/path/to/log4j.properties\"");
         fw.flush();
         fw.close();
 
@@ -164,7 +163,6 @@ public class ZKAuditCliTest {
         String[] args = { "-c", configPath, "audit", "-i", auditConfigPath};
 
         new CommandLine(new ZKPolicyCli(args)).execute(args);
-
         assertTrue(!outContent.toString().isEmpty());
     }
 }
