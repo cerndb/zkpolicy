@@ -1,0 +1,17 @@
+---
+queries:
+  - name: "globMatchACL"
+    rootpath: "/"
+    acls:
+      - "digest:*:*"
+
+  - name: "exactACL"
+    rootpath: "/zookeeper"
+    acls:
+      - "world:anyone:r"
+  
+  - name: "noACL"
+    rootpath: "/zpnode"
+
+  - name: "parentYesChildNo"
+    rootpath: "/"

@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 
 /**
@@ -38,28 +37,24 @@ public class ZKDefaultQuery {
      * Match nodes that have equal ACL with the passed
      */
     private class exactACLDef implements ZKQuery {
-        public boolean query(List<ACL> aclList, String path, ZooKeeper zk, String[] queryACLs) {
+        public boolean query(List<ACL> aclList, String path, ZKClient zk, String[] queryACLs) {
             // If the two provided lists do not have the same length, we are sure that the
             // query should fail
             if (aclList.size() != queryACLs.length) {
                 return false;
             }
 
-            // construct the string ACL list of current checked element
-            List<String> aclListString = new ArrayList<String>();
-            for (ACL aclElement : aclList) {
-                aclListString.add(aclElement.toString());
-            }
+            List<ACLAugment> aclListAugment = ACLAugment.generateACLAugmentList(aclList);
 
             // Get sublist removing the first argument (name of query)
             List<String> queryACLsSub = Arrays.asList(queryACLs);
-            List<String> queryACLString = new ArrayList<String>();
+            List<ACLAugment> queryACLString = new ArrayList<ACLAugment>();
             for (String queryACL : queryACLsSub) {
                 ACLAugment tempACLAugment = new ACLAugment(queryACL);
-                queryACLString.add(tempACLAugment.getACL().toString());
+                queryACLString.add(tempACLAugment);
             }
 
-            if (aclListString.containsAll(queryACLString)) {
+            if (aclListAugment.containsAll(queryACLString)) {
                 return true;
             } else {
                 return false;
@@ -71,7 +66,7 @@ public class ZKDefaultQuery {
      * Match nodes that have no ACL restrictions (world:anyone:crwda)
      */
     private class noACLDef implements ZKQuery {
-        public boolean query(List<ACL> aclList, String path, ZooKeeper zk, String[] queryACLs) {
+        public boolean query(List<ACL> aclList, String path, ZKClient zk, String[] queryACLs) {
 
             for (ACL aclElement : aclList) {
                 ACLAugment ACLAugment = new ACLAugment(aclElement);
@@ -89,12 +84,8 @@ public class ZKDefaultQuery {
      * Match nodes that do satisfy the passed ACL (logical match)
      */
     private class satisfyACLDef implements ZKQuery {
-        public boolean query(List<ACL> aclList, String path, ZooKeeper zk, String[] queryACLs) {
-            List<ACLAugment> aclListAugment = new ArrayList<ACLAugment>();
-
-            for (ACL aclElement : aclList) {
-                aclListAugment.add(new ACLAugment(aclElement));
-            }
+        public boolean query(List<ACL> aclList, String path, ZKClient zk, String[] queryACLs) {
+            List<ACLAugment> aclListAugment = ACLAugment.generateACLAugmentList(aclList);
 
             // queryACL list
             for (String queryACLString : queryACLs) {
@@ -113,22 +104,14 @@ public class ZKDefaultQuery {
      * Match nodes that wave ACL not complying with their parents ACL
      */
     private class parentYesChildNoDef implements ZKQuery {
-        public boolean query(List<ACL> parentACLList, String path, ZooKeeper zk, String[] queryACLs) {
+        public boolean query(List<ACL> parentACLList, String path, ZKClient zk, String[] queryACLs) {
             List<ACL> myACLs;
-            List<String> myACLsAugment = new ArrayList<String>();
-            List<String> parentACLsAugment = new ArrayList<String>();
-
+            List<ACLAugment> myACLsAugment = null;
+            List<ACLAugment> parentACLsAugment = null;
             try {
                 myACLs = zk.getACL(path, null);
-
-                for (ACL myACL : myACLs) {
-                    myACLsAugment.add(new ACLAugment(myACL).getACL().toString());
-                }
-
-                for (ACL parentACL : parentACLList) {
-                    parentACLsAugment.add(new ACLAugment(parentACL).getACL().toString());
-                }
-
+                myACLsAugment = ACLAugment.generateACLAugmentList(myACLs);
+                parentACLsAugment = ACLAugment.generateACLAugmentList(parentACLList);
             } catch (KeeperException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -144,7 +127,7 @@ public class ZKDefaultQuery {
      * Match nodes that have no ACL restrictions (world:anyone:crwda)
      */
     private class duplicateACLDef implements ZKQuery {
-        public boolean query(List<ACL> aclList, String path, ZooKeeper zk, String[] queryACLs) {
+        public boolean query(List<ACL> aclList, String path, ZKClient zk, String[] queryACLs) {
             HashSet<ACLAugment> unique = new HashSet<ACLAugment>();
 
             for (ACL aclElement : aclList) {
@@ -161,7 +144,7 @@ public class ZKDefaultQuery {
      * Match nodes with ACLs matching the passed regular expressions
      */
     private class regexMatchACLDef implements ZKQuery {
-        public boolean query(List<ACL> aclList, String path, ZooKeeper zk, String[] queryACLRegexList) {
+        public boolean query(List<ACL> aclList, String path, ZKClient zk, String[] queryACLRegexList) {
             List<Pattern> queryPatternList = ZKPattern.createRegexPatternList(queryACLRegexList);
 
             int queryListSentinel = queryPatternList.size();
@@ -188,7 +171,7 @@ public class ZKDefaultQuery {
      * Match nodes with ACLs matching the passed glob expressions
      */
     private class globMatchACLDef implements ZKQuery {
-        public boolean query(List<ACL> aclList, String path, ZooKeeper zk, String[] queryACLGlobList) {
+        public boolean query(List<ACL> aclList, String path, ZKClient zk, String[] queryACLGlobList) {
             List<Pattern> queryPatternList = ZKPattern.createGlobPatternList(queryACLGlobList);
 
             int queryListSentinel = queryPatternList.size();

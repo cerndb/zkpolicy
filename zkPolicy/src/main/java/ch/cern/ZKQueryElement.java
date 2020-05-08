@@ -19,4 +19,5 @@ public class ZKQueryElement {
     private String name;
     private String rootpath;
     private String[] acls;
+    private ZKQuery query;
 }

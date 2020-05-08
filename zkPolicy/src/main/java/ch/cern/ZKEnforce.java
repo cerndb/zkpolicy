@@ -6,14 +6,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 
 public class ZKEnforce {
-    private ZooKeeper zk;
+    private ZKClient zk;
     private ZKDefaultQuery zkDefaultQuery = new ZKDefaultQuery();
 
-    public ZKEnforce(ZooKeeper zk) {
+    public ZKEnforce(ZKClient zk) {
         this.zk = zk;
     }
 

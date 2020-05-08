@@ -9,7 +9,7 @@ import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.Option;
 
 @Command(name = "zkpolicy", description = "ZooKeeper policy auditing tool", versionProvider = ZKPolicyCli.PropertiesVersionProvider.class, subcommands = {
-        ZKQueryCli.class, ZKExportCli.class, ZKTreeCli.class, ZKEnforceCli.class, HelpCommand.class }, mixinStandardHelpOptions = true)
+        ZKQueryCli.class, ZKExportCli.class, ZKTreeCli.class, ZKEnforceCli.class, ZKAuditCli.class, HelpCommand.class }, mixinStandardHelpOptions = true)
 /**
  * Class that handles CLI arguments for the tool.
  */

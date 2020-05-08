@@ -6,6 +6,10 @@ import lombok.Getter;
 
 public class ZKPolicyDefs {
 
+    static enum Formats{
+        json, yaml
+    }
+    
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     static enum Colors {
         // This will call enum constructor with one
@@ -16,6 +20,34 @@ public class ZKPolicyDefs {
         // declaring private variable for getting values
         @Getter
         private String ANSIValue;
+    }
+
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    static enum FourLetterWords {
+        // This will call enum constructor with one
+        // String argument
+        CONF("conf"),
+        CONS("cons"),
+        CRST("crst"),
+        DIRS("dirs"),
+        DUMP("dump"),
+        ENVI("envi"),
+        GTMK("gtmk"),
+        RUOK("ruok"),
+        STMK("stmk"),
+        SRST("srst"),
+        SRVR("srvr"),
+        STAT("stat"), 
+        WCHC("wchc"),
+        WCHP("wchp"),
+        WCHS("wchs"),
+        MNTR("mntr"),
+        ISRO("isro"),
+        HASH("hash");
+
+        // declaring private variable for getting values
+        @Getter
+        private String command;
     }
 
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
@@ -42,5 +74,9 @@ public class ZKPolicyDefs {
         static String lastParentIndent = "      ";
         static String innerParentIndent = "│     ";
         static int indentStepLength = lastChildIndent.length();
+
+        // Audit report CLI constants
+        static String sectionSeparator = "\n===============================================\n";
+        static String subSectionSeparator = "\n---------------------------------------------------------------------\n";
     }
 }

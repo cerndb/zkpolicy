@@ -1,23 +1,38 @@
 package ch.cern;
 
-import org.apache.curator.framework.CuratorFramework;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.apache.curator.test.TestingServer;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ZKTreeTest {
-  TestingServer zkTestServer;
-  CuratorFramework cli;
+    ZKConfig config;
+    ZKClient zkClient;
+    ZKTree zkTree;
+    TestingServer zkTestServer;
+    String colorMatch;
+    String colorNoMatch;
+    String colorReset;
 
-  public static void create(CuratorFramework client, String path, byte[] payload) throws Exception {
-    // this will create the given ZNode with the given data
-    client.create().creatingParentsIfNeeded().forPath(path, payload);
-  }
+    @Test
+    public void testColorCodeExplanation() throws Exception {
+        zkTestServer = new TestingServer();
+        this.config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "", "");
+        this.zkClient = new ZKClient(config);
+        this.zkTree  = new ZKTree(zkClient);
 
-  public static void delete(CuratorFramework client, String path) throws Exception {
-    // delete the given node
-    client.delete().deletingChildrenIfNeeded().forPath(path);
-  }
+        this.colorMatch = ZKPolicyDefs.Colors.GREEN.getANSIValue();
+        this.colorNoMatch = ZKPolicyDefs.Colors.RED.getANSIValue();
+        this.colorReset = ZKPolicyDefs.Colors.RESET.getANSIValue();
+
+        String expectedOutput = "* " + this.colorMatch + "GREEN" + this.colorReset + ": znodes matching the query\n"+
+        "* " + this.colorNoMatch + "RED" + this.colorReset + ": znodes not matching the query\n";
+
+        assertEquals(expectedOutput, zkTree.colorCodeExplanation());
+
+    }
 
 }

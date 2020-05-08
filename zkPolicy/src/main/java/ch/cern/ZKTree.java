@@ -1,32 +1,20 @@
 package ch.cern;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.NoAuthException;
-import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
-import org.apache.zookeeper.data.Stat;
 
 /**
  * Class that handles operations on the ZNode tree structure.
  */
 public class ZKTree {
-    private ZooKeeper zk;
-
-    private ZKConfig config;
+    private ZKClient zk;
 
     private String resetColor;
     private String matchColor;
@@ -34,25 +22,22 @@ public class ZKTree {
 
     /**
      *
-     * @param zk A ZooKeeper instance that provides access to the ZNode tree
-     * @param config ZKPolicy configuration
+     * @param zk     A ZooKeeper instance that provides access to the ZNode tree
      */
-    public ZKTree(ZooKeeper zk, ZKConfig config) {
+    public ZKTree(ZKClient zk) {
         this.zk = zk;
-        this.config = config;
         this.resetColor = ZKPolicyDefs.Colors.valueOf("RESET").getANSIValue();
-        this.matchColor = ZKPolicyDefs.Colors.valueOf(config.getMatchcolor()).getANSIValue();
-        this.misMatchColor = ZKPolicyDefs.Colors.valueOf(config.getMismatchcolor()).getANSIValue();
+        this.matchColor = ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMatchcolor()).getANSIValue();
+        this.misMatchColor = ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMismatchcolor()).getANSIValue();
     }
 
     /**
      * Function to return a tree view of the selected sub-tree with query matching
      * nodes colored green and non matching red
      *
-     * @param queryName Query to be executed
-     * @param rootPath Root path of recursive traversal
-     * @param queryACLs Query ACL parameters
-     * @return String ready to be printed in tree format
+     * @param rootPath Path to start recursive query execution from
+     * @param queryElements List of queries to be executed on each node
+     * @param queriesOutput Output buffers for each query
      * @throws KeeperException
      * @throws InterruptedException
      * @throws SecurityException
@@ -62,30 +47,45 @@ public class ZKTree {
      * @throws IllegalAccessException
      * @throws NoSuchFieldException
      */
-    public String queryTree(String queryName, String rootPath, String[] queryACLs)
+    public void queryTree(String rootPath, List<ZKQueryElement> queryElements, Hashtable<Integer, List<String>> queriesOutput)
             throws KeeperException, InterruptedException, NoSuchMethodException, SecurityException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
 
-        List<String> output = new ArrayList<String>();
-        ZKDefaultQuery zkDefaultQuery = new ZKDefaultQuery();
+        int parentYesChildNoIndex = -1;
+        for (int i = 0; i < queryElements.size(); i++) {
+            ZKQueryElement zkQueryElement = queryElements.get(i);
 
-        ZKQuery query = zkDefaultQuery.getValueOf(queryName);
-
-        if (queryName.equals("parentYesChildNo")) {
-            this.queryTreeIntParentYesChildNo(output, rootPath, "", "", query, queryACLs, null, true, false, false);
-        } else {
-            this.queryTreeIntPreOrder(output, rootPath, "", "", query, queryACLs, true, false, false);
+            //validate root path requested:
+            if(this.zk.exists(zkQueryElement.getRootpath(), null) == null){
+                throw new IllegalArgumentException("The path " + zkQueryElement.getRootpath() + " does not exist." );
+            }
+            if (zkQueryElement.getName().equals("parentYesChildNo")) {
+                this.queryTreeIntParentYesChildNo(zkQueryElement.getRootpath(), "", "", null, true, false, false,
+                        queriesOutput, zkQueryElement);
+                parentYesChildNoIndex = i;
+            }
+        }
+        if (parentYesChildNoIndex != -1) {
+            queryElements.remove(parentYesChildNoIndex);
         }
 
-        return this.colorCodeExplanation() + String.join("", output) + '\n';
+        if (queryElements.size() > 0) {
+            this.queryTreeIntPreOrder(rootPath, "", "", queryElements, true, false, false, queriesOutput);
+        }
     }
 
     /**
      * recursive function that constructs the full ZNode tree
+     * 
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
      */
-    private void queryTreeIntPreOrder(List<String> output, String path, String indent, String name, ZKQuery query,
-            String[] optionArgs, boolean isQueryRoot, boolean isLast, boolean isParentLast)
-            throws KeeperException, InterruptedException {
+    private void queryTreeIntPreOrder(String path, String indent, String name, List<ZKQueryElement> queryElements,
+            boolean isQueryRoot, boolean isLast, boolean isParentLast, Hashtable<Integer, List<String>> queriesOutput)
+            throws KeeperException, InterruptedException, NoSuchFieldException, SecurityException,
+            IllegalArgumentException, IllegalAccessException {
         List<String> children = null;
         try {
             children = this.zk.getChildren(path, null);
@@ -95,56 +95,75 @@ public class ZKTree {
 
         List<ACL> znodeACLList = this.zk.getACL(path, null);
 
-        String znodePrintColor = "";
-        if (query.query(znodeACLList, path, this.zk, optionArgs)) {
-            znodePrintColor = this.matchColor;
-        } else {
-            znodePrintColor = this.misMatchColor;
+        Boolean isQueryRootSentinel = true;
+        // After we got the ACL, execute all the queries
+        for (ZKQueryElement zkQueryElement : queryElements) {
+            isQueryRootSentinel = false;
+            String znodePrintColor = "";
+            ZKQuery query = zkQueryElement.getQuery();
+
+            if (query.query(znodeACLList, path, this.zk, zkQueryElement.getAcls())) {
+                znodePrintColor = this.matchColor;
+            } else {
+                znodePrintColor = this.misMatchColor;
+            }
+
+            if (isQueryRoot) {
+                name = path.substring(1, path.length());
+            } else {
+                if (name.equals("")) {
+                    name = path.substring(1, path.length());
+                }
+
+                if (indent.length() > 0) {
+                    if (isParentLast) {
+                        indent = indent.substring(0,
+                                indent.length() - ZKPolicyDefs.TerminalConstants.indentStepLength)
+                                + ZKPolicyDefs.TerminalConstants.lastParentIndent;
+                    } else {
+                        indent = indent.substring(0,
+                                indent.length() - ZKPolicyDefs.TerminalConstants.indentStepLength)
+                                + ZKPolicyDefs.TerminalConstants.innerParentIndent;
+                    }
+                }
+                if (isLast) {
+                    indent += ZKPolicyDefs.TerminalConstants.lastChildIndent;
+                } else {
+                    indent += ZKPolicyDefs.TerminalConstants.innerChildIndent;
+                }
+
+            }
+            queriesOutput.get(zkQueryElement.hashCode())
+                    .add(indent + znodePrintColor + "/" + name + this.resetColor);
+        
         }
 
         if (path.equals("/")) {
             path = "";
-        } else if (isQueryRoot) {
-            name = path.substring(1, path.length());
-        } else {
-            if (name.equals("")) {
-                name = path.substring(1, path.length());
-            }
-
-            if (indent.length() > 0) {
-                if (isParentLast) {
-                    indent = indent.substring(0, indent.length() - ZKPolicyDefs.TerminalConstants.indentStepLength)
-                            + ZKPolicyDefs.TerminalConstants.lastParentIndent;
-                } else {
-                    indent = indent.substring(0, indent.length() - ZKPolicyDefs.TerminalConstants.indentStepLength)
-                            + ZKPolicyDefs.TerminalConstants.innerParentIndent;
-                }
-            }
-            if (isLast) {
-                indent += ZKPolicyDefs.TerminalConstants.lastChildIndent;
-            } else {
-                indent += ZKPolicyDefs.TerminalConstants.innerChildIndent;
-            }
-
         }
-        output.add(indent + znodePrintColor + "/" + name + this.resetColor + "\n");
-
         Collections.sort(children);
 
         Iterator<String> iterator = children.iterator();
         while (iterator.hasNext()) {
             String child = iterator.next();
-            this.queryTreeIntPreOrder(output, path + "/" + child, indent, child, query, optionArgs, false,
-                    !iterator.hasNext(), isLast);
+            this.queryTreeIntPreOrder(path + "/" + child, indent, child, queryElements, isQueryRootSentinel, !iterator.hasNext(),
+                    isLast, queriesOutput);
         }
     }
 
     /**
-     * recursive function that constructs the full ZNode tree while passing parent ACL to child queries
+     * recursive function that constructs the full ZNode tree while passing parent
+     * ACL to child queries
+     * 
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
      */
-    private void queryTreeIntParentYesChildNo(List<String> output, String path, String indent, String name,
-            ZKQuery query, String[] optionArgs, List<ACL> parentACLList, boolean isQueryRoot, boolean isLast,
-            boolean isParentLast) throws KeeperException, InterruptedException {
+    private void queryTreeIntParentYesChildNo(String path, String indent, String name, List<ACL> parentACLList,
+            boolean isQueryRoot, boolean isLast, boolean isParentLast, Hashtable<Integer, List<String>> queriesOutput,
+            ZKQueryElement queryElement) throws KeeperException, InterruptedException, NoSuchFieldException,
+            SecurityException, IllegalArgumentException, IllegalAccessException {
         List<String> children = null;
 
         try {
@@ -155,7 +174,9 @@ public class ZKTree {
 
         String znodePrintColor = "";
 
-        if (parentACLList == null || query.query(parentACLList, path, this.zk, optionArgs)) {
+        ZKQuery query = queryElement.getQuery();
+
+        if (parentACLList == null || query.query(parentACLList, path, this.zk, null)) {
             znodePrintColor = this.matchColor;
         } else {
             znodePrintColor = this.misMatchColor;
@@ -186,15 +207,15 @@ public class ZKTree {
                 indent += znodePrintColor + ZKPolicyDefs.TerminalConstants.innerChildIndent;
             }
         }
-        output.add(indent + this.resetColor + "/" + name + "\n");
+        queriesOutput.get(queryElement.hashCode()).add(indent + this.resetColor + "/" + name);
 
         Collections.sort(children);
 
         Iterator<String> iterator = children.iterator();
         while (iterator.hasNext()) {
             String child = iterator.next();
-            this.queryTreeIntParentYesChildNo(output, path + "/" + child, indent, child, query, optionArgs,
-                    parentACLList, false, !iterator.hasNext(), isLast);
+            this.queryTreeIntParentYesChildNo(path + "/" + child, indent, child, parentACLList, false,
+                    !iterator.hasNext(), isLast, queriesOutput, queryElement);
         }
     }
 
@@ -202,10 +223,9 @@ public class ZKTree {
      * Function to return a list of the selected sub-tree with the full path of
      * query matching nodes
      *
-     * @param queryName Query to be executed
-     * @param rootPath Root path of recursive traversal
-     * @param queryACLs Query ACL parameters
-     * @return String ready to be printed in list format.
+     * @param rootPath Path to start recursive query execution from
+     * @param queryElements List of queries to be executed on each node
+     * @param queriesOutput Output buffers for each query
      * @throws KeeperException
      * @throws InterruptedException
      * @throws SecurityException
@@ -215,69 +235,104 @@ public class ZKTree {
      * @throws IllegalAccessException
      * @throws NoSuchFieldException
      */
-    public String queryFind(String queryName, String rootPath, String[] queryACLs)
+    public void queryFind(String rootPath, List<ZKQueryElement> queryElements, Hashtable<Integer, List<String>> queriesOutput)
             throws KeeperException, InterruptedException, NoSuchMethodException, SecurityException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
 
-        List<String> output = new ArrayList<String>();
+        int parentYesChildNoIndex = -1;
+        for (int i = 0; i < queryElements.size(); i++) {
+            ZKQueryElement zkQueryElement = queryElements.get(i);
 
-        ZKDefaultQuery zkDefaultQuery = new ZKDefaultQuery();
-        ZKQuery query = zkDefaultQuery.getValueOf(queryName);
-
-        if (queryName.equals("parentYesChildNo")) {
-            this.queryFindIntParentYesChildNo(output, rootPath, "", "", query, queryACLs, null);
-        } else {
-            this.queryFindIntPreOrder(output, rootPath, "", "", query, queryACLs);
+            //validate root path requested:
+            if(this.zk.exists(zkQueryElement.getRootpath(), null) == null){
+                throw new IllegalArgumentException("The path " + zkQueryElement.getRootpath() + " does not exist." );
+            }
+            
+            if (zkQueryElement.getName().equals("parentYesChildNo")) {
+                this.queryFindIntParentYesChildNo(zkQueryElement.getRootpath(), null, queriesOutput, zkQueryElement);
+                parentYesChildNoIndex = i;
+            }
+        }
+        if (parentYesChildNoIndex != -1) {
+            queryElements.remove(parentYesChildNoIndex);
         }
 
-        return '\n' + String.join("", output) + '\n';
+        if (queryElements.size() > 0) {
+            this.queryFindIntPreOrder(rootPath, queryElements, queriesOutput);
+        }
     }
 
     /**
      * recursive function that constructs the full ZNode tree
+     * 
+     * @param queryElements List of queries to be executed on each node
+     * @param queriesOutput Output buffers for each query
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
      */
-    private void queryFindIntPreOrder(List<String> output, String path, String indent, String name, ZKQuery query,
-            String[] optionArgs) throws KeeperException, InterruptedException {
+    private void queryFindIntPreOrder(String path, List<ZKQueryElement> queryElements,
+            Hashtable<Integer, List<String>> queriesOutput) throws KeeperException, InterruptedException,
+            NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
         List<String> children = null;
 
         try {
             children = this.zk.getChildren(path, null);
         } catch (NoAuthException e) {
+            for (ZKQueryElement zkQueryElement : queryElements) {        
+                queriesOutput.get(zkQueryElement.hashCode()).add("WARNING: No READ permission for " + path + ", skipping subtree");
+            }
             return;
         }
         List<ACL> znodeACLList = this.zk.getACL(path, null);
 
-        if (query.query(znodeACLList, path, this.zk, optionArgs)) {
+        for (ZKQueryElement zkQueryElement : queryElements) {        
+            ZKQuery query = zkQueryElement.getQuery();
 
-            output.add(path + "\n");
+            if (query.query(znodeACLList, path, this.zk, zkQueryElement.getAcls())) {
+                queriesOutput.get(zkQueryElement.hashCode()).add(path);
+            }
         }
+
         if (path.equals("/")) {
             path = "";
         }
 
         Collections.sort(children);
         for (String child : children) {
-            this.queryFindIntPreOrder(output, path + "/" + child, indent, child, query, optionArgs);
+            this.queryFindIntPreOrder(path + "/" + child, queryElements, queriesOutput);
         }
     }
 
     /**
-     * recursive function that constructs the full ZNode tree, passing parent ACL to children queries
+     * recursive function that constructs the full ZNode tree, passing parent ACL to
+     * children queries
+     * 
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws SecurityException
+     * @throws NoSuchFieldException
      */
-    private void queryFindIntParentYesChildNo(List<String> output, String path, String indent, String name,
-            ZKQuery query, String[] optionArgs, List<ACL> parentACLList) throws KeeperException, InterruptedException {
+    private void queryFindIntParentYesChildNo(String path, List<ACL> parentACLList,
+            Hashtable<Integer, List<String>> queriesOutput, ZKQueryElement queryElement)
+            throws KeeperException, InterruptedException, NoSuchFieldException, SecurityException,
+            IllegalArgumentException, IllegalAccessException {
 
         List<String> children = null;
 
         try {
             children = this.zk.getChildren(path, null);
         } catch (NoAuthException e) {
+            queriesOutput.get(queryElement.hashCode()).add("WARNING: No READ permission for " + path + ", skipping subtree");
             return;
         }
 
-        if (parentACLList != null && !query.query(parentACLList, path, this.zk, optionArgs)) {
-            output.add(path + "\n");
+        ZKQuery query = queryElement.getQuery();
+
+        if (parentACLList != null && !query.query(parentACLList, path, this.zk, queryElement.getAcls())) {
+            queriesOutput.get(queryElement.hashCode()).add(path);
         }
         parentACLList = this.zk.getACL(path, null);
 
@@ -287,108 +342,20 @@ public class ZKTree {
 
         Collections.sort(children);
         for (String child : children) {
-            this.queryFindIntParentYesChildNo(output, path + "/" + child, indent, child, query, optionArgs,
-                    parentACLList);
+            this.queryFindIntParentYesChildNo(path + "/" + child, parentACLList, queriesOutput, queryElement);
         }
-    }
-
-    /**
-     * Export a znode subtree to certain output format
-     * @param rootPath Path to start recursively exporting znodes
-     * @param format Export format
-     * @param compactMode Enable minified mode for export file
-     * @param outputFile Output file path
-     */
-    public void export(String rootPath, ZKExportCli.Format format, boolean compactMode, File outputFile) {
-        switch (format) {
-            case json:
-                this.exportToJSON(outputFile, rootPath, compactMode);
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
-     * Export znode subtree to JSON
-     */
-    private void exportToJSON(File outputFile, String rootPath, boolean compactMode) {
-        ZKTreeNode root = new ZKTreeNode();
-        Gson gson;
-        try {
-            this.toTreeStruct(rootPath, root);
-        } catch (KeeperException | InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        if (compactMode) {
-            gson = new GsonBuilder().create();
-        } else {
-            gson = new GsonBuilder().setPrettyPrinting().create();
-        }
-
-        try {
-            Writer writer = new FileWriter(outputFile);
-            gson.toJson(root, writer);
-            writer.flush(); // flush data to file <---
-            writer.close(); // close write <---
-        } catch (JsonIOException | IOException e1) {
-            e1.printStackTrace();
-        }
-    }
-
-    /**
-     * recursive function that constructs the full ZNode tree
-     */
-    private void toTreeStruct(String path, ZKTreeNode currentNode) throws KeeperException, InterruptedException {
-
-        byte[] data;
-        List<ACL> acl;
-        Stat stat = new Stat();
-        try {
-            data = this.zk.getData(path, null, stat); // fill the stat afterwards
-            acl = this.zk.getACL(path, null);
-        } catch (NoAuthException e) {
-            return;
-        }
-        currentNode.setData(data);
-        currentNode.setPath(path);
-        currentNode.setAcl(acl);
-        currentNode.setStat(stat);
-
-        List<String> children = null;
-        try {
-            children = this.zk.getChildren(path, null);
-        } catch (NoAuthException e) {
-            return;
-        }
-
-        Collections.sort(children);
-
-        if (path.equals("/")) {
-            path = "";
-        }
-
-        Iterator<String> iterator = children.iterator();
-        List<ZKTreeNode> childrenList = new ArrayList<ZKTreeNode>();
-        while (iterator.hasNext()) {
-            String child = iterator.next();
-            ZKTreeNode childNode = new ZKTreeNode();
-            this.toTreeStruct(path + "/" + child, childNode);
-            childrenList.add(childNode);
-        }
-        currentNode.setChildren(childrenList.toArray(new ZKTreeNode[childrenList.size()]));
     }
 
     /**
      * Return color code explanation for command line output
+     * @return Hint for colors used in tree representation
      */
-    private String colorCodeExplanation() {
+    public String colorCodeExplanation() {
         String explanation = "";
-        explanation += "* " + this.matchColor + config.getMatchcolor() + ":\t" + this.resetColor
-                + " znodes matching the query" + "\n";
-        explanation += "* " + this.misMatchColor + config.getMismatchcolor() + ":\t\t" + this.resetColor
-                + " znodes not matching the query" + "\n";
+        explanation += "* " + this.matchColor + this.zk.getZKPConfig().getMatchcolor() + this.resetColor + ": znodes matching the query"
+                + "\n";
+        explanation += "* " + this.misMatchColor + this.zk.getZKPConfig().getMismatchcolor() + this.resetColor
+                + ": znodes not matching the query" + "\n";
         return explanation;
     }
 }

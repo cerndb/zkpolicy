@@ -7,4 +7,9 @@ zkservers: "127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181"
 matchcolor: "GREEN"
 mismatchcolor: "RED"
 jaas: "/path/to/jaas.conf"
+
+# Optional parameter
 log4j: "/path/to/log4j.properties"
+
+# This path will be used when the audit subcommand is executed without any further arguments.
+defaultauditpath: "/path/to/defaultAudit.yaml"

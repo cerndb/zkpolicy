@@ -30,6 +30,7 @@ public class ZKConfig {
     private String mismatchcolor;
     private String jaas;
     private String log4j;
+    private String defaultauditpath;
 
     public ZKConfig(File configFile) throws JsonParseException, JsonMappingException, IOException {
         ObjectMapper om = new ObjectMapper(new YAMLFactory());

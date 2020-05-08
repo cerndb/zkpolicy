@@ -2,19 +2,17 @@ package ch.cern;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.Hashtable;
 import java.util.List;
 
-
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.data.ACL;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
-@Command(name = "tree", aliases = { "t" }, description = "tree command for ZooKeeper", helpCommand = true, mixinStandardHelpOptions = true)
+@Command(name = "tree", aliases = {
+        "t" }, description = "tree command for ZooKeeper", helpCommand = true, mixinStandardHelpOptions = true)
 public class ZKTreeCli implements Runnable {
 
     @ParentCommand
@@ -25,65 +23,38 @@ public class ZKTreeCli implements Runnable {
 
     @Override
     public void run() {
-        this.tree();
-    }
+        ZKTree zktree = null;
 
-    private void tree() {
-        ZooKeeper zk;
-        List<String> output = new ArrayList<String>();
+        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
+        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
 
-        try (ZKConnection zkServer = new ZKConnection()){
-            ZKConfig config = new ZKConfig(parent.configFile);
-            zk = zkServer.connect(config.getZkservers(), config.getTimeout());
-            treeRecursive(output, zk, this.rootPath, "", "", true, false, false);
-            System.out.println(String.join("\n", output));
-        } catch (IOException | InterruptedException e) {
+        // Add the treeAlwaysTrueQuery query to the execution list
+        ZKQuery query = new treeAlwaysTrueQuery();
+        ZKQueryElement queryElement = new ZKQueryElement("treeAlwaysTrueQuery", this.rootPath, null, query);
+
+        queriesList.add(queryElement);
+        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
+
+        ZKConfig config = null;
+        try {
+            config = new ZKConfig(parent.configFile);
+            config.setMatchcolor("WHITE");
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
+        try (ZKClient zk = new ZKClient(config)){
+            zktree = new ZKTree(zk);
+            zktree.queryTree(queryElement.getRootpath(), queriesList, queriesOutput);
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
+        System.out.println(String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
     }
 
-    private void treeRecursive(List<String> output, ZooKeeper zk, String path, String indent, String name,
-            boolean isQueryRoot, boolean isLast, boolean isParentLast) {
-        List<String> children = null;
-        try {
-            children = zk.getChildren(path, null);
-        } catch (KeeperException | InterruptedException e) {
-            return;
-        }
-
-        if (path.equals("/")) {
-            path = "";
-        } else if (isQueryRoot) {
-            name = path.substring(1, path.length());
-        } else {
-            if (name.equals("")) {
-                name = path.substring(1, path.length());
-            }
-            if (indent.length() > 0) {
-                if (isParentLast) {
-                    indent = indent.substring(0, indent.length() - ZKPolicyDefs.TerminalConstants.indentStepLength)
-                            + ZKPolicyDefs.TerminalConstants.lastParentIndent;
-                } else {
-                    indent = indent.substring(0, indent.length() - ZKPolicyDefs.TerminalConstants.indentStepLength)
-                            + ZKPolicyDefs.TerminalConstants.innerParentIndent;
-                }
-            }
-            if (isLast) {
-                indent += ZKPolicyDefs.TerminalConstants.lastChildIndent;
-            } else {
-                indent += ZKPolicyDefs.TerminalConstants.innerChildIndent;
-            }
-
-        }
-        output.add(indent + "/" + name);
-
-        Collections.sort(children);
-        Iterator<String> iterator = children.iterator();
-        while (iterator.hasNext()) {
-            String child = iterator.next();
-            this.treeRecursive(output, zk, path + "/" + child, indent, child, false, !iterator.hasNext(), isLast);
+    private class treeAlwaysTrueQuery implements ZKQuery {
+        public boolean query(List<ACL> aclList, String path, ZKClient zk, String[] queryACLs){
+            return true;
         }
     }
-
 }

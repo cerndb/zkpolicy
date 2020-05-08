@@ -9,13 +9,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.retry.RetryOneTime;
 import org.apache.curator.test.TestingServer;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
 import org.junit.jupiter.api.AfterAll;
@@ -29,70 +25,63 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 @TestInstance(Lifecycle.PER_CLASS)
 public class ZKEnforceTest {
     TestingServer zkTestServer;
-    CuratorFramework cli;
-    ZooKeeper zkeeper;
     ZKConfig config;
     ZKEnforce zkEnforce;
-    ZKConnection zkConnection;
+    ZKClient zkClient;
     private final PrintStream originalStdOut = System.out;
     private ByteArrayOutputStream consoleContent = new ByteArrayOutputStream();
 
     @BeforeAll
     public void startZookeeper() throws Exception {
         // Choose an available port
-        zkTestServer = new TestingServer(2281);
-        cli = CuratorFrameworkFactory.newClient(zkTestServer.getConnectString(), new RetryOneTime(2000));
-        cli.start();
-        zkConnection = new ZKConnection();
-        zkeeper = zkConnection.connect("127.0.0.1:2281", 2000);
+        zkTestServer = new TestingServer();
+        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "", "");
+        zkClient = new ZKClient(config);
 
         // Setup the znode tree for tests
         // a subtree
         List<ACL> aclListA = new ArrayList<ACL>();
         String tempDigest = DigestAuthenticationProvider.generateDigest("user1:passw1");
         aclListA.add(new ACLAugment("digest:" + tempDigest + ":crwda").getACL());
-        zkeeper.create("/a", "a".getBytes(), aclListA, CreateMode.PERSISTENT);
+        zkClient.create("/a", "a".getBytes(), aclListA, CreateMode.PERSISTENT);
 
-        zkeeper.addAuthInfo("digest", "user1:passw1".getBytes());
-        zkeeper.create("/a/aa", "aa".getBytes(), aclListA, CreateMode.PERSISTENT);
+        zkClient.addAuthInfo("digest", "user1:passw1".getBytes());
+        zkClient.create("/a/aa", "aa".getBytes(), aclListA, CreateMode.PERSISTENT);
 
         List<ACL> aclListABB = new ArrayList<ACL>();
         aclListABB.add(new ACLAugment("digest:testuser:testpass:crwda").getACL());
 
-        zkeeper.create("/a/bb", "aa".getBytes(), aclListABB, CreateMode.PERSISTENT);
+        zkClient.create("/a/bb", "aa".getBytes(), aclListABB, CreateMode.PERSISTENT);
         // b subtree
         List<ACL> aclListB = new ArrayList<ACL>();
         tempDigest = DigestAuthenticationProvider.generateDigest("user2:passw2");
         aclListB.add(new ACLAugment("digest:" + tempDigest + ":crda").getACL());
         aclListB.add(new ACLAugment("ip:127.0.0.3:rda").getACL());
 
-        zkeeper.addAuthInfo("digest", "user2:passw2".getBytes());
+        zkClient.addAuthInfo("digest", "user2:passw2".getBytes());
 
-        zkeeper.create("/b", "b".getBytes(), aclListB, CreateMode.PERSISTENT);
+        zkClient.create("/b", "b".getBytes(), aclListB, CreateMode.PERSISTENT);
 
         List<ACL> aclListBB = new ArrayList<ACL>();
         aclListBB.add(new ACLAugment("ip:127.0.0.3:rda").getACL());
         aclListBB.add(new ACLAugment("world:anyone:ra").getACL());
-        zkeeper.create("/b/bb", "bb".getBytes(), aclListBB, CreateMode.PERSISTENT);
+        zkClient.create("/b/bb", "bb".getBytes(), aclListBB, CreateMode.PERSISTENT);
 
         // c subtree
         List<ACL> aclListC = new ArrayList<ACL>();
         aclListC.add(new ACLAugment("auth:user3:pass3:crda").getACL());
-        zkeeper.create("/c", "c".getBytes(), aclListC, CreateMode.PERSISTENT);
+        zkClient.create("/c", "c".getBytes(), aclListC, CreateMode.PERSISTENT);
 
         List<ACL> aclListCC = new ArrayList<ACL>();
         aclListCC.add(new ACLAugment("world:anyone:crwda").getACL());
-        zkeeper.create("/c/cc", "cc".getBytes(), aclListCC, CreateMode.PERSISTENT);
+        zkClient.create("/c/cc", "cc".getBytes(), aclListCC, CreateMode.PERSISTENT);
 
-        config = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2281", 2000, "GREEN", "RED", "", "");
-        zkEnforce = new ZKEnforce(zkeeper);
+        zkEnforce = new ZKEnforce(zkClient);
     }
 
     @AfterAll
     public void stopZookeeper() throws IOException, InterruptedException {
-        cli.close();
-        zkTestServer.stop();
-        zkConnection.close();
+        this.zkClient.close();
     }
 
     @BeforeEach
@@ -115,8 +104,8 @@ public class ZKEnforceTest {
             throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, KeeperException, InterruptedException, NoSuchFieldException {
         this.zkEnforce.enforceDry("satisfyACL", "/", new String[] { "ip:127.0.0.3:r" });
-        String expectedResult = "/\n" + "WARNING: No READ permission for /a/bb, skipping subtree\n" + "/b\n"
-                + "/b/bb\n" + "/c/cc\n" + "/zookeeper\n" + "/zookeeper/quota\n";
+        String expectedResult = "/\n" + "WARNING: No READ permission for /a/bb, skipping subtree\n" + "/b\n" + "/b/bb\n"
+                + "/c/cc\n" + "/zookeeper\n" + "/zookeeper/config\n" + "/zookeeper/quota\n";
         assertEquals(expectedResult, this.consoleContent.toString());
     }
 
@@ -126,7 +115,7 @@ public class ZKEnforceTest {
         String[] policies = { "world:anyone:ra", "ip:127.0.0.4:cda" };
         this.zkEnforce.enforce(policies, "regexMatchACL", "/b", new String[] { "ip:127.0.0.3:.*", "world:anyone:.*" },
                 false);
-        List<ACL> alteredList = this.zkeeper.getACL("/b/bb", null);
+        List<ACL> alteredList = this.zkClient.getACL("/b/bb", null);
         List<ACL> expectedList = new ArrayList<ACL>();
         expectedList.add(new ACLAugment("world:anyone:ra").getACL());
         expectedList.add(new ACLAugment("ip:127.0.0.4:cda").getACL());
@@ -140,7 +129,7 @@ public class ZKEnforceTest {
         String[] policies = { "ip:127.0.0.3:cr" };
         this.zkEnforce.enforce(policies, "regexMatchACL", "/", new String[] { "ip:127.0.0.4:.*", "world:anyone:.*" },
                 true);
-        List<ACL> alteredList = this.zkeeper.getACL("/b/bb", null);
+        List<ACL> alteredList = this.zkClient.getACL("/b/bb", null);
         List<ACL> expectedList = new ArrayList<ACL>();
         expectedList.add(new ACLAugment("world:anyone:ra").getACL());
         expectedList.add(new ACLAugment("ip:127.0.0.4:cda").getACL());

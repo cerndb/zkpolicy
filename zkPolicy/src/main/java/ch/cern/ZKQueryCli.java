@@ -1,18 +1,23 @@
 package ch.cern;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Hashtable;
+import java.util.List;
 
-import org.apache.zookeeper.ZooKeeper;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
 
-@Command(name = "query", aliases = { "q" }, description = "Query the znode tree", helpCommand = true, mixinStandardHelpOptions = true)
+@Command(name = "query", aliases = {
+        "q" }, description = "Query the znode tree", helpCommand = true, mixinStandardHelpOptions = true)
 public class ZKQueryCli implements Runnable {
 
     @ParentCommand
@@ -32,24 +37,39 @@ public class ZKQueryCli implements Runnable {
 
     @Override
     public void run() {
-        this.executeQuery();
+        try {
+            this.executeQuery();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void executeQuery() {
+    private void executeQuery() throws JsonParseException, JsonMappingException, IOException {
         ZKTree zktree = null;
-        ZooKeeper zkClient;
 
-        try (ZKConnection zkServer = new ZKConnection()){
-            ZKConfig config = new ZKConfig(parent.configFile);
-            zkClient = zkServer.connect(config.getZkservers(), config.getTimeout());
-            zktree = new ZKTree(zkClient, config);
+        ZKConfig config = new ZKConfig(parent.configFile);
+
+        try (ZKClient zk = new ZKClient(config)){
+            zktree = new ZKTree(zk);
+
+            ZKDefaultQuery zkDefaultQuery = new ZKDefaultQuery();
+
+            // Get query to execute
+            ZKQuery query = zkDefaultQuery.getValueOf(this.queryName);
+
+            ZKQueryElement queryElement = new ZKQueryElement(this.queryName, this.rootPath, this.queryACLs, query);
+            List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
+            Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
+
+            queriesList.add(queryElement);
+            queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
             if (this.listMode) {
-                System.out.println(zktree.queryFind(this.queryName, this.rootPath, this.queryACLs));
+                zktree.queryFind(queryElement.getRootpath(), queriesList, queriesOutput);
+                System.out.println("\n" + String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
             } else {
-                System.out.println(zktree.queryTree(this.queryName, this.rootPath, this.queryACLs));
+                zktree.queryTree(queryElement.getRootpath(), queriesList, queriesOutput);
+                System.out.println(zktree.colorCodeExplanation() + String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
             }
-            zkServer.close();
-
         } catch (NoSuchMethodException | SecurityException e) {
             System.out.println("No such method: " + this.queryName);
             System.out.println("Please consult the list of default queries using query -h");

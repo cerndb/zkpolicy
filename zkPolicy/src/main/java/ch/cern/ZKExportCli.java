@@ -3,25 +3,18 @@ package ch.cern;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.zookeeper.ZooKeeper;
-
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
 
 @Command(name = "export", aliases = { "e" }, description = "Export the znode tree", mixinStandardHelpOptions = true)
 public class ZKExportCli implements Runnable {
-
-    enum Format {
-        json, yaml
-    };
-
     @ParentCommand
     private ZKPolicyCli parent;
 
     @Option(names = { "-t",
             "--type" }, required = true, description = "Export format ${COMPLETION-CANDIDATES} (default: json)")
-    Format format = Format.json;
+    ZKPolicyDefs.Formats format = ZKPolicyDefs.Formats.json;
 
     @Option(names = { "-C", "--compact" }, description = "Minified export (default: false)")
     Boolean compactMode = false;
@@ -34,12 +27,16 @@ public class ZKExportCli implements Runnable {
 
     @Override
     public void run() {
-        try (ZKConnection zkServer = new ZKConnection();){
-            ZKConfig config = new ZKConfig(parent.configFile);
-            ZooKeeper zkClient = zkServer.connect(config.getZkservers(), config.getTimeout());
-            ZKTree zktree = new ZKTree(zkClient, config);
-            zktree.export(rootPath, format, compactMode, outputFile);
-        } catch (IOException | InterruptedException e) {
+        ZKConfig config = null;
+        try {
+            config = new ZKConfig(parent.configFile);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        try (ZKClient zk = new ZKClient(config)){
+            ZKExport zkExport = new ZKExport(zk);
+            zkExport.export(rootPath, format, compactMode, outputFile);
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
