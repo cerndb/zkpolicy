@@ -38,8 +38,9 @@ public class ZKTreeCliTest {
     private final PrintStream originalErr = System.err;
 
     @TempDir
-    File testTempDir;
-    File configFile;
+    static File testTempDir;
+    
+    String configPath;
 
     @BeforeAll
     public void startZookeeper() throws Exception {
@@ -71,7 +72,7 @@ public class ZKTreeCliTest {
         this.resetColor = ZKPolicyDefs.Colors.RESET.getANSIValue();
 
         // Setup config file
-        configFile = new File(testTempDir, "conf_tmp.yml");
+        File configFile = new File(testTempDir, "conf_tmp.yml");
 
         FileWriter fw = new FileWriter(configFile);
         fw.write("---\n");
@@ -83,6 +84,8 @@ public class ZKTreeCliTest {
         fw.write("log4j: \"/path/to/log4j.properties\"");
         fw.flush();
         fw.close();
+
+        this.configPath = configFile.getCanonicalPath();
     }
 
     @BeforeEach
@@ -99,7 +102,7 @@ public class ZKTreeCliTest {
 
     @Test
     public void testTreeSubCommand() throws IOException {
-        String[] args = { "-c", configFile.getCanonicalPath(), "tree", "-p", "/" };
+        String[] args = { "-c", this.configPath, "tree", "-p", "/" };
 
         new CommandLine(new ZKPolicyCli(args)).execute(args);
         String expectedOutput = String.join("\n", this.whiteColor + "/" + this.resetColor,

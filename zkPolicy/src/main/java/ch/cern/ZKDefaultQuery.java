@@ -26,6 +26,8 @@ public class ZKDefaultQuery {
     public duplicateACLDef duplicateACL = new duplicateACLDef();
     public regexMatchACLDef regexMatchACL = new regexMatchACLDef();
     public globMatchACLDef globMatchACL = new globMatchACLDef();
+    public globMatchPathDef globMatchPath = new globMatchPathDef();
+    public regexMatchPathDef regexMatchPath = new regexMatchPathDef();
 
     public ZKQuery getValueOf(String lookingForValue) throws NoSuchFieldException, SecurityException,
             IllegalArgumentException, IllegalAccessException {
@@ -189,6 +191,37 @@ public class ZKDefaultQuery {
                         return true;
                     }
                 }
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Match nodes with ACLs matching the passed glob expressions
+     */
+    private class globMatchPathDef implements ZKQuery {
+        // We do expect only one glob expression to check for path match
+        public boolean query(List<ACL> aclList, String path, ZKClient zk, String[] queryPathGlobList) {
+            List<Pattern> queryPatternList = ZKPattern.createGlobPatternList(queryPathGlobList);
+
+            Matcher pathMatcher = queryPatternList.get(0).matcher(path);  
+            if (pathMatcher.matches()) {
+                return true;
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Match nodes with ACLs matching the passed glob expressions
+     */
+    private class regexMatchPathDef implements ZKQuery {
+        // We do expect only one glob expression to check for path match
+        public boolean query(List<ACL> aclList, String path, ZKClient zk, String[] queryPathRegexList) {
+            List<Pattern> queryPatternList = ZKPattern.createRegexPatternList(queryPathRegexList);
+            Matcher pathMatcher = queryPatternList.get(0).matcher(path);  
+            if (pathMatcher.matches()) {
+                return true;
             }
             return false;
         }

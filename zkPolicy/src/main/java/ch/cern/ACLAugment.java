@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.zookeeper.ZooDefs;
-import org.apache.zookeeper.cli.AclParser;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
 

@@ -2,9 +2,7 @@ package ch.cern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -150,10 +148,6 @@ public class ZKDefaultQueryTest {
         this.green +"└─── "+ this.reset +"/zookeeper\n" +
         this.green +"      "+ this.red +"├─── " + this.reset +"/config\n"+
         this.green +"      "+ this.green +"└─── " + this.reset +"/quota\n";
-
-        try (PrintStream out = new PrintStream(new FileOutputStream("filename.txt"))) {
-            out.print(actualOutput);
-        }
         
         assertEquals(expectedOutput, actualOutput);
     }

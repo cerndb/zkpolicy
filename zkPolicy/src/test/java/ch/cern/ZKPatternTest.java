@@ -19,8 +19,8 @@ public class ZKPatternTest {
         String[] globList = {"world:*:*","sasl:*:c?rw"};
         List<Pattern> patternList = ZKPattern.createGlobPatternList(globList);
         List<Pattern> expectedList = new ArrayList<Pattern>();
-        expectedList.add(Pattern.compile("^world:.*:.*$"));
-        expectedList.add(Pattern.compile("^sasl:.*:c.rw$"));
+        expectedList.add(Pattern.compile("world:.*:.*"));
+        expectedList.add(Pattern.compile("sasl:.*:c.rw"));
         assertEquals(expectedList.size(), patternList.size());
         assertEquals(expectedList.get(0).pattern(), patternList.get(0).pattern());
         assertEquals(expectedList.get(1).pattern(), patternList.get(1).pattern());
