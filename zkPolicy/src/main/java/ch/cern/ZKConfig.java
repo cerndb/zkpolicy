@@ -31,12 +31,22 @@ public class ZKConfig {
     private String jaas;
     private String defaultauditpath;
 
+    /**
+     * Construct ZKConfig using configuration YAML file
+     * @param configFile YAML config file
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws IOException
+     */
     public ZKConfig(File configFile) throws JsonParseException, JsonMappingException, IOException {
         ObjectMapper om = new ObjectMapper(new YAMLFactory());
         om.readerForUpdating(this).readValue(configFile);
         this.setPropertyJaas();
     }
 
+    /**
+     * Set java.security.auth.login.config environment variable
+     */
     public void setPropertyJaas() {
         if (this.jaas != null && !this.jaas.isEmpty()) {
             java.lang.System.setProperty("java.security.auth.login.config", this.jaas);

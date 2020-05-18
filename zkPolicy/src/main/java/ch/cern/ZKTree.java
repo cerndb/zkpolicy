@@ -1,6 +1,7 @@
 package ch.cern;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -22,7 +23,7 @@ public class ZKTree {
 
     /**
      *
-     * @param zk     A ZooKeeper instance that provides access to the ZNode tree
+     * @param zk A ZooKeeper instance that provides access to the ZNode tree
      */
     public ZKTree(ZKClient zk) {
         this.zk = zk;
@@ -35,7 +36,7 @@ public class ZKTree {
      * Function to return a tree view of the selected sub-tree with query matching
      * nodes colored green and non matching red
      *
-     * @param rootPath Path to start recursive query execution from
+     * @param rootPath      Path to start recursive query execution from
      * @param queryElements List of queries to be executed on each node
      * @param queriesOutput Output buffers for each query
      * @throws KeeperException
@@ -47,26 +48,43 @@ public class ZKTree {
      * @throws IllegalAccessException
      * @throws NoSuchFieldException
      */
-    public void queryTree(String rootPath, List<ZKQueryElement> queryElements, Hashtable<Integer, List<String>> queriesOutput)
+    public void queryTree(String rootPath, List<ZKQueryElement> queryElements,
+            Hashtable<Integer, List<String>> queriesOutput)
             throws KeeperException, InterruptedException, NoSuchMethodException, SecurityException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
 
-        int parentYesChildNoIndex = -1;
-        for (int i = 0; i < queryElements.size(); i++) {
-            ZKQueryElement zkQueryElement = queryElements.get(i);
+        List<ZKQueryElement> invalidQueries = new ArrayList<ZKQueryElement>();
+        List<ZKQueryElement> parentYesChildNoQueries = new ArrayList<ZKQueryElement>();
 
-            //validate root path requested:
-            if(this.zk.exists(zkQueryElement.getRootpath(), null) == null){
-                throw new IllegalArgumentException("The path " + zkQueryElement.getRootpath() + " does not exist." );
+        for (ZKQueryElement zkQueryElement : queryElements) {
+            // validate root path requested:
+            try {
+                if (this.zk.exists(zkQueryElement.getRootpath(), null) == null) {
+                    queriesOutput.get(zkQueryElement.hashCode())
+                            .add("The path " + zkQueryElement.getRootpath() + " does not exist.");
+                    invalidQueries.add(zkQueryElement);
+                    continue;
+                }
+            } catch (IllegalArgumentException e) {
+                queriesOutput.get(zkQueryElement.hashCode())
+                        .add("Invalid rootpath " + zkQueryElement.getRootpath() + " : " + e.getMessage());
+                invalidQueries.add(zkQueryElement);
+                continue;
             }
             if (zkQueryElement.getName().equals("parentYesChildNo")) {
                 this.queryTreeIntParentYesChildNo(zkQueryElement.getRootpath(), "", "", null, true, false, false,
                         queriesOutput, zkQueryElement);
-                parentYesChildNoIndex = i;
+                parentYesChildNoQueries.add(zkQueryElement);
             }
+
         }
-        if (parentYesChildNoIndex != -1) {
-            queryElements.remove(parentYesChildNoIndex);
+
+        for (ZKQueryElement zkQueryElement : parentYesChildNoQueries) {
+            queryElements.remove(zkQueryElement);
+        }
+
+        for (ZKQueryElement zkQueryElement : invalidQueries) {
+            queryElements.remove(zkQueryElement);
         }
 
         if (queryElements.size() > 0) {
@@ -117,12 +135,10 @@ public class ZKTree {
 
                 if (indent.length() > 0) {
                     if (isParentLast) {
-                        indent = indent.substring(0,
-                                indent.length() - ZKPolicyDefs.TerminalConstants.indentStepLength)
+                        indent = indent.substring(0, indent.length() - ZKPolicyDefs.TerminalConstants.indentStepLength)
                                 + ZKPolicyDefs.TerminalConstants.lastParentIndent;
                     } else {
-                        indent = indent.substring(0,
-                                indent.length() - ZKPolicyDefs.TerminalConstants.indentStepLength)
+                        indent = indent.substring(0, indent.length() - ZKPolicyDefs.TerminalConstants.indentStepLength)
                                 + ZKPolicyDefs.TerminalConstants.innerParentIndent;
                     }
                 }
@@ -133,9 +149,8 @@ public class ZKTree {
                 }
 
             }
-            queriesOutput.get(zkQueryElement.hashCode())
-                    .add(indent + znodePrintColor + "/" + name + this.resetColor);
-        
+            queriesOutput.get(zkQueryElement.hashCode()).add(indent + znodePrintColor + "/" + name + this.resetColor);
+
         }
 
         if (path.equals("/")) {
@@ -146,8 +161,8 @@ public class ZKTree {
         Iterator<String> iterator = children.iterator();
         while (iterator.hasNext()) {
             String child = iterator.next();
-            this.queryTreeIntPreOrder(path + "/" + child, indent, child, queryElements, isQueryRootSentinel, !iterator.hasNext(),
-                    isLast, queriesOutput);
+            this.queryTreeIntPreOrder(path + "/" + child, indent, child, queryElements, isQueryRootSentinel,
+                    !iterator.hasNext(), isLast, queriesOutput);
         }
     }
 
@@ -223,7 +238,7 @@ public class ZKTree {
      * Function to return a list of the selected sub-tree with the full path of
      * query matching nodes
      *
-     * @param rootPath Path to start recursive query execution from
+     * @param rootPath      Path to start recursive query execution from
      * @param queryElements List of queries to be executed on each node
      * @param queriesOutput Output buffers for each query
      * @throws KeeperException
@@ -235,26 +250,41 @@ public class ZKTree {
      * @throws IllegalAccessException
      * @throws NoSuchFieldException
      */
-    public void queryFind(String rootPath, List<ZKQueryElement> queryElements, Hashtable<Integer, List<String>> queriesOutput)
+    public void queryFind(String rootPath, List<ZKQueryElement> queryElements,
+            Hashtable<Integer, List<String>> queriesOutput)
             throws KeeperException, InterruptedException, NoSuchMethodException, SecurityException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
 
-        int parentYesChildNoIndex = -1;
-        for (int i = 0; i < queryElements.size(); i++) {
-            ZKQueryElement zkQueryElement = queryElements.get(i);
-
-            //validate root path requested:
-            if(this.zk.exists(zkQueryElement.getRootpath(), null) == null){
-                throw new IllegalArgumentException("The path " + zkQueryElement.getRootpath() + " does not exist." );
+        List<ZKQueryElement> invalidQueries = new ArrayList<ZKQueryElement>();
+        List<ZKQueryElement> parentYesChildNoQueries = new ArrayList<ZKQueryElement>();
+        for (ZKQueryElement zkQueryElement : queryElements) {
+            // validate root path requested:
+            try {
+                if (this.zk.exists(zkQueryElement.getRootpath(), null) == null) {
+                    queriesOutput.get(zkQueryElement.hashCode())
+                            .add("The path " + zkQueryElement.getRootpath() + " does not exist.");
+                    invalidQueries.add(zkQueryElement);
+                    continue;
+                }
+            } catch (IllegalArgumentException e) {
+                queriesOutput.get(zkQueryElement.hashCode())
+                        .add("Invalid rootpath " + zkQueryElement.getRootpath() + " : " + e.getMessage());
+                invalidQueries.add(zkQueryElement);
+                continue;
             }
-            
+
             if (zkQueryElement.getName().equals("parentYesChildNo")) {
                 this.queryFindIntParentYesChildNo(zkQueryElement.getRootpath(), null, queriesOutput, zkQueryElement);
-                parentYesChildNoIndex = i;
+                parentYesChildNoQueries.add(zkQueryElement);
             }
         }
-        if (parentYesChildNoIndex != -1) {
-            queryElements.remove(parentYesChildNoIndex);
+
+        for (ZKQueryElement zkQueryElement : parentYesChildNoQueries) {
+            queryElements.remove(zkQueryElement);
+        }
+
+        for (ZKQueryElement zkQueryElement : invalidQueries) {
+            queryElements.remove(zkQueryElement);
         }
 
         if (queryElements.size() > 0) {
@@ -281,14 +311,15 @@ public class ZKTree {
         try {
             children = this.zk.getChildren(path, null);
         } catch (NoAuthException e) {
-            for (ZKQueryElement zkQueryElement : queryElements) {        
-                queriesOutput.get(zkQueryElement.hashCode()).add("WARNING: No READ permission for " + path + ", skipping subtree");
+            for (ZKQueryElement zkQueryElement : queryElements) {
+                queriesOutput.get(zkQueryElement.hashCode())
+                        .add("WARNING: No READ permission for " + path + ", skipping subtree");
             }
             return;
         }
         List<ACL> znodeACLList = this.zk.getACL(path, null);
 
-        for (ZKQueryElement zkQueryElement : queryElements) {        
+        for (ZKQueryElement zkQueryElement : queryElements) {
             ZKQuery query = zkQueryElement.getQuery();
 
             if (query.query(znodeACLList, path, this.zk, zkQueryElement.getAcls())) {
@@ -325,7 +356,8 @@ public class ZKTree {
         try {
             children = this.zk.getChildren(path, null);
         } catch (NoAuthException e) {
-            queriesOutput.get(queryElement.hashCode()).add("WARNING: No READ permission for " + path + ", skipping subtree");
+            queriesOutput.get(queryElement.hashCode())
+                    .add("WARNING: No READ permission for " + path + ", skipping subtree");
             return;
         }
 
@@ -348,12 +380,13 @@ public class ZKTree {
 
     /**
      * Return color code explanation for command line output
+     * 
      * @return Hint for colors used in tree representation
      */
     public String colorCodeExplanation() {
         String explanation = "";
-        explanation += "* " + this.matchColor + this.zk.getZKPConfig().getMatchcolor() + this.resetColor + ": znodes matching the query"
-                + "\n";
+        explanation += "* " + this.matchColor + this.zk.getZKPConfig().getMatchcolor() + this.resetColor
+                + ": znodes matching the query" + "\n";
         explanation += "* " + this.misMatchColor + this.zk.getZKPConfig().getMismatchcolor() + this.resetColor
                 + ": znodes not matching the query" + "\n";
         return explanation;

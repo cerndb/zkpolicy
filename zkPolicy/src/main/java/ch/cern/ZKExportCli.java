@@ -1,7 +1,6 @@
 package ch.cern;
 
 import java.io.File;
-import java.io.IOException;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -30,14 +29,14 @@ public class ZKExportCli implements Runnable {
         ZKConfig config = null;
         try {
             config = new ZKConfig(parent.configFile);
-        } catch (IOException e1) {
-            e1.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(e.toString()); 
         }
         try (ZKClient zk = new ZKClient(config)){
             ZKExport zkExport = new ZKExport(zk);
             zkExport.export(rootPath, format, compactMode, outputFile);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.toString()); 
         }
 
     }

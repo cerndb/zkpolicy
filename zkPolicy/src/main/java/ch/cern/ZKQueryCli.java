@@ -11,6 +11,9 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -19,6 +22,7 @@ import picocli.CommandLine.ParentCommand;
 @Command(name = "query", aliases = {
         "q" }, description = "Query the znode tree", helpCommand = true, mixinStandardHelpOptions = true)
 public class ZKQueryCli implements Runnable {
+    private static Logger logger = LogManager.getLogger(ZKQueryCli.class);
 
     @ParentCommand
     private ZKPolicyCli parent;
@@ -39,8 +43,9 @@ public class ZKQueryCli implements Runnable {
     public void run() {
         try {
             this.executeQuery();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(e.toString()); 
+            logger.error("Exception occurred!", e); 
         }
     }
 
@@ -74,7 +79,8 @@ public class ZKQueryCli implements Runnable {
             System.out.println("No such method: " + this.queryName);
             System.out.println("Please consult the list of default queries using query -h");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.toString()); 
+            logger.error("Exception occurred!", e); 
         }
     }
 
@@ -85,7 +91,9 @@ public class ZKQueryCli implements Runnable {
             Field[] fields = zkDefaultQueryClass.getDeclaredFields();
 
             for (Field field : fields) {
-                this.add("%n * " + field.getName());
+                if (!field.getName().equals("logger")) {
+                    this.add("%n * " + field.getName());
+                } 
             }
             Collections.sort(this);
         }

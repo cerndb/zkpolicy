@@ -9,6 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
@@ -16,6 +19,7 @@ import picocli.CommandLine.ParentCommand;
 
 @Command(name = "audit", aliases = { "a" }, description = "Generate full audit report", mixinStandardHelpOptions = true)
 public class ZKAuditCli implements Runnable {
+    private static Logger logger = LogManager.getLogger(ZKAuditCli.class);
 
     @ParentCommand
     private ZKPolicyCli parent;
@@ -38,8 +42,6 @@ public class ZKAuditCli implements Runnable {
             ZKAudit zkAudit = null;
 
             config = new ZKConfig(parent.configFile);
-
-
 
             // Define the query set to be executed for each node as well as the output arrays for each query
             // Check the passed audit yaml config file for queries and construct the HashTable
@@ -65,7 +67,8 @@ public class ZKAuditCli implements Runnable {
                 outputString += zkAudit.getACLOverview();
                 
             } catch ( Exception e ) {
-                e.printStackTrace();
+                System.out.println(e.toString()); 
+                logger.error("Exception occurred!", e);
             }
 
             
@@ -81,7 +84,8 @@ public class ZKAuditCli implements Runnable {
             
             // Decide whether this would be human readable or for enforcing later on
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.toString()); 
+            logger.error("Exception occurred!", e);
         }
 
     }

@@ -1,11 +1,12 @@
 package ch.cern;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
 import org.apache.zookeeper.data.ACL;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -14,6 +15,7 @@ import picocli.CommandLine.ParentCommand;
 @Command(name = "tree", aliases = {
         "t" }, description = "tree command for ZooKeeper", helpCommand = true, mixinStandardHelpOptions = true)
 public class ZKTreeCli implements Runnable {
+    private static Logger logger = LogManager.getLogger(ZKTreeCli.class);
 
     @ParentCommand
     private ZKPolicyCli parent;
@@ -39,15 +41,17 @@ public class ZKTreeCli implements Runnable {
         try {
             config = new ZKConfig(parent.configFile);
             config.setMatchcolor("WHITE");
-        } catch (IOException e1) {
-            e1.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            logger.error("Exception occurred!", e); 
         }
 
         try (ZKClient zk = new ZKClient(config)){
             zktree = new ZKTree(zk);
             zktree.queryTree(queryElement.getRootpath(), queriesList, queriesOutput);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.toString()); 
+            logger.error("Exception occurred!", e);
         }
         System.out.println(String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
     }

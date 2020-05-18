@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Class that holds configuration parameters as defined in the config.yaml CLI
- * argument
+ * Class for query elements to be executed, constructed based on configuration
+ * yaml files argument
  */
 @Getter
 @Setter

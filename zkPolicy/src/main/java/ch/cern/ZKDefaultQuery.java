@@ -10,13 +10,15 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
-import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.ACL;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * ZKDefaultQuery Class that provides a basic set of queries for the ZNode tree.
  */
 public class ZKDefaultQuery {
+    private static Logger logger = LogManager.getLogger(ZKDefaultQuery.class);
 
     // Define default queries with appropriate names
     public exactACLDef exactACL = new exactACLDef();
@@ -29,6 +31,15 @@ public class ZKDefaultQuery {
     public globMatchPathDef globMatchPath = new globMatchPathDef();
     public regexMatchPathDef regexMatchPath = new regexMatchPathDef();
 
+    /**
+     * Get value of class field using its name
+     * @param lookingForValue Field name
+     * @return Corresponding query
+     * @throws NoSuchFieldException
+     * @throws SecurityException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     */
     public ZKQuery getValueOf(String lookingForValue) throws NoSuchFieldException, SecurityException,
             IllegalArgumentException, IllegalAccessException {
         Field field = this.getClass().getField(lookingForValue);
@@ -114,8 +125,9 @@ public class ZKDefaultQuery {
                 myACLs = zk.getACL(path, null);
                 myACLsAugment = ACLAugment.generateACLAugmentList(myACLs);
                 parentACLsAugment = ACLAugment.generateACLAugmentList(parentACLList);
-            } catch (KeeperException | InterruptedException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                System.out.println(e.toString()); 
+                logger.error("Exception occurred!", e);
             }
 
             if (CollectionUtils.isEqualCollection(myACLsAugment, parentACLsAugment)) {

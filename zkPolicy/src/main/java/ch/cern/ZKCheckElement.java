@@ -2,22 +2,23 @@ package ch.cern;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Class that holds configuration for policies as defined in the enforcing
- * yaml configuration file
+ * Check element as defined in the audit report configuration file
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class ZKEnforcePolicyElement {
-
+@EqualsAndHashCode
+public class ZKCheckElement {
     private String title;
-    private ZKQueryElement query;
-    private boolean append;
+    private String rootpath;
+    private String pathpattern;
     private String[] acls;
+    public boolean $status = true;
 }

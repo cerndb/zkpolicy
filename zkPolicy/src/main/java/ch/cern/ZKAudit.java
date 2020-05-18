@@ -26,9 +26,11 @@ import lombok.Setter;
 @Setter
 public class ZKAudit {
     private ZKClient zk;
-    private ZKAuditQueriesSet zkAuditSet;
+    private ZKAuditSet zkAuditSet;
     private Hashtable<String, List<ZKQueryElement>> rootPathGroups;
-    Hashtable<Integer, List<String>> queriesOutput;
+    private Hashtable<String, List<ZKCheckElement>> rootPathCheckGroups;
+    Hashtable<Integer, List<String>> queriesOutput = null;
+    Hashtable<Integer, List<String>> checksOutput = null;
 
     /**
      * Get a set of unique root paths defined by the user for each query
@@ -36,6 +38,14 @@ public class ZKAudit {
      */
     public Set<String> getRootPathKeys() {
         return this.rootPathGroups.keySet();
+    }
+
+    /**
+     * Get a set of unique root paths defined by the user for each check
+     * @return Check root path set
+     */
+    public Set<String> getRootPathCheckKeys() {
+        return this.rootPathCheckGroups.keySet();
     }
 
     /**
@@ -49,8 +59,15 @@ public class ZKAudit {
     public ZKAudit(ZKClient zk, File auditConfigFile) throws JsonParseException, JsonMappingException, IOException {
         this.zk = zk;
         this.rootPathGroups = new Hashtable<String, List<ZKQueryElement>>();
-        this.zkAuditSet = new ZKAuditQueriesSet(auditConfigFile);
-        this.queriesOutput = ZKPolicyUtils.getOutputBuffer(this.zkAuditSet.getQueries());
+        this.rootPathCheckGroups = new Hashtable<String, List<ZKCheckElement>>();
+        this.zkAuditSet = new ZKAuditSet(auditConfigFile);
+        if (this.zkAuditSet.getQueries() != null) {
+            this.queriesOutput = ZKPolicyUtils.getQueryOutputBuffer(this.zkAuditSet.getQueries());    
+        }
+
+        if (this.zkAuditSet.getChecks() != null) {
+            this.checksOutput = ZKPolicyUtils.getChecksOutputBuffer(this.zkAuditSet.getChecks());    
+        }
     }
 
     /**
@@ -154,6 +171,20 @@ public class ZKAudit {
         }
     }
 
+    private void executeRootGroupChecks() throws JsonParseException, JsonMappingException, IOException,
+            NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+            NoSuchMethodException, InvocationTargetException, KeeperException, InterruptedException {
+
+        ZKCheck zkCheck = new ZKCheck(this.zk);
+        this.groupChecksByRootPath();
+
+        for (String rootPath : this.getRootPathCheckKeys()) {
+            List<ZKCheckElement> currentBatch = this.getRootPathCheckGroups().get(rootPath);
+            // Execute one for each batch of rootPaths
+            zkCheck.check(rootPath, currentBatch, checksOutput);
+        }
+    }
+
     /**
      * Generate query result section
      * @return Audit report section with query results
@@ -174,22 +205,58 @@ public class ZKAudit {
             NoSuchMethodException, InvocationTargetException, KeeperException, InterruptedException {
 
         String outputString = "";
-        this.executeRootGroupQueries();
-
-        // Parse output buffers
-        for (ZKQueryElement queryElement : zkAuditSet.getQueries()) {
-            outputString += "\nQuery: " + queryElement.getName() + "\n";
-            outputString += "Root Path: " + queryElement.getRootpath() + "\n";
-            if (queryElement.getAcls() != null) {
-                outputString += "Arguments:" + "\n- " + String.join("\n- ", queryElement.getAcls()) + "\n";
+        int aggregateCheckSuccessNum = 0;
+        
+        // Parse output buffers for queries
+        if (zkAuditSet.getQueries() != null) {
+            this.executeRootGroupQueries();
+            for (ZKQueryElement queryElement : zkAuditSet.getQueries()) {
+                outputString += "\nQuery: " + queryElement.getName() + "\n";
+                outputString += "Root Path: " + queryElement.getRootpath() + "\n";
+                if (queryElement.getAcls() != null) {
+                    outputString += "Arguments:" + "\n- " + String.join("\n- ", queryElement.getAcls()) + "\n";
+                }
+    
+                outputString += "\nResult:\n";
+                outputString += String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
+                outputString += ZKPolicyDefs.TerminalConstants.subSectionSeparator;
             }
+                
+        }
 
-            outputString += "\nResult:\n";
-            outputString += String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
-            outputString += ZKPolicyDefs.TerminalConstants.subSectionSeparator;
+        
+        // Parse output buffers for checks
+        if (zkAuditSet.getChecks() != null) {
+            this.executeRootGroupChecks();
+            for (ZKCheckElement checkElement : zkAuditSet.getChecks()) {
+                outputString += "\nCheck: " + checkElement.getTitle() + "\n";
+                outputString += "Root Path: " + checkElement.getRootpath() + "\n";
+                outputString += "Path Pattern: " + checkElement.getPathpattern() + "\n";
+                if (checkElement.getAcls() != null) {
+                    outputString += "Arguments:" + "\n- " + String.join("\n- ", checkElement.getAcls()) + "\n";
+                }
+                
+                if (checkElement.$status) {
+                    outputString += "\nResult: PASS\n";
+                    aggregateCheckSuccessNum++;    
+                } else {
+                    outputString += "\nResult: FAIL\n";
+                }
+                outputString += String.join("\n", checksOutput.get(checkElement.hashCode())) + "\n";
+                outputString += ZKPolicyDefs.TerminalConstants.subSectionSeparator;
+            }
+            
+            // Add aggregate result for checks
+            if (aggregateCheckSuccessNum == zkAuditSet.getChecks().size()) {
+                outputString += "\nOverall Check Result: PASS\n";    
+            } else {
+                outputString += "\nOverall Check Result: FAIL\n";
+                outputString += "\nPASS: "+aggregateCheckSuccessNum+ ", FAIL: " + (zkAuditSet.getChecks().size() - aggregateCheckSuccessNum) +"\n";
+            }    
         }
         return outputString;
     }
+
 
     /**
      * Recursively parse the znode tree for ACL overview generation
@@ -257,6 +324,29 @@ public class ZKAudit {
                 List<ZKQueryElement> batchList = new ArrayList<ZKQueryElement>();
                 batchList.add(queryElement);
                 this.rootPathGroups.put(queryElement.getRootpath(), batchList);
+            }
+        }
+    }
+
+    /**
+     * Group checks based on their root path for optimal performance
+     * @throws NoSuchFieldException
+     * @throws SecurityException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     */
+    public void groupChecksByRootPath()
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+        
+
+        for (ZKCheckElement checkElement : this.zkAuditSet.getChecks()) {
+        
+            if (this.rootPathCheckGroups.containsKey(checkElement.getRootpath())) {
+                this.rootPathCheckGroups.get(checkElement.getRootpath()).add(checkElement);
+            } else {
+                List<ZKCheckElement> batchList = new ArrayList<ZKCheckElement>();
+                batchList.add(checkElement);
+                this.rootPathCheckGroups.put(checkElement.getRootpath(), batchList);
             }
         }
     }

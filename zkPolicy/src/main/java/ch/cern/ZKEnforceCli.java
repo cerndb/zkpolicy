@@ -7,6 +7,9 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -16,6 +19,8 @@ import picocli.CommandLine.ParentCommand;
 @Command(name = "enforce", aliases = {
         "f" }, description = "Enforce policy on znodes", helpCommand = true, mixinStandardHelpOptions = true)
 public class ZKEnforceCli implements Runnable {
+    private static Logger logger = LogManager.getLogger(ZKEnforceCli.class);
+    
     @ParentCommand
     private ZKPolicyCli parent;
 
@@ -64,8 +69,9 @@ public class ZKEnforceCli implements Runnable {
             } else if (this.exclusive.cliEnforceGroup == null) {
                 this.cliEnforceFromFIle();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(e.toString()); 
+            logger.error("Exception occurred!", e);
         }
     }
 
@@ -94,7 +100,8 @@ public class ZKEnforceCli implements Runnable {
             System.out.println("No such method: " + this.exclusive.cliEnforceGroup.queryName);
             System.out.println("Please consult the list of default queries using query -h");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.toString()); 
+            logger.error("Exception occurred!", e);
         }
     }
 
@@ -128,7 +135,8 @@ public class ZKEnforceCli implements Runnable {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.toString());
+            logger.error("Exception occurred!", e); 
         }
     }
 }

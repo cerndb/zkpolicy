@@ -16,18 +16,19 @@ import lombok.Setter;
 import lombok.AccessLevel;
 
 /**
- * Class that holds configuration parameters as defined in the config.yaml CLI
- * argument
+ * Class that holds the report scenario description with different steps
+ * (queries and checks) to be executed on the ZK tree argument
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class ZKAuditQueriesSet {
+public class ZKAuditSet {
 
     private List<ZKQueryElement> queries;
+    private List<ZKCheckElement> checks;
 
-    public ZKAuditQueriesSet(File auditConfigFile) throws JsonParseException, JsonMappingException, IOException {
+    public ZKAuditSet(File auditConfigFile) throws JsonParseException, JsonMappingException, IOException {
         ObjectMapper om = new ObjectMapper(new YAMLFactory());
         om.readerForUpdating(this).readValue(auditConfigFile);
     }

@@ -4,12 +4,15 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * Constants commonly used throughout the ZooKeeper Policy Audit tool codebase
+ */
 public class ZKPolicyDefs {
 
-    static enum Formats{
+    static enum Formats {
         json, yaml
     }
-    
+
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
     static enum Colors {
         // This will call enum constructor with one
@@ -26,24 +29,9 @@ public class ZKPolicyDefs {
     static enum FourLetterWords {
         // This will call enum constructor with one
         // String argument
-        CONF("conf"),
-        CONS("cons"),
-        CRST("crst"),
-        DIRS("dirs"),
-        DUMP("dump"),
-        ENVI("envi"),
-        GTMK("gtmk"),
-        RUOK("ruok"),
-        STMK("stmk"),
-        SRST("srst"),
-        SRVR("srvr"),
-        STAT("stat"), 
-        WCHC("wchc"),
-        WCHP("wchp"),
-        WCHS("wchs"),
-        MNTR("mntr"),
-        ISRO("isro"),
-        HASH("hash");
+        CONF("conf"), CONS("cons"), CRST("crst"), DIRS("dirs"), DUMP("dump"), ENVI("envi"), GTMK("gtmk"), RUOK("ruok"),
+        STMK("stmk"), SRST("srst"), SRVR("srvr"), STAT("stat"), WCHC("wchc"), WCHP("wchp"), WCHS("wchs"), MNTR("mntr"),
+        ISRO("isro"), HASH("hash");
 
         // declaring private variable for getting values
         @Getter

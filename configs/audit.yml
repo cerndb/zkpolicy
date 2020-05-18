@@ -1,0 +1,109 @@
+---
+queries:
+    # Hbase
+    # https://docs.cloudera.com/HDPDocuments/HDP3/HDP-3.1.5/zookeeper-acls/content/zookeeper_acls_best_practices_hbase.html
+    - name: "exactACL"
+      rootpath: "/hbase"
+      acls:
+          - "sasl:hbase:cdrwa"
+    
+    - name: "duplicateACL"
+      rootpath: "/hbase"
+
+    # HDFS/WebHDFS
+    # https://docs.cloudera.com/HDPDocuments/HDP3/HDP-3.1.5/zookeeper-acls/content/zookeeper_acls_best_practices_hdfs_webhdfs.html
+    - name: "exactACL"
+      rootpath: "/hadoop-ha"
+      acls:
+          - "sasl:hdfs:cdrwa"
+
+    # Hive/HCatalog
+    # https://docs.cloudera.com/HDPDocuments/HDP3/HDP-3.1.5/zookeeper-acls/content/zookeeper_acls_best_practices_hive_hcatalog.html
+    - name: "exactACL"
+      rootpath: "/hiveserver2"
+      acls:
+          - "world:anyone:r"
+          - "sasl:hive:cdrwa"
+
+    - name: "exactACL"
+      rootpath: "/hivedelegation"
+      acls:
+          - "world:anyone:r"
+          - "sasl:hive:cdrwa"
+
+    - name: "exactACL"
+      rootpath: "/hive_zookeeper_namespace"
+      acls:
+          - "world:anyone:cdrwa"
+
+    - name: "exactACL"
+      rootpath: "/llap-sasl"
+      acls:
+          - "world:anyone:r"
+          - "sasl:hive:cdrwa"
+
+    - name: "exactACL"
+      rootpath: "/llap-unsecure"
+      acls:
+          - "world:anyone:cdrwa"
+
+checks:
+    # HBase
+
+    - title: "Hbase Unsecure Check"
+      rootpath: "/hbase-unsecure"
+      pathpattern: "/hbase-unsecure.*"
+      acls:
+          - "world:anyone:cdrwa"
+    
+    # missing rest of hbase checks
+
+    - title: "HDFS/WebHDFS Check"
+      rootpath: "/hadoop-ha"
+      pathpattern: "/hadoop-ha"
+      acls:
+          - "sasl:hdfs:cdrwa"
+
+    - title: "Hive/HCatalog Check"
+      rootpath: "/"
+      pathpattern: "/(?:hiveserver2|hivedelegation|/llap-sasl/user-).*"
+      acls:
+          - "world:anyone:r"
+          - "sasl:hive:cdrwa"
+    
+    - title: "Hive/HCatalog Check"
+      rootpath: "/"
+      pathpattern: "/(?:hive_zookeeper_namespace|llap-unsecure/user-).*"
+      acls:
+          - "world:anyone:cdrwa"
+    
+    - title: "Hive/HCatalog Check"
+      rootpath: "/"
+      pathpattern: "/zkdtsm_[^/ ]+/ZKDTSMRoot/.*"
+      acls:
+          - "sasl:hive:cdrwa"
+
+    - title: "Kafka Check"
+      rootpath: "/"
+      pathpattern: "/(?:controller|isr_change_notification).*"
+      acls:
+          - "world:anyone:r"
+          - "sasl:kafka:cdrwa"
+
+    - title: "Kafka Check"
+      rootpath: "/"
+      pathpattern: "/(?:brokers|admin|controller_epoch|consumers|config).*"
+      acls:
+          - "world:anyone:cdrwa"
+
+    - title: "Kafka Check"
+      rootpath: "/"
+      pathpattern: "/kafka-acl.*"
+      acls:
+          - "sasl:kafka:cdrwa"
+
+    - title: "Ooozie Check"
+      rootpath: "/oozie"
+      pathpattern: "/oozie.*"
+      acls:
+          - "sasl:oozie:cdrwa"

@@ -16,8 +16,9 @@ import lombok.Setter;
 import lombok.AccessLevel;
 
 /**
- * Class that holds configuration parameters as defined in the config.yaml CLI
- * argument
+ * Class that holds policies for enforcing derived from the respective yaml
+ * configuration file
+ * 
  */
 @Getter
 @Setter

@@ -15,7 +15,6 @@ import lombok.AccessLevel;
 /**
  * ZKTreeNode
  */
-
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)

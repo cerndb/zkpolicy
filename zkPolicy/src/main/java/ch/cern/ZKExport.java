@@ -2,7 +2,6 @@ package ch.cern;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,21 +10,25 @@ import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.NoAuthException;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+/**
+ * Export ZooKeeper tree functionality
+ */
 public class ZKExport {
-    ZKClient zk ;
-    
+    private static Logger logger = LogManager.getLogger(ZKExport.class);
+
+    private ZKClient zk ;
 
     public ZKExport(ZKClient zk){
         this.zk = zk;
     }
-
 
     /**
      * Export a znode subtree to certain output format
@@ -53,8 +56,9 @@ public class ZKExport {
         Gson gson;
         try {
             this.toTreeStruct(rootPath, root);
-        } catch (KeeperException | InterruptedException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(e.toString()); 
+            logger.error("Exception occurred!", e);
         }
 
         if (compactMode) {
@@ -68,13 +72,14 @@ public class ZKExport {
             gson.toJson(root, writer);
             writer.flush(); // flush data to file <---
             writer.close(); // close write <---
-        } catch (JsonIOException | IOException e1) {
-            e1.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(e.toString()); 
+            logger.error("Exception occurred!", e);
         }
     }
 
     /**
-     * recursive function that constructs the full ZNode tree
+     * Recursive function that constructs the full ZNode tree
      */
     private void toTreeStruct(String path, ZKTreeNode currentNode) throws KeeperException, InterruptedException {
 

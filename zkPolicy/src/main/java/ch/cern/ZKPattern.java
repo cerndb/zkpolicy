@@ -6,28 +6,38 @@ import java.util.regex.Pattern;
 
 public class ZKPattern {
 
-    public static List<Pattern> createGlobPatternList(String[] patternStringList) {
+    /**
+     * Create a list of Pattern objects from a list of glob expression strings 
+     * @param globStringList Glob expression List
+     * @return List of Pattern objects
+     */
+    public static List<Pattern> createGlobPatternList(String[] globStringList) {
         List<Pattern> queryPatternList =  new ArrayList<Pattern>();
 
-        for (String queryGlob : patternStringList) {
-            String regexFromGlob = wildcardToRegex(queryGlob);
+        for (String queryGlob : globStringList) {
+            String regexFromGlob = globToRegex(queryGlob);
             Pattern patternRegex = Pattern.compile(regexFromGlob);
             queryPatternList.add(patternRegex);
         }
         return queryPatternList;
     }
 
-    public static List<Pattern> createRegexPatternList(String[] patternStringList) {
+    /**
+     * Create a list of Pattern objects from a list of regular expression strings
+     * @param regexStringList
+     * @return List of Pattern objects
+     */
+    public static List<Pattern> createRegexPatternList(String[] regexStringList) {
         List<Pattern> queryPatternList =  new ArrayList<Pattern>();
 
-        for (String queryGlob : patternStringList) {
-            Pattern patternRegex = Pattern.compile(queryGlob);
+        for (String queryRegEx : regexStringList) {
+            Pattern patternRegex = Pattern.compile(queryRegEx);
             queryPatternList.add(patternRegex);
         }
         return queryPatternList;
     }
 
-    private static String wildcardToRegex(String pattern) {
+    private static String globToRegex(String pattern) {
         StringBuilder sb = new StringBuilder(pattern.length());
         int inGroup = 0;
         int inClass = 0;
