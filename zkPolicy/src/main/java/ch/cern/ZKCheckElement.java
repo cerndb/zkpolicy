@@ -17,8 +17,8 @@ import lombok.Setter;
 @EqualsAndHashCode
 public class ZKCheckElement {
     private String title;
-    private String rootpath;
-    private String pathpattern;
+    private String rootPath;
+    private String pathPattern;
     private String[] acls;
     public boolean $status = true;
 }

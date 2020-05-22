@@ -27,8 +27,8 @@ public class ZKEnforcePolicySetTest {
                                     "    title: \"Policy 1\"\n" +
                                     "    query:\n" +
                                     "        name: \"globMatchACL\"\n" +
-                                    "        rootpath: \"/\"\n" +
-                                    "        acls:\n" +
+                                    "        rootPath: \"/\"\n" +
+                                    "        args:\n" +
                                     "          - \"ip:*:*\"\n" +
                                     "    append: false\n" +
                                     "    acls:\n" +

@@ -49,12 +49,12 @@ public class ZKCheckCli implements Runnable {
             checksList.add(checkElement);
             checksOutput.put(checkElement.hashCode(), new ArrayList<String>());
 
-            zkCheck.check(checkElement.getRootpath(), checksList, checksOutput);
+            zkCheck.check(checkElement.getRootPath(), checksList, checksOutput);
 
             if (checkElement.$status) {
-                System.out.println("\n" + "Check Result: " + ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMatchcolor()).getANSIValue() + "PASS" + ZKPolicyDefs.Colors.RESET.getANSIValue());
+                System.out.println("\n" + "Check Result: " + ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMatchColor()).getANSIValue() + "PASS" + ZKPolicyDefs.Colors.RESET.getANSIValue());
             } else {
-                System.out.println("\n" + "Check Result: "+ ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMismatchcolor()).getANSIValue() +"FAIL" + ZKPolicyDefs.Colors.RESET.getANSIValue());
+                System.out.println("\n" + "Check Result: "+ ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMismatchColor()).getANSIValue() +"FAIL" + ZKPolicyDefs.Colors.RESET.getANSIValue());
             }
             System.out.println("\n" + String.join("\n", checksOutput.get(checkElement.hashCode())) + "\n");
 

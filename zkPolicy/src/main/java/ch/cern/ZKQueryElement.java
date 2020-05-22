@@ -17,7 +17,7 @@ import lombok.Setter;
 public class ZKQueryElement {
 
     private String name;
-    private String rootpath;
-    private String[] acls;
+    private String rootPath;
+    private String[] args;
     private ZKQuery query;
 }

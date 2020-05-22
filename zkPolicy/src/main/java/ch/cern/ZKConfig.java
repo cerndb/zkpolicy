@@ -24,12 +24,12 @@ import lombok.AccessLevel;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ZKConfig {
 
-    private String zkservers;
+    private String zkServers;
     private int timeout;
-    private String matchcolor;
-    private String mismatchcolor;
+    private String matchColor;
+    private String mismatchColor;
     private String jaas;
-    private String defaultauditpath;
+    private String defaultAuditPath;
 
     /**
      * Construct ZKConfig using configuration YAML file

@@ -9,7 +9,7 @@ import lombok.Getter;
  */
 public class ZKPolicyDefs {
 
-    static enum Formats {
+    static enum ExportFormats {
         json, yaml
     }
 

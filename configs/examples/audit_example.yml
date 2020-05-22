@@ -1,0 +1,34 @@
+---
+# For audit report generation, two sections have to be defined in this file,
+# * queries
+# * checks
+# More information for the aforementioned terms can be found at the
+# "Main concepts" section of the zkPolicy README.md
+
+queries:
+    - name: "globMatchACL"
+      rootPath: "/"
+      args:
+        - "digest:*:*"
+
+    - name: "exactACL"
+      rootPath: "/zookeeper"
+      args:
+        - "world:anyone:r"
+
+    - name: "noACL"
+      rootPath: "/"
+
+checks:
+    - title: "Example check 1"
+      rootPath: "/znode_path1" # Check recursively starting from this path
+      pathPattern: "/znode_path1.*" # Only check znodes matching this pattern
+      acls:
+        - "world:anyone:cdrwa" 
+
+    - title: "Example check 2"
+      rootPath: "/znode_path2" 
+      pathPattern: "/znode_path2/.*"
+      acls:
+        - "sasl:user2:cdwra"
+        - "world:anyone:r"

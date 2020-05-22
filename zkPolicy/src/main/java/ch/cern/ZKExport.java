@@ -1,15 +1,14 @@
 package ch.cern;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.NoAuthException;
@@ -38,11 +37,13 @@ public class ZKExport {
      * @param compactMode Enable minified mode for export file
      * @param outputFile  Output file path
      */
-    public void export(String rootPath, ZKPolicyDefs.Formats format, boolean compactMode, File outputFile) {
+    public void export(String rootPath, ZKPolicyDefs.ExportFormats format, boolean compactMode, File outputFile) {
         switch (format) {
             case json:
                 this.exportToJSON(outputFile, rootPath, compactMode);
                 break;
+            case yaml:
+                this.exportToYAML(outputFile, rootPath, compactMode);
             default:
                 break;
         }
@@ -53,7 +54,6 @@ public class ZKExport {
      */
     private void exportToJSON(File outputFile, String rootPath, boolean compactMode) {
         ZKTreeNode root = new ZKTreeNode();
-        Gson gson;
         try {
             this.toTreeStruct(rootPath, root);
         } catch (Exception e) {
@@ -61,17 +61,35 @@ public class ZKExport {
             logger.error("Exception occurred!", e);
         }
 
-        if (compactMode) {
-            gson = new GsonBuilder().create();
-        } else {
-            gson = new GsonBuilder().setPrettyPrinting().create();
+        try {
+            ObjectMapper mapper = new ObjectMapper(new JsonFactory());
+            if (compactMode) {
+                mapper.writeValue(outputFile, root);
+            } else {
+                mapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, root);
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString()); 
+            logger.error("Exception occurred!", e);
+        }
+    }
+
+    /**
+     * Export znode subtree to YAML
+     */
+    private void exportToYAML(File outputFile, String rootPath, boolean compactMode) {
+        ZKTreeNode root = new ZKTreeNode();
+        try {
+            this.toTreeStruct(rootPath, root);
+        } catch (Exception e) {
+            System.out.println(e.toString()); 
+            logger.error("Exception occurred!", e);
         }
 
         try {
-            Writer writer = new FileWriter(outputFile);
-            gson.toJson(root, writer);
-            writer.flush(); // flush data to file <---
-            writer.close(); // close write <---
+            // We ignore compactMode for YAML files
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            mapper.writeValue(outputFile, root);
         } catch (Exception e) {
             System.out.println(e.toString()); 
             logger.error("Exception occurred!", e);

@@ -1,0 +1,27 @@
+---
+# Policy enforcing
+# More information for policies can be found at the
+# "Main concepts" section of the zkPolicy README.md
+# Be sure for the changes that a policy can enforce to a ZK tree.
+# Execute first using -d (Dry Run) for overviewing the znodes that 
+# will be affected by this policy.
+policies:
+    - title: "Append ip:127.0.0.2:c to all matching ip:*:*"
+      query:
+          name: "globMatchACL"
+          rootPath: "/"
+          args:
+              - "ip:*:*"
+      # If true, policy ACL elements are appended to existing znode ACL
+      # else the existing ACL is overwritten
+      append: true
+      acls:
+          - "ip:127.0.0.3:c"
+          
+    - title: "Harden all nodes that are unprotected with a specific ACL entry"
+      query:
+          name: "noACL"
+          rootPath: "/"
+      append: false
+      acls:
+          - "sasl:user1:cdrwa"

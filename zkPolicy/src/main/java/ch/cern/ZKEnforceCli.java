@@ -125,13 +125,13 @@ public class ZKEnforceCli implements Runnable {
 
                 if (this.dryRun) {
                     System.out.println(policy.getTitle());
-                    zkEnforce.enforceDry(policy.getQuery().getName(), policy.getQuery().getRootpath(),
-                            policy.getQuery().getAcls());
+                    zkEnforce.enforceDry(policy.getQuery().getName(), policy.getQuery().getRootPath(),
+                            policy.getQuery().getArgs());
                     System.out.print("\n");
 
                 } else {
-                    zkEnforce.enforce(policy.getAcls(), policy.getQuery().getName(), policy.getQuery().getRootpath(),
-                            policy.getQuery().getAcls(), policy.isAppend());
+                    zkEnforce.enforce(policy.getAcls(), policy.getQuery().getName(), policy.getQuery().getRootPath(),
+                            policy.getQuery().getArgs(), policy.isAppend());
                 }
             }
         } catch (Exception e) {

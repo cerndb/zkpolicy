@@ -62,13 +62,13 @@ public class ZKClient extends ZooKeeper {
      * @throws IOException
      */
     public ZKClient(ZKConfig config) throws IOException {
-        super(config.getZkservers(), config.getTimeout(), new Watcher(){
+        super(config.getZkServers(), config.getTimeout(), new Watcher(){
         
             @Override
             public void process(WatchedEvent event) {   
             }
         });
-        logger.debug("Connecting to one of {} ...", config.getZkservers());
+        logger.debug("Connecting to one of {} ...", config.getZkServers());
         waitUntilConnected(this);
         this.zkpConfig = config;
         // Get host and port connected from ZooKeeper tostring

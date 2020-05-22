@@ -3,16 +3,19 @@ package ch.cern;
 import java.io.File;
 import java.util.Properties;
 
+import lombok.NoArgsConstructor;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ScopeType;
 
 @Command(name = "zkpolicy", description = "ZooKeeper policy auditing tool", versionProvider = ZKPolicyCli.PropertiesVersionProvider.class, subcommands = {
         ZKQueryCli.class, ZKExportCli.class, ZKTreeCli.class, ZKEnforceCli.class, ZKAuditCli.class, ZKCheckCli.class , HelpCommand.class }, mixinStandardHelpOptions = true)
 /**
  * Class that handles CLI arguments for the tool.
  */
+@NoArgsConstructor
 public class ZKPolicyCli implements Runnable {
     String[] args;
 
@@ -20,7 +23,7 @@ public class ZKPolicyCli implements Runnable {
         this.args = args;
     }
 
-    @Option(names = { "-c", "--config" }, required = true, description = "YAML config file absolute path")
+    @Option(names = { "-c", "--config" }, required = true, description = "YAML config file absolute path", scope = ScopeType.INHERIT)
     public File configFile=null;
 
     @Override

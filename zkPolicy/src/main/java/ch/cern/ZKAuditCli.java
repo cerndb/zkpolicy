@@ -46,7 +46,7 @@ public class ZKAuditCli implements Runnable {
             // Define the query set to be executed for each node as well as the output arrays for each query
             // Check the passed audit yaml config file for queries and construct the HashTable
             if (this.auditConfigFile == null) {
-                this.auditConfigFile = new File(config.getDefaultauditpath());
+                this.auditConfigFile = new File(config.getDefaultAuditPath());
             } 
             
             try (ZKClient zk = new ZKClient(config)) {
@@ -101,7 +101,7 @@ public class ZKAuditCli implements Runnable {
         Date date = new Date();
         headerOut += "DateTime: " + dateFormat.format(date) + "\n";
         if (auditConfigFile == null) {
-            headerOut += "Report results for file: " + new File(this.config.getDefaultauditpath()).getCanonicalPath() + "\n";   
+            headerOut += "Report results for file: " + new File(this.config.getDefaultAuditPath()).getCanonicalPath() + "\n";   
         } else {
             headerOut += "Report results for file: " + auditConfigFile.getCanonicalPath() + "\n";
         }

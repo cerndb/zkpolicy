@@ -77,9 +77,9 @@ public class ZKTreeCliTest {
         FileWriter fw = new FileWriter(configFile);
         fw.write("---\n");
         fw.write("timeout: 2000\n");
-        fw.write("zkservers: \""+ zkTestServer.getConnectString() +"\"\n");
-        fw.write("matchcolor: \"GREEN\"\n");
-        fw.write("mismatchcolor: \"RED\"\n");
+        fw.write("zkServers: \""+ zkTestServer.getConnectString() +"\"\n");
+        fw.write("matchColor: \"GREEN\"\n");
+        fw.write("mismatchColor: \"RED\"\n");
         fw.write("jaas: \"/path/to/jaas.conf\"\n");
         fw.flush();
         fw.close();

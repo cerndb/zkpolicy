@@ -1,35 +1,69 @@
-# Zookeeper Policy Audit Tool
+# ZooKeeper Policy Audit Tool
 
-Zookeeper audit and policy tool for checking and enforcing ACLs on the znodes.
+### Table of contents
+1. [Overview](#overview)
+2. [Documentation](#documentation)
+3. [Contribution](#contribution)
+4. [Installation](#installation)
+    * [Requirements](#requirements)
+    * [Using the RPM package](#using-the-rpm-package)
+    * [Building from source](#building-from-source)
+5. [Using the tool](#using-the-tool)
+6. [Configuration](#configuration)
 
-## Build from source
-To build the zkPolicy tool, the following steps are required:
+## Overview
+Zookeeper Policy Audit Tool (aka zkPolicy) for checking and enforcing ACLs on ZNodes.
+
+This repository contains all the source code for the tool, that uses the ZooKeeper Java API, as well as proposed default configuration for auditing and enforcing policies on the ZooKeeper ZNode tree.
+
+## Documentation
+See the current [reference docs](docs/README.md).
+
+## Contribution
+Contributions of any form are welcome, provided that they adhere to the [contributor guidelines](CONTRIBUTING.md).
+
+## Installation
+
+### Requirements
+* ZooKeeper >= 3.4.13
+* Java SDK >= 1.8
+* Maven 3
+
+### Using the RPM package
+Installation instructions using the RPM package [TODO after package creation]
+
+### Building from source
+
+The project is built using `maven`. In order to build the project:
 
 1. Clone this repository
-2. While in the zkPOlicy directory, build using maven:
-    ```bash
-    mvn clean package
-    ```
-    The build will also execute all implemented tests while packaging.
-3. The artifact produced after packaging is located at the `zkPolicy/target/zkpolicy-<version_id>.jar`
+2. ```bash
+   cd zookeeper-policy-audit-tool/zkPolicy
+   mvn package -DskipTests
+   ```
 
-## Execute the tool
-Using the tool can either be done right from the `.jar` file or by using the respective maven plugin:
-1. Use maven to run the project with CLI arguments:
-    ```bash
-    mvn exec:java -Dexec.args="-h"
-    ```
-## Documentation
-This project uses `javadoc` for documentation of the API developed. In order to generate the complete documentation, one has to execute the following command:
+This commands generates the wanted `.jar` in the `zkPolicy/target/` directory.
+
+To test zkPolicy:
 
 ```bash
-mvn javadoc:javadoc
+mvn test
 ```
 
-## Testing
-Although the tests are executed along with the execution and packaging procedures, they can also be explicitly executed with the following command:
+## Using the tool
+The tool can be executed either by the `.jar` file:
+
 ```bash
-mvn clean test
+java -jar ./target/zkpolicy-<Version>.jar [arguments]
 ```
 
-For automatic code coverage reports, the `Jacoco` tool is used.
+or using the alias created by the tool package:
+
+```bash
+zkpolicy [arguments]
+```
+
+For usage details, please consult the tool man pages or the [tool documentation](docs/README.md#usage).
+
+## Configuration
+The tool execution is configured by the main configuration file that is passed as a parameter to the `-c, --config` flag. More information about the structure of the configuration file can be found at the [tool documentation](docs/README.md#configuration).

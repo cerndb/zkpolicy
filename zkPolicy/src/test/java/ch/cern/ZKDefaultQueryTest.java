@@ -93,7 +93,7 @@ public class ZKDefaultQueryTest {
 
         List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
         queriesList.add(queryElement);
-        zktree.queryTree(queryElement.getRootpath(), queriesList, queriesOutput);
+        zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
         String actualOutput = String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
 
         String expectedOutput = 
@@ -120,7 +120,7 @@ public class ZKDefaultQueryTest {
         
         List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
         queriesList.add(queryElement);
-        this.zktree.queryFind(queryElement.getRootpath(), queriesList, queriesOutput);
+        this.zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
         String actualOutString = String.join("\n", queriesOutput.get(queryElement.hashCode()));
         assertEquals(expectedString, actualOutString);
     }
@@ -135,7 +135,7 @@ public class ZKDefaultQueryTest {
 
         List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
         queriesList.add(queryElement);
-        zktree.queryTree(queryElement.getRootpath(), queriesList, queriesOutput);
+        zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
         String actualOutput = String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
 
         String expectedOutput = 
@@ -163,7 +163,7 @@ public class ZKDefaultQueryTest {
 
         List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
         queriesList.add(queryElement);
-        this.zktree.queryFind(queryElement.getRootpath(), queriesList, queriesOutput);
+        this.zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
         String actualOutString = String.join("\n", queriesOutput.get(queryElement.hashCode()));
         assertEquals(expectedString, actualOutString);
     }
@@ -182,7 +182,7 @@ public class ZKDefaultQueryTest {
 
         List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
         queriesList.add(queryElement);
-        zktree.queryTree(queryElement.getRootpath(), queriesList, queriesOutput);
+        zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
         String actualOutput = String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
 
         String expectedOutput =
@@ -214,7 +214,7 @@ public class ZKDefaultQueryTest {
 
         List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
         queriesList.add(queryElement);
-        this.zktree.queryFind(queryElement.getRootpath(), queriesList, queriesOutput);
+        this.zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
         String actualOutString = String.join("\n", queriesOutput.get(queryElement.hashCode()));
         assertEquals(expectedString, actualOutString);
     }
@@ -231,7 +231,7 @@ public class ZKDefaultQueryTest {
 
         List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
         queriesList.add(queryElement);
-        zktree.queryTree(queryElement.getRootpath(), queriesList, queriesOutput);
+        zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
         String actualOutput = String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
         String expectedOutput = 
         this.red + "/"+this.reset+"\n" +
@@ -259,7 +259,7 @@ public class ZKDefaultQueryTest {
         
         List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
         queriesList.add(queryElement);
-        this.zktree.queryFind(queryElement.getRootpath(), queriesList, queriesOutput);
+        this.zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
         String actualOutString = String.join("\n", queriesOutput.get(queryElement.hashCode()));
         assertEquals(expectedString, actualOutString);
     }
@@ -276,7 +276,7 @@ public class ZKDefaultQueryTest {
 
         List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
         queriesList.add(queryElement);
-        zktree.queryTree(queryElement.getRootpath(), queriesList, queriesOutput);
+        zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
         String actualOutput = String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
 
         String expectedOutput = 
@@ -305,7 +305,7 @@ public class ZKDefaultQueryTest {
         String expectedString = "/a\n" + "/a/aa\n" + "/b\n" + "WARNING: No READ permission for /b/bb, skipping subtree\n" + "/c";
         List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
         queriesList.add(queryElement);
-        this.zktree.queryFind(queryElement.getRootpath(), queriesList, queriesOutput);
+        this.zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
         String actualOutString = String.join("\n", queriesOutput.get(queryElement.hashCode()));
         assertEquals(expectedString, actualOutString);
     }

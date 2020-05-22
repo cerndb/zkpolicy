@@ -13,7 +13,7 @@ public class ZKExportCli implements Runnable {
 
     @Option(names = { "-t",
             "--type" }, required = true, description = "Export format ${COMPLETION-CANDIDATES} (default: json)")
-    ZKPolicyDefs.Formats format = ZKPolicyDefs.Formats.json;
+    ZKPolicyDefs.ExportFormats format = ZKPolicyDefs.ExportFormats.json;
 
     @Option(names = { "-C", "--compact" }, description = "Minified export (default: false)")
     Boolean compactMode = false;

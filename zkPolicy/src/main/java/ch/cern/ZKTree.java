@@ -28,8 +28,8 @@ public class ZKTree {
     public ZKTree(ZKClient zk) {
         this.zk = zk;
         this.resetColor = ZKPolicyDefs.Colors.valueOf("RESET").getANSIValue();
-        this.matchColor = ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMatchcolor()).getANSIValue();
-        this.misMatchColor = ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMismatchcolor()).getANSIValue();
+        this.matchColor = ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMatchColor()).getANSIValue();
+        this.misMatchColor = ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMismatchColor()).getANSIValue();
     }
 
     /**
@@ -59,20 +59,20 @@ public class ZKTree {
         for (ZKQueryElement zkQueryElement : queryElements) {
             // validate root path requested:
             try {
-                if (this.zk.exists(zkQueryElement.getRootpath(), null) == null) {
+                if (this.zk.exists(zkQueryElement.getRootPath(), null) == null) {
                     queriesOutput.get(zkQueryElement.hashCode())
-                            .add("The path " + zkQueryElement.getRootpath() + " does not exist.");
+                            .add("The path " + zkQueryElement.getRootPath() + " does not exist.");
                     invalidQueries.add(zkQueryElement);
                     continue;
                 }
             } catch (IllegalArgumentException e) {
                 queriesOutput.get(zkQueryElement.hashCode())
-                        .add("Invalid rootpath " + zkQueryElement.getRootpath() + " : " + e.getMessage());
+                        .add("Invalid rootpath " + zkQueryElement.getRootPath() + " : " + e.getMessage());
                 invalidQueries.add(zkQueryElement);
                 continue;
             }
             if (zkQueryElement.getName().equals("parentYesChildNo")) {
-                this.queryTreeIntParentYesChildNo(zkQueryElement.getRootpath(), "", "", null, true, false, false,
+                this.queryTreeIntParentYesChildNo(zkQueryElement.getRootPath(), "", "", null, true, false, false,
                         queriesOutput, zkQueryElement);
                 parentYesChildNoQueries.add(zkQueryElement);
             }
@@ -120,7 +120,7 @@ public class ZKTree {
             String znodePrintColor = "";
             ZKQuery query = zkQueryElement.getQuery();
 
-            if (query.query(znodeACLList, path, this.zk, zkQueryElement.getAcls())) {
+            if (query.query(znodeACLList, path, this.zk, zkQueryElement.getArgs())) {
                 znodePrintColor = this.matchColor;
             } else {
                 znodePrintColor = this.misMatchColor;
@@ -260,21 +260,21 @@ public class ZKTree {
         for (ZKQueryElement zkQueryElement : queryElements) {
             // validate root path requested:
             try {
-                if (this.zk.exists(zkQueryElement.getRootpath(), null) == null) {
+                if (this.zk.exists(zkQueryElement.getRootPath(), null) == null) {
                     queriesOutput.get(zkQueryElement.hashCode())
-                            .add("The path " + zkQueryElement.getRootpath() + " does not exist.");
+                            .add("The path " + zkQueryElement.getRootPath() + " does not exist.");
                     invalidQueries.add(zkQueryElement);
                     continue;
                 }
             } catch (IllegalArgumentException e) {
                 queriesOutput.get(zkQueryElement.hashCode())
-                        .add("Invalid rootpath " + zkQueryElement.getRootpath() + " : " + e.getMessage());
+                        .add("Invalid rootpath " + zkQueryElement.getRootPath() + " : " + e.getMessage());
                 invalidQueries.add(zkQueryElement);
                 continue;
             }
 
             if (zkQueryElement.getName().equals("parentYesChildNo")) {
-                this.queryFindIntParentYesChildNo(zkQueryElement.getRootpath(), null, queriesOutput, zkQueryElement);
+                this.queryFindIntParentYesChildNo(zkQueryElement.getRootPath(), null, queriesOutput, zkQueryElement);
                 parentYesChildNoQueries.add(zkQueryElement);
             }
         }
@@ -322,7 +322,7 @@ public class ZKTree {
         for (ZKQueryElement zkQueryElement : queryElements) {
             ZKQuery query = zkQueryElement.getQuery();
 
-            if (query.query(znodeACLList, path, this.zk, zkQueryElement.getAcls())) {
+            if (query.query(znodeACLList, path, this.zk, zkQueryElement.getArgs())) {
                 queriesOutput.get(zkQueryElement.hashCode()).add(path);
             }
         }
@@ -363,7 +363,7 @@ public class ZKTree {
 
         ZKQuery query = queryElement.getQuery();
 
-        if (parentACLList != null && !query.query(parentACLList, path, this.zk, queryElement.getAcls())) {
+        if (parentACLList != null && !query.query(parentACLList, path, this.zk, queryElement.getArgs())) {
             queriesOutput.get(queryElement.hashCode()).add(path);
         }
         parentACLList = this.zk.getACL(path, null);
@@ -385,9 +385,9 @@ public class ZKTree {
      */
     public String colorCodeExplanation() {
         String explanation = "";
-        explanation += "* " + this.matchColor + this.zk.getZKPConfig().getMatchcolor() + this.resetColor
+        explanation += "* " + this.matchColor + this.zk.getZKPConfig().getMatchColor() + this.resetColor
                 + ": znodes matching the query" + "\n";
-        explanation += "* " + this.misMatchColor + this.zk.getZKPConfig().getMismatchcolor() + this.resetColor
+        explanation += "* " + this.misMatchColor + this.zk.getZKPConfig().getMismatchColor() + this.resetColor
                 + ": znodes not matching the query" + "\n";
         return explanation;
     }

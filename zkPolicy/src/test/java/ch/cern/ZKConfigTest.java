@@ -30,17 +30,17 @@ public class ZKConfigTest {
     FileWriter fw = new FileWriter(file);
     fw.write("---\n");
     fw.write("timeout: 2000\n");
-    fw.write("zkservers: \"127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181\"\n");
-    fw.write("matchcolor: \"GREEN\"\n");
-    fw.write("mismatchcolor: \"RED\"\n");
+    fw.write("zkServers: \"127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181\"\n");
+    fw.write("matchColor: \"GREEN\"\n");
+    fw.write("mismatchColor: \"RED\"\n");
     fw.write("jaas: \"/path/to/jaas.conf\"\n");
     fw.flush();
     fw.close();
 
     ZKConfig zkConfig = new ZKConfig(file);
-    assertAll(() -> assertEquals("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", zkConfig.getZkservers()),
-        () -> assertEquals(2000, zkConfig.getTimeout()), () -> assertEquals("GREEN", zkConfig.getMatchcolor()),
-        () -> assertEquals("RED", zkConfig.getMismatchcolor()),
+    assertAll(() -> assertEquals("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", zkConfig.getZkServers()),
+        () -> assertEquals(2000, zkConfig.getTimeout()), () -> assertEquals("GREEN", zkConfig.getMatchColor()),
+        () -> assertEquals("RED", zkConfig.getMismatchColor()),
         () -> assertEquals("/path/to/jaas.conf", zkConfig.getJaas()));
   }
 

@@ -69,10 +69,10 @@ public class ZKQueryCli implements Runnable {
             queriesList.add(queryElement);
             queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
             if (this.listMode) {
-                zktree.queryFind(queryElement.getRootpath(), queriesList, queriesOutput);
+                zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
                 System.out.println("\n" + String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
             } else {
-                zktree.queryTree(queryElement.getRootpath(), queriesList, queriesOutput);
+                zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
                 System.out.println(zktree.colorCodeExplanation() + String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
             }
         } catch (NoSuchMethodException | SecurityException e) {

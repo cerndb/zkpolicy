@@ -1,0 +1,23 @@
+---
+# Session timeout in milliseconds.
+timeout: 2000
+
+# Option for connection targets in the form of connection string
+# containing a comma separated list of host:port pairs,
+# each corresponding to a ZooKeeper server.
+zkServers: "127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181"
+
+# colors for tree view output
+# matchcolor is the color for matching nodes per query
+# mismatchcolor is the color for mismatching nodes per query
+# Available colors: RED, GREEN, BLACK, BLUE, YELLOW, MAGENTA, CYAN, WHITE
+matchColor: "GREEN"
+mismatchColor: "RED"
+
+# Absolute path pointing to the JAAS configuration required
+# for ZooKeeper authentication and authorization
+jaas: "/path/to/jaas.conf"
+
+# Absolute path of file that will be used when the audit sub-command
+# is executed without defining a specific audit configuration file.
+defaultAuditPath: "/path/to/defaultAudit.yaml"

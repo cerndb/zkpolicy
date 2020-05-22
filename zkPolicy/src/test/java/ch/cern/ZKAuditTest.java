@@ -85,28 +85,28 @@ public class ZKAuditTest {
         fw.write("queries:\n");
         fw.write(" -\n");
         fw.write("  name: \"globMatchACL\"\n");
-        fw.write("  rootpath: \"/\"\n");
-        fw.write("  acls:\n");
+        fw.write("  rootPath: \"/\"\n");
+        fw.write("  args:\n");
         fw.write("   - \"digest:*:*\"\n");
 
         fw.write(" -\n");
         fw.write("  name: \"exactACL\"\n");
-        fw.write("  rootpath: \"/zookeeper/quota\"\n");
-        fw.write("  acls:\n");
+        fw.write("  rootPath: \"/zookeeper/quota\"\n");
+        fw.write("  args:\n");
         fw.write("   - \"world:anyone:r\"\n");
 
         fw.write(" -\n");
         fw.write("  name: \"noACL\"\n");
-        fw.write("  rootpath: \"/a\"\n");
+        fw.write("  rootPath: \"/a\"\n");
 
         fw.write(" -\n");
         fw.write("  name: \"parentYesChildNo\"\n");
-        fw.write("  rootpath: \"/hbase\"\n");
+        fw.write("  rootPath: \"/hbase\"\n");
 
         fw.write(" -\n");
         fw.write("  name: \"regexMatchACL\"\n");
-        fw.write("  rootpath: \"/zookeeper\"\n");
-        fw.write("  acls:\n");
+        fw.write("  rootPath: \"/zookeeper\"\n");
+        fw.write("  args:\n");
         fw.write("   - \"sasl:.*:.*\"\n");
 
         fw.flush();
@@ -132,28 +132,28 @@ public class ZKAuditTest {
         fw.write("queries:\n");
         fw.write(" -\n");
         fw.write("  name: \"globMatchACL\"\n");
-        fw.write("  rootpath: \"/\"\n");
-        fw.write("  acls:\n");
+        fw.write("  rootPath: \"/\"\n");
+        fw.write("  args:\n");
         fw.write("   - \"digest:*:*\"\n");
 
         fw.write(" -\n");
         fw.write("  name: \"exactACL\"\n");
-        fw.write("  rootpath: \"/zookeeper/quota\"\n");
-        fw.write("  acls:\n");
+        fw.write("  rootPath: \"/zookeeper/quota\"\n");
+        fw.write("  args:\n");
         fw.write("   - \"world:anyone:r\"\n");
 
         fw.write(" -\n");
         fw.write("  name: \"noACL\"\n");
-        fw.write("  rootpath: \"/a\"\n");
+        fw.write("  rootPath: \"/a\"\n");
 
         fw.write(" -\n");
         fw.write("  name: \"parentYesChildNo\"\n");
-        fw.write("  rootpath: \"/hbase\"\n");
+        fw.write("  rootPath: \"/hbase\"\n");
 
         fw.write(" -\n");
         fw.write("  name: \"regexMatchACL\"\n");
-        fw.write("  rootpath: \"/zookeeper\"\n");
-        fw.write("  acls:\n");
+        fw.write("  rootPath: \"/zookeeper\"\n");
+        fw.write("  args:\n");
         fw.write("   - \"sasl:.*:.*\"\n");
 
         fw.flush();
@@ -183,30 +183,30 @@ public class ZKAuditTest {
         fw.write("queries:\n");
         fw.write(" -\n");
         fw.write("  name: \"globMatchACL\"\n");
-        fw.write("  rootpath: \"/a\"\n");
-        fw.write("  acls:\n");
+        fw.write("  rootPath: \"/a\"\n");
+        fw.write("  args:\n");
         fw.write("   - \"digest:*:*\"\n");
 
         fw.write(" -\n");
         fw.write("  name: \"exactACL\"\n");
-        fw.write("  rootpath: \"/zookeeper/quota\"\n");
-        fw.write("  acls:\n");
+        fw.write("  rootPath: \"/zookeeper/quota\"\n");
+        fw.write("  args:\n");
         fw.write("   - \"world:anyone:r\"\n");
 
         fw.write(" -\n");
         fw.write("  name: \"noACL\"\n");
-        fw.write("  rootpath: \"/b\"\n");
+        fw.write("  rootPath: \"/b\"\n");
 
         fw.write(" -\n");
         fw.write("  name: \"globMatchACL\"\n");
-        fw.write("  rootpath: \"/b\"\n");
-        fw.write("  acls:\n");
+        fw.write("  rootPath: \"/b\"\n");
+        fw.write("  args:\n");
         fw.write("   - \"*:*:*\"\n");
 
         fw.write(" -\n");
         fw.write("  name: \"regexMatchACL\"\n");
-        fw.write("  rootpath: \"/zookeeper\"\n");
-        fw.write("  acls:\n");
+        fw.write("  rootPath: \"/zookeeper\"\n");
+        fw.write("  args:\n");
         fw.write("   - \"sasl:.*:.*\"\n");
 
         fw.flush();

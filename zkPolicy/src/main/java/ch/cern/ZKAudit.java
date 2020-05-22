@@ -212,9 +212,9 @@ public class ZKAudit {
             this.executeRootGroupQueries();
             for (ZKQueryElement queryElement : zkAuditSet.getQueries()) {
                 outputString += "\nQuery: " + queryElement.getName() + "\n";
-                outputString += "Root Path: " + queryElement.getRootpath() + "\n";
-                if (queryElement.getAcls() != null) {
-                    outputString += "Arguments:" + "\n- " + String.join("\n- ", queryElement.getAcls()) + "\n";
+                outputString += "Root Path: " + queryElement.getRootPath() + "\n";
+                if (queryElement.getArgs() != null) {
+                    outputString += "Arguments:" + "\n- " + String.join("\n- ", queryElement.getArgs()) + "\n";
                 }
     
                 outputString += "\nResult:\n";
@@ -230,8 +230,8 @@ public class ZKAudit {
             this.executeRootGroupChecks();
             for (ZKCheckElement checkElement : zkAuditSet.getChecks()) {
                 outputString += "\nCheck: " + checkElement.getTitle() + "\n";
-                outputString += "Root Path: " + checkElement.getRootpath() + "\n";
-                outputString += "Path Pattern: " + checkElement.getPathpattern() + "\n";
+                outputString += "Root Path: " + checkElement.getRootPath() + "\n";
+                outputString += "Path Pattern: " + checkElement.getPathPattern() + "\n";
                 if (checkElement.getAcls() != null) {
                     outputString += "Arguments:" + "\n- " + String.join("\n- ", checkElement.getAcls()) + "\n";
                 }
@@ -318,12 +318,12 @@ public class ZKAudit {
             ZKQuery query = zkDefaultQuery.getValueOf(queryElement.getName());
             queryElement.setQuery(query);
 
-            if (this.rootPathGroups.containsKey(queryElement.getRootpath())) {
-                this.rootPathGroups.get(queryElement.getRootpath()).add(queryElement);
+            if (this.rootPathGroups.containsKey(queryElement.getRootPath())) {
+                this.rootPathGroups.get(queryElement.getRootPath()).add(queryElement);
             } else {
                 List<ZKQueryElement> batchList = new ArrayList<ZKQueryElement>();
                 batchList.add(queryElement);
-                this.rootPathGroups.put(queryElement.getRootpath(), batchList);
+                this.rootPathGroups.put(queryElement.getRootPath(), batchList);
             }
         }
     }
@@ -341,12 +341,12 @@ public class ZKAudit {
 
         for (ZKCheckElement checkElement : this.zkAuditSet.getChecks()) {
         
-            if (this.rootPathCheckGroups.containsKey(checkElement.getRootpath())) {
-                this.rootPathCheckGroups.get(checkElement.getRootpath()).add(checkElement);
+            if (this.rootPathCheckGroups.containsKey(checkElement.getRootPath())) {
+                this.rootPathCheckGroups.get(checkElement.getRootPath()).add(checkElement);
             } else {
                 List<ZKCheckElement> batchList = new ArrayList<ZKCheckElement>();
                 batchList.add(checkElement);
-                this.rootPathCheckGroups.put(checkElement.getRootpath(), batchList);
+                this.rootPathCheckGroups.put(checkElement.getRootPath(), batchList);
             }
         }
     }

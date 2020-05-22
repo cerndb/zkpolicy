@@ -47,15 +47,15 @@ public class ZKCheck {
         for (ZKCheckElement zkCheckElement : checkElements) {
             // validate root path requested:
             try {
-                if (this.zk.exists(zkCheckElement.getRootpath(), null) == null) {
+                if (this.zk.exists(zkCheckElement.getRootPath(), null) == null) {
                     checksOutput.get(zkCheckElement.hashCode())
-                            .add("The path " + zkCheckElement.getRootpath() + " does not exist.");
+                            .add("The path " + zkCheckElement.getRootPath() + " does not exist.");
                     invalidChecks.add(zkCheckElement);
                     continue;
                 }
             } catch (IllegalArgumentException e) {
                 checksOutput.get(zkCheckElement.hashCode())
-                        .add("Invalid rootpath " + zkCheckElement.getRootpath() + " : " + e.getMessage());
+                        .add("Invalid rootpath " + zkCheckElement.getRootPath() + " : " + e.getMessage());
                 invalidChecks.add(zkCheckElement);
                 continue;
             }
@@ -90,7 +90,7 @@ public class ZKCheck {
 
         for (ZKCheckElement zkCheckElement : checkElements) {
             // First check if check element's path pattern satisfies the current one
-            Pattern pathPatternRegex = Pattern.compile(zkCheckElement.getPathpattern());
+            Pattern pathPatternRegex = Pattern.compile(zkCheckElement.getPathPattern());
             Matcher currentMatcher = pathPatternRegex.matcher(path);
             if (currentMatcher.matches()) {
                 // If the path name matches check the ACLs with the ones provided by the check

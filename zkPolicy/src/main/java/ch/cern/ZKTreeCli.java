@@ -40,7 +40,7 @@ public class ZKTreeCli implements Runnable {
         ZKConfig config = null;
         try {
             config = new ZKConfig(parent.configFile);
-            config.setMatchcolor("WHITE");
+            config.setMatchColor("WHITE");
         } catch (Exception e) {
             System.out.println(e.toString());
             logger.error("Exception occurred!", e); 
@@ -48,7 +48,7 @@ public class ZKTreeCli implements Runnable {
 
         try (ZKClient zk = new ZKClient(config)){
             zktree = new ZKTree(zk);
-            zktree.queryTree(queryElement.getRootpath(), queriesList, queriesOutput);
+            zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
         } catch (Exception e) {
             System.out.println(e.toString()); 
             logger.error("Exception occurred!", e);
