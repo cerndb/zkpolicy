@@ -1,4 +1,4 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
@@ -10,6 +10,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <lombok.version>1.18.12</lombok.version>
+        <lombok.maven.plugin.version>1.16.18.1</lombok.maven.plugin.version>
     </properties>
     <dependencies>
         <dependency>
@@ -24,7 +26,6 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-
 
         <!-- SLF4J Bridge -->
         <dependency>
@@ -41,7 +42,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.12</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -71,13 +72,13 @@
         <dependency>
             <groupId>org.apache.zookeeper</groupId>
             <artifactId>zookeeper</artifactId>
-            <version>3.5.7</version>
+            <version>3.6.0</version>
             <exclusions>
                 <exclusion>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-                
-            </exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-core</artifactId>
+
+                </exclusion>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -95,13 +96,13 @@
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-test</artifactId>
-            <version>4.3.0</version>
+            <version>5.0.0</version>
             <exclusions>
                 <exclusion>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
-                
-            </exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-core</artifactId>
+
+                </exclusion>
                 <exclusion>
                     <groupId>org.apache.zookeeper</groupId>
                     <artifactId>zookeeper</artifactId>
@@ -124,7 +125,7 @@
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-framework</artifactId>
-            <version>4.3.0</version>
+            <version>5.0.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.zookeeper</groupId>
@@ -183,6 +184,26 @@
                             </arguments>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-autocompletion-script</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-Dpicocli.autocomplete.systemExitOnError</argument>
+                                <argument>-cp</argument>
+                                <classpath/>
+                                <argument>picocli.AutoComplete</argument>
+                                <argument>--force</argument>
+                                <argument>--completionScript</argument>
+                                <argument>${project.build.directory}/zkpolicy_autocomplete</argument>
+                                <argument>ch.cern.ZKPolicyCli</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
                 </executions>
                 <configuration>
                     <mainClass>ch.cern.ZKPolicy</mainClass>
@@ -201,28 +222,7 @@
                 <artifactId>asciidoctor-maven-plugin</artifactId>
                 <version>1.6.0</version>
                 <executions>
-                    <execution>
-                        <id>output-html</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>process-asciidoc</goal>
-                        </goals>
-                        <configuration>
-                            <sourceHighlighter>coderay</sourceHighlighter>
-                            <backend>html5</backend>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>output-docbook</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>process-asciidoc</goal>
-                        </goals>
-                        <configuration>
-                            <sourceHighlighter>coderay</sourceHighlighter>
-                            <backend>docbook</backend>
-                        </configuration>
-                    </execution>
+
                     <execution>
                         <id>output-manpage</id>
                         <phase>process-classes</phase>
@@ -249,18 +249,16 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <finalName>zkpolicy-${project.version}-full</finalName>
+                            <finalName>cerndb-sw-zkpolicy-${project.version}-uber</finalName>
                             <archive>
                                 <manifest>
-                                    <mainClass>
-                        ch.cern.ZKPolicy
-                                    </mainClass>
+                                    <mainClass>ch.cern.ZKPolicy</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <appendAssemblyId>true</appendAssemblyId>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
                 </executions>
@@ -268,7 +266,7 @@
             <plugin>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok-maven-plugin</artifactId>
-                <version>1.16.12.0</version>
+                <version>${lombok.maven.plugin.version}</version>
                 <configuration>
                     <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
                     <outputDirectory>${delombok.output}</outputDirectory>

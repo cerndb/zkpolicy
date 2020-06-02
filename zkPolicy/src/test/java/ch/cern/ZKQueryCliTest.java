@@ -1,18 +1,14 @@
 package ch.cern;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.curator.test.InstanceSpec;
 import org.apache.curator.test.TestingServer;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.ACL;
@@ -28,39 +24,37 @@ import org.junit.jupiter.api.io.TempDir;
 import picocli.CommandLine;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class ZKAuditCliTest {
+public class ZKQueryCliTest {
     private TestingServer zkTestServer;
     private ZKConfig config;
     private ZKClient zkClient;
-
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+    private String green;
+    private String reset;
+    private String red;
+    
+    private ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    private ByteArrayOutputStream errContent = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
 
     @TempDir
     static File testTempDir;
-
+    
     String configPath;
-    String auditConfigPath;
 
     @BeforeAll
     public void startZookeeper() throws Exception {
-        // Setup test server to ignore ACL for report checking
-        Map<String,Object> customProperties = new HashMap<String,Object>();
-        customProperties.put("skipACL", "yes");
-        InstanceSpec spec = new InstanceSpec(null, -1, -1, -1, true, 1,-1, -1,customProperties);
-        
         // Choose an available port
-        zkTestServer = new TestingServer(spec,true);
+        zkTestServer = new TestingServer();
         config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "");
         this.zkClient = new ZKClient(config);
-
+        
         // Setup the znode tree for tests
         // a subtree
         List<ACL> aclListA = new ArrayList<ACL>();
         String tempDigest = DigestAuthenticationProvider.generateDigest("user1:passw1");
         aclListA.add(new ACLAugment("digest:" + tempDigest + ":crwda").getACL());
+        aclListA.add(new ACLAugment("world:anyone:drwa").getACL());
         zkClient.create("/a", "a".getBytes(), aclListA, CreateMode.PERSISTENT);
 
         zkClient.addAuthInfo("digest", "user1:passw1".getBytes());
@@ -90,64 +84,29 @@ public class ZKAuditCliTest {
         aclListCC.add(new ACLAugment("world:anyone:crwda").getACL());
         zkClient.create("/c/cc", "cc".getBytes(), aclListCC, CreateMode.PERSISTENT);
 
+        this.green = ZKPolicyDefs.Colors.GREEN.getANSIValue();
+        this.red = ZKPolicyDefs.Colors.RED.getANSIValue();
+        this.reset = ZKPolicyDefs.Colors.RESET.getANSIValue();
+
         // Setup config file
         File configFile = new File(testTempDir, "conf_tmp.yml");
 
         FileWriter fw = new FileWriter(configFile);
         fw.write("---\n");
         fw.write("timeout: 2000\n");
-        fw.write("zkServers: \"" + zkTestServer.getConnectString() + "\"\n");
+        fw.write("zkServers: \""+ zkTestServer.getConnectString() +"\"\n");
         fw.write("matchColor: \"GREEN\"\n");
         fw.write("mismatchColor: \"RED\"\n");
-        fw.write("jaas: \"/path/to/jaas.conf\"\n");
         fw.flush();
         fw.close();
-
-        // Setup audit config file
-        File auditConfigFile = new File(testTempDir, "conf_audit.yml");
-
-        fw = new FileWriter(auditConfigFile);
-        fw.write("---\n");
-        fw.write("queries:\n");
-        fw.write(" -\n");
-        fw.write("  name: \"globMatchACL\"\n");
-        fw.write("  rootPath: \"/a\"\n");
-        fw.write("  args:\n");
-        fw.write("   - \"digest:*:*\"\n");
-
-        fw.write(" -\n");
-        fw.write("  name: \"exactACL\"\n");
-        fw.write("  rootPath: \"/zookeeper/quota\"\n");
-        fw.write("  args:\n");
-        fw.write("   - \"world:anyone:r\"\n");
-
-        fw.write(" -\n");
-        fw.write("  name: \"noACL\"\n");
-        fw.write("  rootPath: \"/b\"\n");
-
-        fw.write(" -\n");
-        fw.write("  name: \"globMatchACL\"\n");
-        fw.write("  rootPath: \"/b\"\n");
-        fw.write("  args:\n");
-        fw.write("   - \"*:*:*\"\n");
-
-        fw.write(" -\n");
-        fw.write("  name: \"regexMatchACL\"\n");
-        fw.write("  rootPath: \"/\"\n");
-        fw.write("  args:\n");
-        fw.write("   - \"ip:.*:.*\"\n");
-
-        fw.flush();
-        fw.close();
-
 
         this.configPath = configFile.getCanonicalPath();
-        this.auditConfigPath = auditConfigFile.getCanonicalPath();
-
     }
 
     @BeforeEach
     public void setUpStreams() {
+        outContent.reset();
+        errContent.reset();
         System.setOut(new PrintStream(outContent));
         System.setErr(new PrintStream(errContent));
     }
@@ -159,10 +118,27 @@ public class ZKAuditCliTest {
     }
 
     @Test
-    public void testAuditSubCommand() throws IOException {
-        String[] args = { "-c", configPath, "audit", "-i", auditConfigPath};
-
+    public void testQuerySubCommand() {
+        String[] args = { "-c", this.configPath, "query", "noACL", "-p", "/" , "-l" };
         new CommandLine(new ZKPolicyCli(args)).execute(args);
-        assertTrue(!outContent.toString().isEmpty());
+
+        String expectedOutput = "/\n" +
+        "WARNING: No READ permission for /b, skipping subtree\n"+
+        "WARNING: No READ permission for /c, skipping subtree\n"+
+        "/zookeeper\n"+
+        "/zookeeper/quota\n";
+        
+        assertEquals(expectedOutput, outContent.toString());
+    }
+
+    @Test
+    public void testQuerySubCommandInvalidQueryName() {
+        String[] args = { "-c", this.configPath, "query", "invalidQuery", "-p", "/" , "-l" };
+        new CommandLine(new ZKPolicyCli(args)).execute(args);
+
+        String expectedOutput = "No such method: invalidQuery\n"+
+        "Please consult the list of default queries using query -h\n";
+        
+        assertEquals(expectedOutput, outContent.toString());
     }
 }

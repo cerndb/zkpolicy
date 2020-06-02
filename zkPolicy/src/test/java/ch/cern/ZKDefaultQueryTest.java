@@ -3,12 +3,14 @@ package ch.cern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
 import org.apache.curator.test.TestingServer;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
 import org.junit.jupiter.api.AfterAll;
@@ -32,9 +34,9 @@ public class ZKDefaultQueryTest {
     public void startZookeeper() throws Exception {
         // Choose an available port
         zkTestServer = new TestingServer();
-        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "");
+        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "");
         this.zkClient = new ZKClient(config);
-        
+
         // Setup the znode tree for tests
         // a subtree
         List<ACL> aclListA = new ArrayList<ACL>();
@@ -80,121 +82,65 @@ public class ZKDefaultQueryTest {
     @AfterAll
     public void stopZookeeper() throws IOException, InterruptedException {
         this.zkClient.close();
+        zkTestServer.stop();
     }
 
     @Test
     public void testNoACLTree() throws Exception {
+        String actualOutput = this.executeTreeQuery("noACL", "/", null);
 
-        ZKQuery query = zkDefaultQuery.getValueOf("noACL");
-
-        ZKQueryElement queryElement = new ZKQueryElement("noACL", "/", null, query);
-        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
-
-        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-        queriesList.add(queryElement);
-        zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
-        String actualOutput = String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
-
-        String expectedOutput = 
-        this.green + "/"+this.reset+"\n" +
-        "├─── "+ this.red+"/a"+this.reset+"\n" +
-        "│     └─── "+this.red+"/aa" + this.reset + "\n" +
-        "├─── "+this.red+"/b"+this.reset+"\n" +
-        "├─── "+this.red+"/c" +this.reset+"\n" +
-        "│     └─── "+this.green+"/cc" +this.reset+"\n" +
-        "└─── "+this.green+"/zookeeper"+this.reset+"\n" +
-        "      ├─── "+this.red+"/config"+this.reset+"\n" +
-        "      └─── "+this.green+"/quota"+this.reset+"\n"; 
+        String expectedOutput = this.green + "/" + this.reset + "\n" + "├─── " + this.red + "/a" + this.reset + "\n"
+                + "│     └─── " + this.red + "/aa" + this.reset + "\n" + "├─── " + this.red + "/b" + this.reset + "\n"
+                + "├─── " + this.red + "/c" + this.reset + "\n" + "│     └─── " + this.green + "/cc" + this.reset + "\n"
+                + "└─── " + this.green + "/zookeeper" + this.reset + "\n" + "      ├─── " + this.red + "/config"
+                + this.reset + "\n" + "      └─── " + this.green + "/quota" + this.reset + "\n";
         assertEquals(expectedOutput, actualOutput);
     }
 
     @Test
     public void testNoACLFind() throws Exception {
-        ZKQuery query = zkDefaultQuery.getValueOf("noACL");
+        String actualOutput = this.executeFindQuery("noACL", "/", null);
 
-        ZKQueryElement queryElement = new ZKQueryElement("noACL", "/", null, query);
-        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
-        String expectedString = "/\n" + "WARNING: No READ permission for /b/bb, skipping subtree\n" + "/c/cc\n" + "/zookeeper\n" + "/zookeeper/quota";
-        
-        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-        queriesList.add(queryElement);
-        this.zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
-        String actualOutString = String.join("\n", queriesOutput.get(queryElement.hashCode()));
-        assertEquals(expectedString, actualOutString);
+        String expectedOutput = "/\n" + "WARNING: No READ permission for /b/bb, skipping subtree\n" + "/c/cc\n"
+                + "/zookeeper\n" + "/zookeeper/quota";
+
+        assertEquals(expectedOutput, actualOutput);
     }
 
     @Test
     public void testParentYesChildNoTree() throws Exception {
-        ZKQuery query = zkDefaultQuery.getValueOf("parentYesChildNo");
+        String actualOutput = this.executeTreeQuery("parentYesChildNo", "/", null);
 
-        ZKQueryElement queryElement = new ZKQueryElement("parentYesChildNo", "/", null, query);
-        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
+        String expectedOutput = this.reset + "/\n" + this.red + "├─── " + this.reset + "/a\n" + this.red + "│     "
+                + this.green + "└─── " + this.reset + "/aa\n" + this.red + "├─── " + this.reset + "/b\n" + this.red
+                + "├─── " + this.reset + "/c\n" + this.red + "│     " + this.red + "└─── " + this.reset + "/cc\n"
+                + this.green + "└─── " + this.reset + "/zookeeper\n" + this.green + "      " + this.red + "├─── "
+                + this.reset + "/config\n" + this.green + "      " + this.green + "└─── " + this.reset + "/quota\n";
 
-        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-        queriesList.add(queryElement);
-        zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
-        String actualOutput = String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
-
-        String expectedOutput = 
-        this.reset +"/\n" +
-        this.red +"├─── "+ this.reset +"/a\n" +
-        this.red +"│     "+ this.green +"└─── "+ this.reset +"/aa\n" +
-        this.red +"├─── "+ this.reset +"/b\n" +
-        this.red +"├─── "+ this.reset +"/c\n" +
-        this.red +"│     "+ this.red +"└─── "+ this.reset +"/cc\n" +
-        this.green +"└─── "+ this.reset +"/zookeeper\n" +
-        this.green +"      "+ this.red +"├─── " + this.reset +"/config\n"+
-        this.green +"      "+ this.green +"└─── " + this.reset +"/quota\n";
-        
         assertEquals(expectedOutput, actualOutput);
     }
 
     @Test
     public void testParentYesChildNoFind() throws Exception {
-        ZKQuery query = zkDefaultQuery.getValueOf("parentYesChildNo");
+        String actualOutput = this.executeFindQuery("parentYesChildNo", "/", null);
 
-        ZKQueryElement queryElement = new ZKQueryElement("parentYesChildNo", "/", null, query);
-        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
-        String expectedString = "/a\n" + "/b\n" + "WARNING: No READ permission for /b/bb, skipping subtree\n" + "/c\n" + "/c/cc\n" + "/zookeeper/config";
+        String expectedOutput = "/a\n" + "/b\n" + "WARNING: No READ permission for /b/bb, skipping subtree\n" + "/c\n"
+                + "/c/cc\n" + "/zookeeper/config";
 
-        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-        queriesList.add(queryElement);
-        this.zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
-        String actualOutString = String.join("\n", queriesOutput.get(queryElement.hashCode()));
-        assertEquals(expectedString, actualOutString);
+        assertEquals(expectedOutput, actualOutput);
     }
 
     @Test
     public void testExactACLTree() throws Exception {
         String tempDigest = DigestAuthenticationProvider.generateDigest("user2:passw2");
-        String[] aclArguments = new String[] { "digest:" + tempDigest + ":rcda", "ip:127.0.0.3:rda" };
+        String[] arguments = new String[] { "digest:" + tempDigest + ":rcda", "ip:127.0.0.3:rda" };
+        String actualOutput = this.executeTreeQuery("exactACL", "/", arguments);
 
-        ZKQuery query = zkDefaultQuery.getValueOf("exactACL");
-
-        ZKQueryElement queryElement = new ZKQueryElement("exactACL", "/", aclArguments, query);
-
-        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
-
-        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-        queriesList.add(queryElement);
-        zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
-        String actualOutput = String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
-
-        String expectedOutput =
-        this.red + "/"+this.reset+"\n" +
-        "├─── "+ this.red+"/a"+this.reset+"\n" +
-        "│     └─── "+this.red+"/aa" + this.reset + "\n" +
-        "├─── "+this.green+"/b"+this.reset+"\n" +
-        "├─── "+this.red+"/c" +this.reset+"\n" +
-        "│     └─── "+this.red+"/cc" +this.reset+"\n" +
-        "└─── "+this.red+"/zookeeper"+this.reset+"\n" +
-        "      ├─── "+this.red+"/config"+this.reset+"\n" +
-        "      └─── "+this.red+"/quota"+this.reset+"\n";
+        String expectedOutput = this.red + "/" + this.reset + "\n" + "├─── " + this.red + "/a" + this.reset + "\n"
+                + "│     └─── " + this.red + "/aa" + this.reset + "\n" + "├─── " + this.green + "/b" + this.reset + "\n"
+                + "├─── " + this.red + "/c" + this.reset + "\n" + "│     └─── " + this.red + "/cc" + this.reset + "\n"
+                + "└─── " + this.red + "/zookeeper" + this.reset + "\n" + "      ├─── " + this.red + "/config"
+                + this.reset + "\n" + "      └─── " + this.red + "/quota" + this.reset + "\n";
 
         assertEquals(expectedOutput, actualOutput);
     }
@@ -202,112 +148,141 @@ public class ZKDefaultQueryTest {
     @Test
     public void testExactACLFind() throws Exception {
         String tempDigest = DigestAuthenticationProvider.generateDigest("user2:passw2");
-        String[] aclArguments = new String[] { "digest:" + tempDigest + ":rcda", "ip:127.0.0.3:rda" };
+        String[] arguments = new String[] { "digest:" + tempDigest + ":rcda", "ip:127.0.0.3:rda" };
+        String actualOutput = this.executeFindQuery("exactACL", "/", arguments);
 
-        ZKQuery query = zkDefaultQuery.getValueOf("exactACL");
-
-        ZKQueryElement queryElement = new ZKQueryElement("exactACL", "/", aclArguments, query);
-        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
-
-        String expectedString = "/b\n" + "WARNING: No READ permission for /b/bb, skipping subtree";
-
-        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-        queriesList.add(queryElement);
-        this.zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
-        String actualOutString = String.join("\n", queriesOutput.get(queryElement.hashCode()));
-        assertEquals(expectedString, actualOutString);
+        String expectedOutput = "/b\n" + "WARNING: No READ permission for /b/bb, skipping subtree";
+        assertEquals(expectedOutput, actualOutput);
     }
 
     @Test
     public void testRegexMatchACLTree() throws Exception {
-        String[] aclArguments = new String[] { "digest:.*:.*r.*" };
+        String[] arguments = new String[] { "digest:.*:.*r.*" };
+        String actualOutput = this.executeTreeQuery("regexMatchACL", "/", arguments);
 
-        ZKQuery query = zkDefaultQuery.getValueOf("regexMatchACL");
-
-        ZKQueryElement queryElement = new ZKQueryElement("regexMatchACL", "/", aclArguments, query);
-        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
-
-        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-        queriesList.add(queryElement);
-        zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
-        String actualOutput = String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
-        String expectedOutput = 
-        this.red + "/"+this.reset+"\n" +
-        "├─── "+ this.green+"/a"+this.reset+"\n" +
-        "│     └─── "+this.green+"/aa" + this.reset + "\n" +
-        "├─── "+this.green+"/b"+this.reset+"\n" +
-        "├─── "+this.green+"/c" +this.reset+"\n" +
-        "│     └─── "+this.red+"/cc" +this.reset+"\n" +
-        "└─── "+this.red+"/zookeeper"+this.reset+"\n" +
-        "      ├─── "+this.red+"/config"+this.reset+"\n" +
-        "      └─── "+this.red+"/quota"+this.reset+"\n";
+        String expectedOutput = this.red + "/" + this.reset + "\n" + "├─── " + this.green + "/a" + this.reset + "\n"
+                + "│     └─── " + this.green + "/aa" + this.reset + "\n" + "├─── " + this.green + "/b" + this.reset
+                + "\n" + "├─── " + this.green + "/c" + this.reset + "\n" + "│     └─── " + this.red + "/cc" + this.reset
+                + "\n" + "└─── " + this.red + "/zookeeper" + this.reset + "\n" + "      ├─── " + this.red + "/config"
+                + this.reset + "\n" + "      └─── " + this.red + "/quota" + this.reset + "\n";
 
         assertEquals(expectedOutput, actualOutput);
     }
 
     @Test
     public void testRegexMatchACLFind() throws Exception {
-        String[] aclArguments = new String[] { "digest:.*:.*r.*" };
-        ZKQuery query = zkDefaultQuery.getValueOf("regexMatchACL");
+        String[] arguments = new String[] { "digest:.*:.*r.*" };
+        String actualOutput = this.executeFindQuery("regexMatchACL", "/", arguments);
 
-        ZKQueryElement queryElement = new ZKQueryElement("regexMatchACL", "/", aclArguments, query);
-        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
-        String expectedString = "/a\n" + "/a/aa\n" + "/b\n" + "WARNING: No READ permission for /b/bb, skipping subtree\n" + "/c";        
-        
-        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-        queriesList.add(queryElement);
-        this.zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
-        String actualOutString = String.join("\n", queriesOutput.get(queryElement.hashCode()));
-        assertEquals(expectedString, actualOutString);
+        String expectedOutput = "/a\n" + "/a/aa\n" + "/b\n"
+                + "WARNING: No READ permission for /b/bb, skipping subtree\n" + "/c";
+
+        assertEquals(expectedOutput, actualOutput);
     }
 
     @Test
     public void testGlobMatchACLTree() throws Exception {
-        String[] aclArguments = new String[] { "digest:*:*r*" };
+        String[] arguments = new String[] { "digest:*:*r*" };
+        String actualOutput = this.executeTreeQuery("globMatchACL", "/", arguments);
 
-        ZKQuery query = zkDefaultQuery.getValueOf("globMatchACL");
-
-        ZKQueryElement queryElement = new ZKQueryElement("globMatchACL", "/", aclArguments, query);
-        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
-
-        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-        queriesList.add(queryElement);
-        zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
-        String actualOutput = String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
-
-        String expectedOutput = 
-        this.red + "/"+this.reset+"\n" +
-        "├─── "+ this.green+"/a"+this.reset+"\n" +
-        "│     └─── "+this.green+"/aa" + this.reset + "\n" +
-        "├─── "+this.green+"/b"+this.reset+"\n" +
-        "├─── "+this.green+"/c" +this.reset+"\n" +
-        "│     └─── "+this.red+"/cc" +this.reset+"\n" +
-        "└─── "+this.red+"/zookeeper"+this.reset+"\n" +
-        "      ├─── "+this.red+"/config"+this.reset+"\n" +
-        "      └─── "+this.red+"/quota"+this.reset+"\n";
+        String expectedOutput = this.red + "/" + this.reset + "\n" + "├─── " + this.green + "/a" + this.reset + "\n"
+                + "│     └─── " + this.green + "/aa" + this.reset + "\n" + "├─── " + this.green + "/b" + this.reset
+                + "\n" + "├─── " + this.green + "/c" + this.reset + "\n" + "│     └─── " + this.red + "/cc" + this.reset
+                + "\n" + "└─── " + this.red + "/zookeeper" + this.reset + "\n" + "      ├─── " + this.red + "/config"
+                + this.reset + "\n" + "      └─── " + this.red + "/quota" + this.reset + "\n";
 
         assertEquals(expectedOutput, actualOutput);
     }
 
     @Test
     public void testGlobMatchACLFind() throws Exception {
-        String[] aclArguments = new String[] { "digest:*:*r*" };
-        ZKQuery query = zkDefaultQuery.getValueOf("globMatchACL");
+        String[] arguments = new String[] { "digest:*:*r*" };
+        String actualOutput = this.executeFindQuery("globMatchACL", "/", arguments);
 
-        ZKQueryElement queryElement = new ZKQueryElement("globMatchACL", "/", aclArguments, query);
-        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
-
-        String expectedString = "/a\n" + "/a/aa\n" + "/b\n" + "WARNING: No READ permission for /b/bb, skipping subtree\n" + "/c";
-        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-        queriesList.add(queryElement);
-        this.zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
-        String actualOutString = String.join("\n", queriesOutput.get(queryElement.hashCode()));
-        assertEquals(expectedString, actualOutString);
+        String expectedOutput = "/a\n" + "/a/aa\n" + "/b\n"
+                + "WARNING: No READ permission for /b/bb, skipping subtree\n" + "/c";
+        assertEquals(expectedOutput, actualOutput);
     }
 
+    @Test
+    public void testGlobMatchPathTree() throws Exception {
+        String[] arguments = new String[] { "{/a*,/zookeep*}" };
+        String actualOutput = this.executeTreeQuery("globMatchPath", "/", arguments);
+
+        String expectedOutput = this.red + "/" + this.reset + "\n" + "├─── " + this.green + "/a" + this.reset + "\n"
+                + "│     └─── " + this.green + "/aa" + this.reset + "\n" + "├─── " + this.red + "/b" + this.reset + "\n"
+                + "├─── " + this.red + "/c" + this.reset + "\n" + "│     └─── " + this.red + "/cc" + this.reset + "\n"
+                + "└─── " + this.green + "/zookeeper" + this.reset + "\n" + "      ├─── " + this.green + "/config"
+                + this.reset + "\n" + "      └─── " + this.green + "/quota" + this.reset + "\n";
+
+        assertEquals(expectedOutput, actualOutput);
+    }
+
+    @Test
+    public void testGlobMatchPathFind() throws Exception {
+        String[] arguments = new String[] { "{/a*,/zookeep*}" };
+        String actualOutput = this.executeFindQuery("globMatchPath", "/", arguments);
+
+        String expectedOutput = "/a\n" + "/a/aa\n" + 
+        "WARNING: No READ permission for /b/bb, skipping subtree\n" + "/zookeeper\n" + "/zookeeper/config\n" + "/zookeeper/quota";
+
+        assertEquals(expectedOutput, actualOutput);
+    }
+
+    @Test
+    public void testRegexMatchPathTree() throws Exception {
+        String[] arguments = new String[] { "(/a.*|/zookeep.*)" };
+        String actualOutput = this.executeTreeQuery("regexMatchPath", "/", arguments);
+
+        String expectedOutput = this.red + "/" + this.reset + "\n" + "├─── " + this.green + "/a" + this.reset + "\n"
+                + "│     └─── " + this.green + "/aa" + this.reset + "\n" + "├─── " + this.red + "/b" + this.reset + "\n"
+                + "├─── " + this.red + "/c" + this.reset + "\n" + "│     └─── " + this.red + "/cc" + this.reset + "\n"
+                + "└─── " + this.green + "/zookeeper" + this.reset + "\n" + "      ├─── " + this.green + "/config"
+                + this.reset + "\n" + "      └─── " + this.green + "/quota" + this.reset + "\n";
+
+        assertEquals(expectedOutput, actualOutput);
+    }
+
+    @Test
+    public void testRegexMatchPathFind() throws Exception {
+        String[] arguments = new String[] { "(/a.*|/zookeep.*)" };
+        String actualOutput = this.executeFindQuery("regexMatchPath", "/", arguments);
+
+        String expectedOutput = "/a\n" + "/a/aa\n" + 
+        "WARNING: No READ permission for /b/bb, skipping subtree\n" + "/zookeeper\n" + "/zookeeper/config\n" + "/zookeeper/quota";
+
+        assertEquals(expectedOutput, actualOutput);
+    }
+
+    private String executeTreeQuery(String name, String path, String[] args)
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+            NoSuchMethodException, InvocationTargetException, KeeperException, InterruptedException {
+        ZKQuery query = zkDefaultQuery.getValueOf(name);
+        ZKQueryElement queryElement = new ZKQueryElement(name, path, args, query);
+        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
+        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
+        
+        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
+        queriesList.add(queryElement);
+        zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
+        
+        return String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
+    }
+
+    private String executeFindQuery(String name, String path, String[] args)
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+            NoSuchMethodException, InvocationTargetException, KeeperException, InterruptedException {
+        ZKQuery query = zkDefaultQuery.getValueOf(name);
+        ZKQueryElement queryElement = new ZKQueryElement(name, path, args, query);
+        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
+        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
+        
+        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
+        queriesList.add(queryElement);
+
+        this.zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
+
+        return String.join("\n", queriesOutput.get(queryElement.hashCode()));
+    }
+    
 }

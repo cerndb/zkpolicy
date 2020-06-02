@@ -49,7 +49,7 @@ public class ZKConfigTest {
     String matchcolor = "GREEN";
     String mismatchcolor = "RED";
     java.lang.System.clearProperty("log4j.configuration");
-    new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor, null, null);
+    new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor, null);
     assertEquals("", java.lang.System.getProperty("log4j.configuration", ""));
   }
 
@@ -58,10 +58,9 @@ public class ZKConfigTest {
     String matchcolor = "GREEN";
     String mismatchcolor = "RED";
     String jaas = "/path/to/jaas.conf";
-    String defaultAudit = "/path/to/defaultAudit.yaml";
     java.lang.System.clearProperty("java.security.auth.login.config");
     ZKConfig zkConfig = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor,
-        jaas, defaultAudit);
+        jaas);
     zkConfig.setPropertyJaas();
     assertEquals("/path/to/jaas.conf", java.lang.System.getProperty("java.security.auth.login.config", ""));
   }
@@ -72,7 +71,7 @@ public class ZKConfigTest {
     String mismatchcolor = "RED";
     java.lang.System.clearProperty("java.security.auth.login.config");
     ZKConfig zkConfig = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor,
-        null, null);
+        null);
     zkConfig.setPropertyJaas();
     assertEquals("", java.lang.System.getProperty("java.security.auth.login.config", ""));
   }
@@ -82,10 +81,9 @@ public class ZKConfigTest {
     String matchcolor = "GREEN";
     String mismatchcolor = "RED";
     String jaas = "";
-    String defaultAudit = "";
     java.lang.System.clearProperty("java.security.auth.login.config");
     ZKConfig zkConfig = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor,
-        jaas, defaultAudit);
+        jaas);
     zkConfig.setPropertyJaas();
     assertEquals("", java.lang.System.getProperty("java.security.auth.login.config", ""));
   }

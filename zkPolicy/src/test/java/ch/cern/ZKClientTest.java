@@ -23,7 +23,7 @@ public class ZKClientTest {
 
   @Test
   public void testConnect() throws Exception {
-    config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "");
+    config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "");
     ZKClient zkClient = new ZKClient(config);
     Assertions.assertEquals(States.CONNECTED, zkClient.getState());
     zkClient.close();

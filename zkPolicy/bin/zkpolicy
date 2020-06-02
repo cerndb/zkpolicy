@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+
+if [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+    JAVA="$JAVA_HOME/bin/java"
+elif [[ $(type -p java) = *java* ]]; then
+    JAVA=java
+else
+    echo "Error: JAVA_HOME is not set and java could not be found in PATH." 1>&2
+    exit 1
+fi
+
+"$JAVA" -jar /opt/zkpolicy/cerndb-sw-zkpolicy.jar "$@"

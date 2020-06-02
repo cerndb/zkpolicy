@@ -40,15 +40,32 @@ Zookeeper audit and policy tool for checking and enforcing ACLs on the znodes.
 %install
 %{__rm} -rf $RPM_BUILD_ROOT/*
 install -d $RPM_BUILD_ROOT%{install_path}
-install %{name}-%{version}.jar $RPM_BUILD_ROOT%{install_path}/%{name}-%{version}.jar
+install -d $RPM_BUILD_ROOT%{_bindir}
+install -d $RPM_BUILD_ROOT/etc/bash_completion.d
+install -d $RPM_BUILD_ROOT%{_mandir}/man1
+install -d $RPM_BUILD_ROOT%{install_path}/conf
 
-mkdir -p $RPM_BUILD_ROOT%{install_path}
+install %{name}-%{version}-uber.jar $RPM_BUILD_ROOT%{install_path}/%{name}.jar
+
+# Wrapper script for jar file
+install bin/zkpolicy $RPM_BUILD_ROOT%{_bindir}
+
+# Autocomplete script
+install zkpolicy_autocomplete $RPM_BUILD_ROOT/etc/bash_completion.d
+
+# Manpages
+install manpages/* $RPM_BUILD_ROOT%{_mandir}/man1
+
+# Default config files
+install conf/* $RPM_BUILD_ROOT%{install_path}/conf
 
 %files
 %config(noreplace) %dir %attr(0755, root, root) %{install_path}
-%attr(0755, root, root) %{install_path}/%{name}-%{version}.jar
-
-ln -sf %{install_path}/%{name}-%{version}.jar $RPM_BUILD_ROOT/usr/bin/
+%attr(0755, root, root) %{install_path}/%{name}.jar
+%{_bindir}/zkpolicy
+/etc/bash_completion.d/zkpolicy_autocomplete
+%{_mandir}/man1/zkpolicy*
+%{install_path}/conf/*
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -60,5 +77,5 @@ rm -rf $RPM_BUILD_ROOT
 %postun -p /bin/sh
 
 %changelog
-* Mon Apr 03 202O Emil Kleszcz <emil.kleszcz@cern.ch>
-- 1.0.0 The first release of the ZK Policy Audit tool
+* Mon Apr 03 2020 Emil Kleszcz <emil.kleszcz@cern.ch> 1.0.0 
+- The first release of the ZK Policy Audit tool

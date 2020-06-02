@@ -82,7 +82,7 @@ public class ZKEnforce {
             return;
         }
 
-        if (query.query(znodeACLList, path, zk, queryACLs)) {
+        if (query.query(znodeACLList, null, path, zk, queryACLs)) {
             System.out.println(path);
         }
 
@@ -111,7 +111,7 @@ public class ZKEnforce {
             return;
         }
 
-        if (query.query(znodeACLList, path, zk, queryACLs)) {
+        if (query.query(znodeACLList, null, path, zk, queryACLs)) {
             if (append) {
                 newACLList.addAll(znodeACLList);
             }

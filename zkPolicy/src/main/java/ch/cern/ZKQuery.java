@@ -4,8 +4,8 @@ import java.util.List;
 import org.apache.zookeeper.data.ACL;
 
 /**
- * Interface for queriy functions.
+ * Interface for query functions.
  */
 public interface ZKQuery {
-    boolean query(List<ACL> aclList, String path, ZKClient zk, String[] queryOptions);
+    boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, String[] queryOptions);
 }

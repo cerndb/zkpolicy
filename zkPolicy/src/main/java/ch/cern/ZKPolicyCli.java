@@ -23,8 +23,8 @@ public class ZKPolicyCli implements Runnable {
         this.args = args;
     }
 
-    @Option(names = { "-c", "--config" }, required = true, description = "YAML config file absolute path", scope = ScopeType.INHERIT)
-    public File configFile=null;
+    @Option(names = { "-c", "--config" }, required = false, description = "YAML configuration file to use (default: ${DEFAULT-VALUE})", scope = ScopeType.INHERIT, defaultValue = "/opt/zkpolicy/conf/config.yml")
+    public File configFile;
 
     @Override
     public void run() {

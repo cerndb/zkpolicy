@@ -16,14 +16,36 @@ public class ZKPatternTest {
 
     @Test
     public void testCreateGlobPatternList() {
-        String[] globList = {"world:*:*","sasl:*:c?rw"};
+        String[] globList = { "world:*:*", "sasl:*:c?rw", "gl*b", "gl\\*b", "gl?b", "gl\\?b", "gl[-o]b", "gl\\[-o\\]b",
+                "gl[!a-n!p-z]b", "gl[[!a-n]!p-z]b", "gl[^o]b", "gl?*.()+|^$@%b", "gl[?*.()+|^$@%]b", "gl\\\\b",
+                "\\Qglob\\E", "{glob,regex}", "\\{glob\\}" , "{glob\\,regex}," };
         List<Pattern> patternList = ZKPattern.createGlobPatternList(globList);
-        List<Pattern> expectedList = new ArrayList<Pattern>();
-        expectedList.add(Pattern.compile("world:.*:.*"));
-        expectedList.add(Pattern.compile("sasl:.*:c.rw"));
+        List<String> expectedList = new ArrayList<String>();
+
+        expectedList.add("world:.*:.*");
+        expectedList.add("sasl:.*:c.rw");
+        expectedList.add("gl.*b");
+        expectedList.add("gl\\*b");
+        expectedList.add("gl.b");
+        expectedList.add("gl\\?b");
+        expectedList.add("gl[-o]b");
+        expectedList.add("gl\\[-o\\]b");
+        expectedList.add("gl[^a-n!p-z]b");
+        expectedList.add("gl[[^a-n]!p-z]b");
+        expectedList.add("gl[\\^o]b");
+        expectedList.add("gl..*\\.\\(\\)\\+\\|\\^\\$\\@\\%b");
+        expectedList.add("gl[?*.()+|^$@%]b");
+        expectedList.add("gl\\\\b");
+        expectedList.add("\\\\Qglob\\\\E");
+        expectedList.add("(glob|regex)");
+
+        expectedList.add("\\{glob\\}");
+        expectedList.add("(glob,regex),");
+
         assertEquals(expectedList.size(), patternList.size());
-        assertEquals(expectedList.get(0).pattern(), patternList.get(0).pattern());
-        assertEquals(expectedList.get(1).pattern(), patternList.get(1).pattern());
+        for (int i = 0; i < globList.length; i++) {
+            assertEquals(expectedList.get(i), patternList.get(i).pattern());
+        }
     }
 
     @Test

@@ -38,7 +38,7 @@ public class ZKAuditTest {
         // Choose an available port
         zkTestServer = new TestingServer();
 
-        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "");
+        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "");
         this.zkClient = new ZKClient(config);
 
         // Setup the znode tree for tests
@@ -167,7 +167,7 @@ public class ZKAuditTest {
                 + "/a/aa - digest:user1:fmzXXlXqk3oTcBzJlNngkWBzCVI=:cdrwa\n"
                 + "/b - digest:user2:MP2IkrliHO/f+GSvcEPq1SHzoYM=:cdra, ip:127.0.0.3:dra\n"
                 + "Warning: No READ permission for /b/bb, skipping this subtree\n"
-                + "/c - digest:user1:fmzXXlXqk3oTcBzJlNngkWBzCVI=:cdra, digest:user2:MP2IkrliHO/f+GSvcEPq1SHzoYM=:cdra\n"
+                + "/c - digest:user2:MP2IkrliHO/f+GSvcEPq1SHzoYM=:cdra, digest:user1:fmzXXlXqk3oTcBzJlNngkWBzCVI=:cdra\n"
                 + "/c/cc - world:anyone:cdrwa\n" + "/zookeeper - world:anyone:cdrwa\n"
                 + "/zookeeper/config - world:anyone:r\n" + "/zookeeper/quota - world:anyone:cdrwa\n";
 

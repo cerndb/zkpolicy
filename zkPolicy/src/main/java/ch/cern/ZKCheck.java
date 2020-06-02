@@ -96,24 +96,26 @@ public class ZKCheck {
                 // If the path name matches check the ACLs with the ones provided by the check
                 // element
                 ZKQuery exactACL = defaultQueries.exactACL;
-                if (exactACL.query(znodeACLList, path, zk, zkCheckElement.getAcls())) {
+                if (exactACL.query(znodeACLList, null, path, zk, zkCheckElement.getAcls())) {
                     checksOutput.get(zkCheckElement.hashCode()).add(path + " : " + "PASS");
                 } else {
                     checksOutput.get(zkCheckElement.hashCode()).add(path + " : " + "FAIL");
                     zkCheckElement.$status = false;
                 }
-
             }
-
         }
 
         if (path.equals("/")) {
             path = "";
         }
 
-        Collections.sort(children);
-        for (String child : children) {
-            this.checkIntPreOrder(path + "/" + child, checkElements, checksOutput);
+        if (children == null) {
+            return;
+        } else {
+            Collections.sort(children);
+            for (String child : children) {
+                this.checkIntPreOrder(path + "/" + child, checkElements, checksOutput);
+            }
         }
     }
 }

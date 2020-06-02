@@ -39,10 +39,10 @@ public class ZKEnforceCli implements Runnable {
         @Option(names = { "-p", "--root-path" }, required = false, description = "Path pattern to match")
         String rootPath = null;
 
-        @Option(names = { "-a", "--acls" }, required = false, description = "ACLs for querying")
-        String[] queryACLs;
+        @Option(names = { "-a", "--args" }, required = false, description = "Query arguments")
+        String[] queryArgs;
 
-        @Option(names = { "-A", "--append" }, required = false, description = "Append policy ACLs to znode's ACL")
+        @Option(names = { "-A", "--append" }, required = false, description = "Append policy ACLs to znode's ACL (default: false)")
         boolean append = false;
     }
 
@@ -90,10 +90,10 @@ public class ZKEnforceCli implements Runnable {
 
             if (this.dryRun) {
                 zkEnforce.enforceDry(this.exclusive.cliEnforceGroup.queryName, this.exclusive.cliEnforceGroup.rootPath,
-                        this.exclusive.cliEnforceGroup.queryACLs);
+                        this.exclusive.cliEnforceGroup.queryArgs);
             } else {
                 zkEnforce.enforce(this.exclusive.cliEnforceGroup.policies, this.exclusive.cliEnforceGroup.queryName,
-                        this.exclusive.cliEnforceGroup.rootPath, this.exclusive.cliEnforceGroup.queryACLs,
+                        this.exclusive.cliEnforceGroup.rootPath, this.exclusive.cliEnforceGroup.queryArgs,
                         this.exclusive.cliEnforceGroup.append);
             }
         } catch (NoSuchMethodException | NoSuchFieldException e) {

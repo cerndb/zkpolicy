@@ -33,10 +33,10 @@ public class ZKQueryCli implements Runnable {
     @Parameters(paramLabel = "[QUERY_NAME]", description = "Query to be executed: ${COMPLETION-CANDIDATES}", completionCandidates = ZKQueryCli.DefaultQueryCandidates.class)
     String queryName;
 
-    @Option(names = { "-p", "--path" }, required = true, description = "Root path to execute query")
+    @Option(names = { "-p", "--path" }, required = true, description = "Query execution root path")
     String rootPath;
 
-    @Option(names = { "-a", "--acls" }, description = "ACLs for querying")
+    @Option(names = { "-a", "--args" }, description = "Query arguments")
     String[] queryACLs;
 
     @Override
@@ -70,12 +70,15 @@ public class ZKQueryCli implements Runnable {
             queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
             if (this.listMode) {
                 zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
-                System.out.println("\n" + String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
+                List<String> queryOutput = queriesOutput.get(queryElement.hashCode());
+                if (queryOutput.size() > 0 ) {
+                    System.out.println(String.join("\n", queryOutput));    
+                }
             } else {
                 zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
                 System.out.println(zktree.colorCodeExplanation() + String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
             }
-        } catch (NoSuchMethodException | SecurityException e) {
+        } catch (NoSuchMethodException | NoSuchFieldException | SecurityException e) {
             System.out.println("No such method: " + this.queryName);
             System.out.println("Please consult the list of default queries using query -h");
         } catch (Exception e) {

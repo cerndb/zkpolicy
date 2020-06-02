@@ -27,8 +27,8 @@ public class ZKAuditCli implements Runnable {
     @Option(names = { "-o", "--output" }, required = false, description = "Audit report output file")
     File outputFile = null;
     
-    @Option(names = { "-i", "--input" }, required = false, description = "Audit report configuration file")
-    File auditConfigFile = null;
+    @Option(names = { "-i", "--input" }, required = false, description = "Audit report configuration file (default: ${DEFAULT-VALUE})", defaultValue = "/opt/zkpolicy/conf/audit.yml")
+    File auditConfigFile;
 
     ZKConfig config;
     ZKClient zk;
@@ -43,12 +43,6 @@ public class ZKAuditCli implements Runnable {
 
             config = new ZKConfig(parent.configFile);
 
-            // Define the query set to be executed for each node as well as the output arrays for each query
-            // Check the passed audit yaml config file for queries and construct the HashTable
-            if (this.auditConfigFile == null) {
-                this.auditConfigFile = new File(config.getDefaultAuditPath());
-            } 
-            
             try (ZKClient zk = new ZKClient(config)) {
                 this.zk = zk;
                 zkAudit = new ZKAudit(zk, this.auditConfigFile);
@@ -100,11 +94,8 @@ public class ZKAuditCli implements Runnable {
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss Z", Locale.getDefault());
         Date date = new Date();
         headerOut += "DateTime: " + dateFormat.format(date) + "\n";
-        if (auditConfigFile == null) {
-            headerOut += "Report results for file: " + new File(this.config.getDefaultAuditPath()).getCanonicalPath() + "\n";   
-        } else {
-            headerOut += "Report results for file: " + auditConfigFile.getCanonicalPath() + "\n";
-        }
+        
+        headerOut += "Report results for file: " + auditConfigFile.getCanonicalPath() + "\n";
 
         headerOut += "Connected to ZooKeeper server: " + this.zk.getHost() + ":" + this.zk.getPort() + "\n";
         return headerOut;

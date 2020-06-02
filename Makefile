@@ -1,4 +1,4 @@
-JARFILE=$(shell find target/ -maxdepth 1 -name \*.jar -exec basename {} \;)
+JARFILE=$(shell find zkPolicy/target/cerndb* -maxdepth 1 -name \*-uber.jar -exec basename {} \;)
 SPECFILE=$(shell find -maxdepth 1 -name \*.spec -exec basename {} \; )
 REPOURL=git+ssh://git@gitlab.cern.ch:7999
 # DB gitlab group
@@ -16,6 +16,8 @@ TARFILE=$(PKGID).tar.gz
 
 DIST_RPM=hdp7
 
+package:
+	cd zkPolicy ; mvn package -DskipTests
 
 sources:
 	@echo $(PKGVERSION)
@@ -26,14 +28,32 @@ sources:
 	rm -rf /tmp/$(PKGID)
 
 	mkdir /tmp/$(PKGID)
+	mkdir /tmp/$(PKGID)/bin
+	mkdir /tmp/$(PKGID)/manpages
+	mkdir /tmp/$(PKGID)/conf
 
-	cp target/${JARFILE} /tmp/$(PKGID)
+	# Uber .jar file
+	cp zkPolicy/target/${JARFILE} /tmp/$(PKGID)
+	
+	# Manpages
+	cp -R zkPolicy/target/generated-docs/*.1 /tmp/$(PKGID)/manpages
+	
+	# Autocomplete script
+	cp zkPolicy/target/zkpolicy_autocomplete /tmp/$(PKGID)
+	
+	# .jar wrapper script
+	cp zkPolicy/bin/zkpolicy /tmp/$(PKGID)/bin
+	
+	# default configuration files
+	cp configs/default/* /tmp/$(PKGID)/conf
+
+	# create archive 
 	cd /tmp ; pwd ; ls -la ; tar -cvzf $(TARFILE) $(PKGID)
 
 	mv /tmp/$(TARFILE) .
 	rm -rf /tmp/$(PKGID)
 
-all: sources
+all: package sources
 
 clean:
 	rm $(TARFILE)

@@ -120,7 +120,7 @@ public class ZKTree {
             String znodePrintColor = "";
             ZKQuery query = zkQueryElement.getQuery();
 
-            if (query.query(znodeACLList, path, this.zk, zkQueryElement.getArgs())) {
+            if (query.query(znodeACLList, null, path, this.zk, zkQueryElement.getArgs())) {
                 znodePrintColor = this.matchColor;
             } else {
                 znodePrintColor = this.misMatchColor;
@@ -129,10 +129,6 @@ public class ZKTree {
             if (isQueryRoot) {
                 name = path.substring(1, path.length());
             } else {
-                if (name.equals("")) {
-                    name = path.substring(1, path.length());
-                }
-
                 if (indent.length() > 0) {
                     if (isParentLast) {
                         indent = indent.substring(0, indent.length() - ZKPolicyDefs.TerminalConstants.indentStepLength)
@@ -189,9 +185,11 @@ public class ZKTree {
 
         String znodePrintColor = "";
 
+        List<ACL> znodeACLList = this.zk.getACL(path, null);
+
         ZKQuery query = queryElement.getQuery();
 
-        if (parentACLList == null || query.query(parentACLList, path, this.zk, null)) {
+        if (parentACLList == null || query.query(znodeACLList, parentACLList, path, this.zk, null)) {
             znodePrintColor = this.matchColor;
         } else {
             znodePrintColor = this.misMatchColor;
@@ -203,10 +201,6 @@ public class ZKTree {
         } else if (isQueryRoot) {
             name = path.substring(1, path.length());
         } else {
-            if (name.equals("")) {
-                name = path.substring(1, path.length());
-            }
-
             if (indent.length() > 0) {
                 if (isParentLast) {
                     indent = indent.substring(0, indent.length() - ZKPolicyDefs.TerminalConstants.indentStepLength)
@@ -322,7 +316,7 @@ public class ZKTree {
         for (ZKQueryElement zkQueryElement : queryElements) {
             ZKQuery query = zkQueryElement.getQuery();
 
-            if (query.query(znodeACLList, path, this.zk, zkQueryElement.getArgs())) {
+            if (query.query(znodeACLList, null, path, this.zk, zkQueryElement.getArgs())) {
                 queriesOutput.get(zkQueryElement.hashCode()).add(path);
             }
         }
@@ -360,10 +354,11 @@ public class ZKTree {
                     .add("WARNING: No READ permission for " + path + ", skipping subtree");
             return;
         }
+        List<ACL> znodeACLList = this.zk.getACL(path, null);
 
         ZKQuery query = queryElement.getQuery();
 
-        if (parentACLList != null && !query.query(parentACLList, path, this.zk, queryElement.getArgs())) {
+        if (parentACLList != null && !query.query(znodeACLList, parentACLList, path, this.zk, null)) {
             queriesOutput.get(queryElement.hashCode()).add(path);
         }
         parentACLList = this.zk.getACL(path, null);

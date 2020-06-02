@@ -32,8 +32,8 @@ public class ZKTreeCliTest {
     private String resetColor;
     private String whiteColor;
 
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+    private ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    private ByteArrayOutputStream errContent = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
 
@@ -46,7 +46,7 @@ public class ZKTreeCliTest {
     public void startZookeeper() throws Exception {
         // Choose an available port
         zkTestServer = new TestingServer();
-        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "", "");
+        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "");
         this.zkClient = new ZKClient(config);
 
         // Setup the znode tree for tests
@@ -89,6 +89,8 @@ public class ZKTreeCliTest {
 
     @BeforeEach
     public void setUpStreams() {
+        outContent.reset();
+        errContent.reset();
         System.setOut(new PrintStream(outContent));
         System.setErr(new PrintStream(errContent));
     }

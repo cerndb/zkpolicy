@@ -29,7 +29,6 @@ public class ZKConfig {
     private String matchColor;
     private String mismatchColor;
     private String jaas;
-    private String defaultAuditPath;
 
     /**
      * Construct ZKConfig using configuration YAML file
