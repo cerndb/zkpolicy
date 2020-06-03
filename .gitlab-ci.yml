@@ -42,14 +42,6 @@ checkstyle:
   tags:
     - docker
 
-clean-mvn-build:
-  stage: test
-  image: ${CI_REGISTRY_IMAGE}:mvn-builder
-  script:
-    - mvn --quiet clean compile
-  tags:
-    - docker
-
 test:
   stage: test
   image: ${CI_REGISTRY_IMAGE}:mvn-builder
