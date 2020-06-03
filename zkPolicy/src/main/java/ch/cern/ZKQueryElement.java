@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Class for query elements to be executed, constructed based on configuration
- * yaml files argument
+ * <p>Class for query elements to be executed, constructed based on configuration
+ * yaml files argument.</p>
  */
 @Getter
 @Setter
@@ -16,8 +16,8 @@ import lombok.Setter;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ZKQueryElement {
 
-    private String name;
-    private String rootPath;
-    private String[] args;
-    private ZKQuery query;
+  private String name;
+  private String rootPath;
+  private String[] args;
+  private ZKQuery query;
 }

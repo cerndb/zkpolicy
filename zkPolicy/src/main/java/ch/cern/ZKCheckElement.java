@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Check element as defined in the audit report configuration file
+ * Check element as defined in the audit report configuration file.
  */
 @Getter
 @Setter
@@ -16,9 +16,11 @@ import lombok.Setter;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @EqualsAndHashCode
 public class ZKCheckElement {
-    private String title;
-    private String rootPath;
-    private String pathPattern;
-    private String[] acls;
-    public boolean $status = true;
+  private String title;
+  private String rootPath;
+  private String pathPattern;
+  private String[] acls;
+  //CHECKSTYLE.OFF: MemberName
+  public boolean $status = true;
+  //CHECKSTYLE.ON : MemberName
 }

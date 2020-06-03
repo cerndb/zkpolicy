@@ -11,56 +11,56 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ACLAugmentEquatorTest {
-    TestingServer zkTestServer;
-    CuratorFramework cli;
+  TestingServer zkTestServer;
+  CuratorFramework cli;
 
-    @Test
-    public void testEquate() {
-        ACLAugmentEquator equator = new ACLAugmentEquator();
-        ACLAugment o1 = new ACLAugment("sasl:test:crwda");
-        ACLAugment o2 = new ACLAugment("world:anyone:crw");
+  @Test
+  public void testEquate() {
+    ACLAugmentEquator equator = new ACLAugmentEquator();
+    ACLAugment o1 = new ACLAugment("sasl:test:crwda");
+    ACLAugment o2 = new ACLAugment("world:anyone:crw");
 
-        assertTrue(equator.equate(o1, o2));
+    assertTrue(equator.equate(o1, o2));
 
-        o1 = new ACLAugment("sasl:test:crw");
-        o2 = new ACLAugment("world:anyone:da");
+    o1 = new ACLAugment("sasl:test:crw");
+    o2 = new ACLAugment("world:anyone:da");
 
-        assertFalse(equator.equate(o1, o2));
+    assertFalse(equator.equate(o1, o2));
 
-        o1 = new ACLAugment("sasl:test:crw");
-        o2 = new ACLAugment("world:test:da");
+    o1 = new ACLAugment("sasl:test:crw");
+    o2 = new ACLAugment("world:test:da");
 
-        assertFalse(equator.equate(o1, o2));
+    assertFalse(equator.equate(o1, o2));
 
-        o1 = new ACLAugment("sasl:test:crw");
-        o2 = new ACLAugment("ip:anyone:crw");
+    o1 = new ACLAugment("sasl:test:crw");
+    o2 = new ACLAugment("ip:anyone:crw");
 
-        assertFalse(equator.equate(o1, o2));
+    assertFalse(equator.equate(o1, o2));
 
-    }
+  }
 
-    @Test
-    public void testComplementaryEquate() {
-        ACLAugmentEquator equator = new ACLAugmentEquator();
-        ACLAugment o1 = new ACLAugment("sasl:test:crw");
-        ACLAugment o2 = new ACLAugment("world:test:da");
+  @Test
+  public void testComplementaryEquate() {
+    ACLAugmentEquator equator = new ACLAugmentEquator();
+    ACLAugment o1 = new ACLAugment("sasl:test:crw");
+    ACLAugment o2 = new ACLAugment("world:test:da");
 
-        assertFalse(equator.equate(o1, o2));
+    assertFalse(equator.equate(o1, o2));
 
-        o1 = new ACLAugment("sasl:test:crw");
-        o2 = new ACLAugment("ip:anyone:crw");
+    o1 = new ACLAugment("sasl:test:crw");
+    o2 = new ACLAugment("ip:anyone:crw");
 
-        assertFalse(equator.equate(o1, o2));
+    assertFalse(equator.equate(o1, o2));
 
-    }
+  }
 
-    @Test
-    public void testNonWorldAnyoneEquate() {
-        ACLAugmentEquator equator = new ACLAugmentEquator();
-        ACLAugment o1 = new ACLAugment("sasl:test:crw");
-        ACLAugment o2 = new ACLAugment("ip:anyone:crw");
+  @Test
+  public void testNonWorldAnyoneEquate() {
+    ACLAugmentEquator equator = new ACLAugmentEquator();
+    ACLAugment o1 = new ACLAugment("sasl:test:crw");
+    ACLAugment o2 = new ACLAugment("ip:anyone:crw");
 
-        assertFalse(equator.equate(o1, o2));
+    assertFalse(equator.equate(o1, o2));
 
-    }
+  }
 }

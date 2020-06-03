@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Class that holds configuration for policies as defined in the enforcing
- * yaml configuration file
+ * Class that holds configuration for policies as defined in the enforcing yaml
+ * configuration file.
  */
 @Getter
 @Setter
@@ -16,8 +16,8 @@ import lombok.Setter;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ZKEnforcePolicyElement {
 
-    private String title;
-    private ZKQueryElement query;
-    private boolean append;
-    private String[] acls;
+  private String title;
+  private ZKQueryElement query;
+  private boolean append;
+  private String[] acls;
 }

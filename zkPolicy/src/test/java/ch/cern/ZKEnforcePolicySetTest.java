@@ -13,34 +13,25 @@ import org.junit.jupiter.api.io.TempDir;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ZKEnforcePolicySetTest {
-    @TempDir
-    File testTempDir;
+  @TempDir
+  File testTempDir;
 
-    @Test
-    public void testZKEnforcePolicyConstructor() throws Exception {
-        File file = new File(testTempDir, "policies_tmp.yml");
+  @Test
+  public void testZKEnforcePolicyConstructor() throws Exception {
+    File file = new File(testTempDir, "policies_tmp.yml");
 
-        FileWriter fw = new FileWriter(file);
-        String policiesTmpContent = "---\n" +
-                                    "policies:\n" +
-                                    "  -\n" +
-                                    "    title: \"Policy 1\"\n" +
-                                    "    query:\n" +
-                                    "        name: \"globMatchACL\"\n" +
-                                    "        rootPath: \"/\"\n" +
-                                    "        args:\n" +
-                                    "          - \"ip:*:*\"\n" +
-                                    "    append: false\n" +
-                                    "    acls:\n" +
-                                    "      - \"ip:127.0.0.3:c\"";
+    FileWriter fw = new FileWriter(file);
+    String policiesTmpContent = "---\n" + "policies:\n" + "  -\n" + "    title: \"Policy 1\"\n" + "    query:\n"
+        + "        name: \"globMatchACL\"\n" + "        rootPath: \"/\"\n" + "        args:\n"
+        + "          - \"ip:*:*\"\n" + "    append: false\n" + "    acls:\n" + "      - \"ip:127.0.0.3:c\"";
 
-        fw.write(policiesTmpContent);
-        fw.flush();
-        fw.close();
+    fw.write(policiesTmpContent);
+    fw.flush();
+    fw.close();
 
-        ZKEnforcePolicySet zkPolicies = new ZKEnforcePolicySet(file);
-        assertAll(() -> assertEquals(1, zkPolicies.getPolicies().size()),
-                () -> assertEquals("Policy 1" , zkPolicies.getPolicies().get(0).getTitle()));
-    }
+    ZKEnforcePolicySet zkPolicies = new ZKEnforcePolicySet(file);
+    assertAll(() -> assertEquals(1, zkPolicies.getPolicies().size()),
+        () -> assertEquals("Policy 1", zkPolicies.getPolicies().get(0).getTitle()));
+  }
 
 }

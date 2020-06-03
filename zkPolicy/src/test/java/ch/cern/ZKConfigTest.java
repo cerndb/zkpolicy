@@ -14,7 +14,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.io.TempDir;
 
-
 @TestInstance(Lifecycle.PER_CLASS)
 public class ZKConfigTest {
   TestingServer zkTestServer;
@@ -89,7 +88,7 @@ public class ZKConfigTest {
   }
 
   @Test
-  public void testConstructor() throws Exception{
+  public void testConstructor() throws Exception {
     assertNotNull(new ZKConfig());
   }
 }

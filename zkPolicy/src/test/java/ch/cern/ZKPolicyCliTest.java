@@ -11,5 +11,5 @@ public class ZKPolicyCliTest {
   @BeforeAll
   public void startZookeeper() throws Exception {
 
-    }
+  }
 }

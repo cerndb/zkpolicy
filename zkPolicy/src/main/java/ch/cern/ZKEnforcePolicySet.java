@@ -3,12 +3,10 @@ package ch.cern;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +15,7 @@ import lombok.AccessLevel;
 
 /**
  * Class that holds policies for enforcing derived from the respective yaml
- * configuration file
+ * configuration file.
  * 
  */
 @Getter
@@ -26,10 +24,10 @@ import lombok.AccessLevel;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ZKEnforcePolicySet {
 
-    private List<ZKEnforcePolicyElement> policies;
+  private List<ZKEnforcePolicyElement> policies;
 
-    public ZKEnforcePolicySet(File policyConfigFile) throws JsonParseException, JsonMappingException, IOException {
-        ObjectMapper om = new ObjectMapper(new YAMLFactory());
-        om.readerForUpdating(this).readValue(policyConfigFile);
-    }
+  public ZKEnforcePolicySet(File policyConfigFile) throws JsonParseException, JsonMappingException, IOException {
+    ObjectMapper om = new ObjectMapper(new YAMLFactory());
+    om.readerForUpdating(this).readValue(policyConfigFile);
+  }
 }

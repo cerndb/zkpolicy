@@ -21,168 +21,166 @@ import org.junit.jupiter.api.io.TempDir;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ZKTreeTest {
-    ZKConfig config;
-    ZKClient zkClient;
-    ZKTree zkTree;
-    TestingServer zkTestServer;
-    String colorMatch;
-    String colorNoMatch;
-    String colorReset;
-    ZKDefaultQuery zkDefaultQuery;
+  ZKConfig config;
+  ZKClient zkClient;
+  ZKTree zkTree;
+  TestingServer zkTestServer;
+  String colorMatch;
+  String colorNoMatch;
+  String colorReset;
+  ZKDefaultQuery zkDefaultQuery;
 
-    @TempDir
-    static File testTempDir;
+  @TempDir
+  static File testTempDir;
 
-    String configPath;
+  String configPath;
 
-    @BeforeAll
-    public void startZookeeper() throws Exception {
-        // Choose an available port
-        zkTestServer = new TestingServer();
-        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "");
-        this.zkClient = new ZKClient(config);
+  @BeforeAll
+  public void startZookeeper() throws Exception {
+    // Choose an available port
+    zkTestServer = new TestingServer();
+    config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "");
+    this.zkClient = new ZKClient(config);
 
-        // Setup the znode tree for tests
-        // a subtree
-        ArrayList<ACL> aclList = new ArrayList<ACL>();
-        aclList.add(new ACL(ZooDefs.Perms.ALL, new Id("world", "anyone")));
-        zkClient.create("/a", "a".getBytes(), aclList, CreateMode.PERSISTENT);
+    // Setup the znode tree for tests
+    // a subtree
+    ArrayList<ACL> aclList = new ArrayList<ACL>();
+    aclList.add(new ACL(ZooDefs.Perms.ALL, new Id("world", "anyone")));
+    zkClient.create("/a", "a".getBytes(), aclList, CreateMode.PERSISTENT);
 
-        zkClient.create("/a/aa", "aa".getBytes(), aclList, CreateMode.PERSISTENT);
+    zkClient.create("/a/aa", "aa".getBytes(), aclList, CreateMode.PERSISTENT);
 
-        // b subtree
-        zkClient.create("/b", "b".getBytes(), aclList, CreateMode.PERSISTENT);
+    // b subtree
+    zkClient.create("/b", "b".getBytes(), aclList, CreateMode.PERSISTENT);
 
-        zkClient.create("/b/bb", "bb".getBytes(), aclList, CreateMode.PERSISTENT);
+    zkClient.create("/b/bb", "bb".getBytes(), aclList, CreateMode.PERSISTENT);
 
-        // c subtree
-        // auth scheme ignores the passed id and matches the current authentication
-        zkClient.create("/c", "c".getBytes(), aclList, CreateMode.PERSISTENT);
-        
-        zkClient.create("/c/cc", "cc".getBytes(), aclList, CreateMode.PERSISTENT);
+    // c subtree
+    // auth scheme ignores the passed id and matches the current authentication
+    zkClient.create("/c", "c".getBytes(), aclList, CreateMode.PERSISTENT);
 
-        this.colorMatch = ZKPolicyDefs.Colors.GREEN.getANSIValue();
-        this.colorNoMatch = ZKPolicyDefs.Colors.RED.getANSIValue();
-        this.colorReset = ZKPolicyDefs.Colors.RESET.getANSIValue();
+    zkClient.create("/c/cc", "cc".getBytes(), aclList, CreateMode.PERSISTENT);
 
-        // Setup config file
-        File configFile = new File(testTempDir, "conf_tmp.yml");
+    this.colorMatch = ZKPolicyDefs.Colors.GREEN.getANSIValue();
+    this.colorNoMatch = ZKPolicyDefs.Colors.RED.getANSIValue();
+    this.colorReset = ZKPolicyDefs.Colors.RESET.getANSIValue();
 
-        FileWriter fw = new FileWriter(configFile);
-        fw.write("---\n");
-        fw.write("timeout: 2000\n");
-        fw.write("zkServers: \""+ zkTestServer.getConnectString() +"\"\n");
-        fw.write("matchColor: \"GREEN\"\n");
-        fw.write("mismatchColor: \"RED\"\n");
-        fw.write("jaas: \"/path/to/jaas.conf\"\n");
-        fw.flush();
-        fw.close();
+    // Setup config file
+    File configFile = new File(testTempDir, "conf_tmp.yml");
 
-        this.configPath = configFile.getCanonicalPath();
-        this.config = new ZKConfig(new File(this.configPath)); 
-        this.zkClient = new ZKClient(config);
-        this.zkTree  = new ZKTree(zkClient);
-        zkDefaultQuery = new ZKDefaultQuery();
-    }
+    FileWriter fw = new FileWriter(configFile);
+    fw.write("---\n");
+    fw.write("timeout: 2000\n");
+    fw.write("zkServers: \"" + zkTestServer.getConnectString() + "\"\n");
+    fw.write("matchColor: \"GREEN\"\n");
+    fw.write("mismatchColor: \"RED\"\n");
+    fw.write("jaas: \"/path/to/jaas.conf\"\n");
+    fw.flush();
+    fw.close();
 
-    @Test
-    public void testColorCodeExplanation() throws Exception {
-        String expectedOutput = "* " + this.colorMatch + "GREEN" + this.colorReset + ": znodes matching the query\n"+
-        "* " + this.colorNoMatch + "RED" + this.colorReset + ": znodes not matching the query\n";
+    this.configPath = configFile.getCanonicalPath();
+    this.config = new ZKConfig(new File(this.configPath));
+    this.zkClient = new ZKClient(config);
+    this.zkTree = new ZKTree(zkClient);
+    zkDefaultQuery = new ZKDefaultQuery();
+  }
 
-        assertEquals(expectedOutput, zkTree.colorCodeExplanation());
-    }
+  @Test
+  public void testColorCodeExplanation() throws Exception {
+    String expectedOutput = "* " + this.colorMatch + "GREEN" + this.colorReset + ": znodes matching the query\n" + "* "
+        + this.colorNoMatch + "RED" + this.colorReset + ": znodes not matching the query\n";
 
-    @Test
-    public void testQuerySuccess() throws Exception {
-        // Execute query with invalid rootPath
-        ZKQuery query = zkDefaultQuery.getValueOf("parentYesChildNo");
-        ZKQueryElement queryElement = new ZKQueryElement("parentYesChildNo", "/zookeeper", null, query);
-        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
+    assertEquals(expectedOutput, zkTree.colorCodeExplanation());
+  }
 
-        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-        queriesList.add(queryElement);
+  @Test
+  public void testQuerySuccess() throws Exception {
+    // Execute query with invalid rootPath
+    ZKQuery query = zkDefaultQuery.getValueOf("parentYesChildNo");
+    ZKQueryElement queryElement = new ZKQueryElement("parentYesChildNo", "/zookeeper", null, query);
+    Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
+    queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
 
-        this.zkTree.queryFind("/zookeeper", queriesList, queriesOutput);
+    List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
+    queriesList.add(queryElement);
 
-        String expectedOutputFind = "/zookeeper/config\n";
+    this.zkTree.queryFind("/zookeeper", queriesList, queriesOutput);
 
-        assertEquals(expectedOutputFind, String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
+    String expectedOutputFind = "/zookeeper/config\n";
 
-        // Clean queries Output buffer 
-        queriesOutput.remove(queryElement.hashCode());
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
+    assertEquals(expectedOutputFind, String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
 
-        // ParentYesChildNo 
-        queriesList.add(queryElement);
-        this.zkTree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
+    // Clean queries Output buffer
+    queriesOutput.remove(queryElement.hashCode());
+    queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
 
-        // Query is deleted as invalid so add it once again
-        this.zkTree.queryTree("/zookeeper", queriesList, queriesOutput);
+    // ParentYesChildNo
+    queriesList.add(queryElement);
+    this.zkTree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
 
-        String expectedOutputTree = this.colorReset + "/zookeeper\n" + 
-        this.colorNoMatch + "├─── " + this.colorReset + "/config\n" + 
-        this.colorMatch + "└─── " + this.colorReset + "/quota\n";
+    // Query is deleted as invalid so add it once again
+    this.zkTree.queryTree("/zookeeper", queriesList, queriesOutput);
 
-        assertEquals(expectedOutputTree, String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
-    }
+    String expectedOutputTree = this.colorReset + "/zookeeper\n" + this.colorNoMatch + "├─── " + this.colorReset
+        + "/config\n" + this.colorMatch + "└─── " + this.colorReset + "/quota\n";
 
-    @Test
-    public void testNotExistingRootPath() throws Exception {
-        // Execute query with invalid rootPath
-        ZKQuery query = zkDefaultQuery.getValueOf("noACL");
-        ZKQueryElement queryElement = new ZKQueryElement("noACL", "/invalid-path", null, query);
-        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
+    assertEquals(expectedOutputTree, String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
+  }
 
-        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-        queriesList.add(queryElement);
+  @Test
+  public void testNotExistingRootPath() throws Exception {
+    // Execute query with invalid rootPath
+    ZKQuery query = zkDefaultQuery.getValueOf("noACL");
+    ZKQueryElement queryElement = new ZKQueryElement("noACL", "/invalid-path", null, query);
+    Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
+    queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
 
-        this.zkTree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
+    List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
+    queriesList.add(queryElement);
 
-        String expectedOutput = "The path /invalid-path does not exist.\n";
+    this.zkTree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
 
-        assertEquals(expectedOutput, String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
+    String expectedOutput = "The path /invalid-path does not exist.\n";
 
-        // Clean queries Output buffer 
-        queriesOutput.remove(queryElement.hashCode());
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
+    assertEquals(expectedOutput, String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
 
-        // Query is deleted as invalid so add it once again
-        queriesList.add(queryElement);
-        this.zkTree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
+    // Clean queries Output buffer
+    queriesOutput.remove(queryElement.hashCode());
+    queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
 
-        assertEquals(expectedOutput, String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
-    }
+    // Query is deleted as invalid so add it once again
+    queriesList.add(queryElement);
+    this.zkTree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
 
-    @Test
-    public void testInvalidRootPath() throws Exception {
-        // Execute query with invalid rootPath
-        ZKQuery query = zkDefaultQuery.getValueOf("noACL");
-        ZKQueryElement queryElement = new ZKQueryElement("noACL", "invalid-path", null, query);
-        Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
+    assertEquals(expectedOutput, String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
+  }
 
-        List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-        queriesList.add(queryElement);
+  @Test
+  public void testInvalidRootPath() throws Exception {
+    // Execute query with invalid rootPath
+    ZKQuery query = zkDefaultQuery.getValueOf("noACL");
+    ZKQueryElement queryElement = new ZKQueryElement("noACL", "invalid-path", null, query);
+    Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
+    queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
 
-        this.zkTree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
+    List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
+    queriesList.add(queryElement);
 
-        String expectedOutput = "Invalid rootpath invalid-path : Path must start with / character\n";
+    this.zkTree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
 
-        assertEquals(expectedOutput, String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
+    String expectedOutput = "Invalid rootpath invalid-path : Path must start with / character\n";
 
-        // Clean queries Output buffer 
-        queriesOutput.remove(queryElement.hashCode());
-        queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
+    assertEquals(expectedOutput, String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
 
-        // Query is deleted as invalid so add it once again
-        queriesList.add(queryElement);
-        this.zkTree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
+    // Clean queries Output buffer
+    queriesOutput.remove(queryElement.hashCode());
+    queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
 
-        assertEquals(expectedOutput, String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
-    }
+    // Query is deleted as invalid so add it once again
+    queriesList.add(queryElement);
+    this.zkTree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
 
+    assertEquals(expectedOutput, String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
+  }
 
 }

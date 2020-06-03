@@ -25,120 +25,117 @@ import picocli.CommandLine;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ZKQueryCliTest {
-    private TestingServer zkTestServer;
-    private ZKConfig config;
-    private ZKClient zkClient;
-    private String green;
-    private String reset;
-    private String red;
-    
-    private ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private ByteArrayOutputStream errContent = new ByteArrayOutputStream();
-    private final PrintStream originalOut = System.out;
-    private final PrintStream originalErr = System.err;
+  private TestingServer zkTestServer;
+  private ZKConfig config;
+  private ZKClient zkClient;
+  private String green;
+  private String reset;
+  private String red;
 
-    @TempDir
-    static File testTempDir;
-    
-    String configPath;
+  private ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+  private ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+  private final PrintStream originalOut = System.out;
+  private final PrintStream originalErr = System.err;
 
-    @BeforeAll
-    public void startZookeeper() throws Exception {
-        // Choose an available port
-        zkTestServer = new TestingServer();
-        config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "");
-        this.zkClient = new ZKClient(config);
-        
-        // Setup the znode tree for tests
-        // a subtree
-        List<ACL> aclListA = new ArrayList<ACL>();
-        String tempDigest = DigestAuthenticationProvider.generateDigest("user1:passw1");
-        aclListA.add(new ACLAugment("digest:" + tempDigest + ":crwda").getACL());
-        aclListA.add(new ACLAugment("world:anyone:drwa").getACL());
-        zkClient.create("/a", "a".getBytes(), aclListA, CreateMode.PERSISTENT);
+  @TempDir
+  static File testTempDir;
 
-        zkClient.addAuthInfo("digest", "user1:passw1".getBytes());
-        zkClient.create("/a/aa", "aa".getBytes(), aclListA, CreateMode.PERSISTENT);
+  String configPath;
 
-        // b subtree
-        List<ACL> aclListB = new ArrayList<ACL>();
-        tempDigest = DigestAuthenticationProvider.generateDigest("user2:passw2");
-        aclListB.add(new ACLAugment("digest:" + tempDigest + ":crda").getACL());
-        aclListB.add(new ACLAugment("ip:127.0.0.3:rda").getACL());
+  @BeforeAll
+  public void startZookeeper() throws Exception {
+    // Choose an available port
+    zkTestServer = new TestingServer();
+    config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "");
+    this.zkClient = new ZKClient(config);
 
-        zkClient.addAuthInfo("digest", "user2:passw2".getBytes());
+    // Setup the znode tree for tests
+    // a subtree
+    List<ACL> aclListA = new ArrayList<ACL>();
+    String tempDigest = DigestAuthenticationProvider.generateDigest("user1:passw1");
+    aclListA.add(new ACLAugment("digest:" + tempDigest + ":crwda").getACL());
+    aclListA.add(new ACLAugment("world:anyone:drwa").getACL());
+    zkClient.create("/a", "a".getBytes(), aclListA, CreateMode.PERSISTENT);
 
-        zkClient.create("/b", "b".getBytes(), aclListB, CreateMode.PERSISTENT);
+    zkClient.addAuthInfo("digest", "user1:passw1".getBytes());
+    zkClient.create("/a/aa", "aa".getBytes(), aclListA, CreateMode.PERSISTENT);
 
-        List<ACL> aclListBB = new ArrayList<ACL>();
-        aclListBB.add(new ACLAugment("ip:127.0.0.3:rda").getACL());
-        zkClient.create("/b/bb", "bb".getBytes(), aclListBB, CreateMode.PERSISTENT);
+    // b subtree
+    List<ACL> aclListB = new ArrayList<ACL>();
+    tempDigest = DigestAuthenticationProvider.generateDigest("user2:passw2");
+    aclListB.add(new ACLAugment("digest:" + tempDigest + ":crda").getACL());
+    aclListB.add(new ACLAugment("ip:127.0.0.3:rda").getACL());
 
-        // c subtree
-        // auth scheme ignores the passed id and matches the current authentication
-        List<ACL> aclListC = new ArrayList<ACL>();
-        aclListC.add(new ACLAugment("auth:lelele:crda").getACL());
-        zkClient.create("/c", "c".getBytes(), aclListC, CreateMode.PERSISTENT);
+    zkClient.addAuthInfo("digest", "user2:passw2".getBytes());
 
-        List<ACL> aclListCC = new ArrayList<ACL>();
-        aclListCC.add(new ACLAugment("world:anyone:crwda").getACL());
-        zkClient.create("/c/cc", "cc".getBytes(), aclListCC, CreateMode.PERSISTENT);
+    zkClient.create("/b", "b".getBytes(), aclListB, CreateMode.PERSISTENT);
 
-        this.green = ZKPolicyDefs.Colors.GREEN.getANSIValue();
-        this.red = ZKPolicyDefs.Colors.RED.getANSIValue();
-        this.reset = ZKPolicyDefs.Colors.RESET.getANSIValue();
+    List<ACL> aclListBB = new ArrayList<ACL>();
+    aclListBB.add(new ACLAugment("ip:127.0.0.3:rda").getACL());
+    zkClient.create("/b/bb", "bb".getBytes(), aclListBB, CreateMode.PERSISTENT);
 
-        // Setup config file
-        File configFile = new File(testTempDir, "conf_tmp.yml");
+    // c subtree
+    // auth scheme ignores the passed id and matches the current authentication
+    List<ACL> aclListC = new ArrayList<ACL>();
+    aclListC.add(new ACLAugment("auth:lelele:crda").getACL());
+    zkClient.create("/c", "c".getBytes(), aclListC, CreateMode.PERSISTENT);
 
-        FileWriter fw = new FileWriter(configFile);
-        fw.write("---\n");
-        fw.write("timeout: 2000\n");
-        fw.write("zkServers: \""+ zkTestServer.getConnectString() +"\"\n");
-        fw.write("matchColor: \"GREEN\"\n");
-        fw.write("mismatchColor: \"RED\"\n");
-        fw.flush();
-        fw.close();
+    List<ACL> aclListCC = new ArrayList<ACL>();
+    aclListCC.add(new ACLAugment("world:anyone:crwda").getACL());
+    zkClient.create("/c/cc", "cc".getBytes(), aclListCC, CreateMode.PERSISTENT);
 
-        this.configPath = configFile.getCanonicalPath();
-    }
+    this.green = ZKPolicyDefs.Colors.GREEN.getANSIValue();
+    this.red = ZKPolicyDefs.Colors.RED.getANSIValue();
+    this.reset = ZKPolicyDefs.Colors.RESET.getANSIValue();
 
-    @BeforeEach
-    public void setUpStreams() {
-        outContent.reset();
-        errContent.reset();
-        System.setOut(new PrintStream(outContent));
-        System.setErr(new PrintStream(errContent));
-    }
+    // Setup config file
+    File configFile = new File(testTempDir, "conf_tmp.yml");
 
-    @AfterEach
-    public void restoreStreams() {
-        System.setOut(originalOut);
-        System.setErr(originalErr);
-    }
+    FileWriter fw = new FileWriter(configFile);
+    fw.write("---\n");
+    fw.write("timeout: 2000\n");
+    fw.write("zkServers: \"" + zkTestServer.getConnectString() + "\"\n");
+    fw.write("matchColor: \"GREEN\"\n");
+    fw.write("mismatchColor: \"RED\"\n");
+    fw.flush();
+    fw.close();
 
-    @Test
-    public void testQuerySubCommand() {
-        String[] args = { "-c", this.configPath, "query", "noACL", "-p", "/" , "-l" };
-        new CommandLine(new ZKPolicyCli(args)).execute(args);
+    this.configPath = configFile.getCanonicalPath();
+  }
 
-        String expectedOutput = "/\n" +
-        "WARNING: No READ permission for /b, skipping subtree\n"+
-        "WARNING: No READ permission for /c, skipping subtree\n"+
-        "/zookeeper\n"+
-        "/zookeeper/quota\n";
-        
-        assertEquals(expectedOutput, outContent.toString());
-    }
+  @BeforeEach
+  public void setUpStreams() {
+    outContent.reset();
+    errContent.reset();
+    System.setOut(new PrintStream(outContent));
+    System.setErr(new PrintStream(errContent));
+  }
 
-    @Test
-    public void testQuerySubCommandInvalidQueryName() {
-        String[] args = { "-c", this.configPath, "query", "invalidQuery", "-p", "/" , "-l" };
-        new CommandLine(new ZKPolicyCli(args)).execute(args);
+  @AfterEach
+  public void restoreStreams() {
+    System.setOut(originalOut);
+    System.setErr(originalErr);
+  }
 
-        String expectedOutput = "No such method: invalidQuery\n"+
-        "Please consult the list of default queries using query -h\n";
-        
-        assertEquals(expectedOutput, outContent.toString());
-    }
+  @Test
+  public void testQuerySubCommand() {
+    String[] args = { "-c", this.configPath, "query", "noACL", "-p", "/", "-l" };
+    new CommandLine(new ZKPolicyCli(args)).execute(args);
+
+    String expectedOutput = "/\n" + "WARNING: No READ permission for /b, skipping subtree\n"
+        + "WARNING: No READ permission for /c, skipping subtree\n" + "/zookeeper\n" + "/zookeeper/quota\n";
+
+    assertEquals(expectedOutput, outContent.toString());
+  }
+
+  @Test
+  public void testQuerySubCommandInvalidQueryName() {
+    String[] args = { "-c", this.configPath, "query", "invalidQuery", "-p", "/", "-l" };
+    new CommandLine(new ZKPolicyCli(args)).execute(args);
+
+    String expectedOutput = "No such method: invalidQuery\n"
+        + "Please consult the list of default queries using query -h\n";
+
+    assertEquals(expectedOutput, outContent.toString());
+  }
 }
