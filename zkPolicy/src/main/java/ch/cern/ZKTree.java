@@ -1,3 +1,4 @@
+//CPD-OFF
 package ch.cern;
 
 import java.lang.reflect.InvocationTargetException;
@@ -14,7 +15,7 @@ import org.apache.zookeeper.data.ACL;
  * Class that handles operations on the ZNode tree structure.
  */
 public class ZKTree {
-  private ZKClient zk;
+  private ZKClient zk = null;
 
   private String resetColor;
   private String matchColor;

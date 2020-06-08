@@ -31,12 +31,13 @@ public class ZKExportCli implements Runnable {
     } catch (Exception e) {
       System.out.println(e.toString());
     }
-    try (ZKClient zk = new ZKClient(config)) {
-      ZKExport zkExport = new ZKExport(zk);
-      zkExport.export(rootPath, format, compactMode, outputFile);
-    } catch (Exception e) {
-      System.out.println(e.toString());
+    if (config != null) {
+      try (ZKClient zk = new ZKClient(config)) {
+        ZKExport zkExport = new ZKExport(zk);
+        zkExport.export(rootPath, format, compactMode, outputFile);
+      } catch (Exception e) {
+        System.out.println(e.toString());
+      }
     }
-
   }
 }

@@ -27,12 +27,6 @@ import picocli.CommandLine.ScopeType;
  */
 @NoArgsConstructor
 public class ZKPolicyCli implements Runnable {
-  String[] args;
-
-  public ZKPolicyCli(String[] args) {
-    this.args = args;
-  }
-
   @Option(names = { "-c",
       "--config" }, required = false,
       description = "YAML configuration file to use (default: ${DEFAULT-VALUE})",

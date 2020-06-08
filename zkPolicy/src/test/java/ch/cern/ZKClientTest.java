@@ -1,6 +1,5 @@
 package ch.cern;
 
-import java.io.IOException;
 import org.apache.curator.test.TestingServer;
 import org.apache.zookeeper.ZooKeeper.States;
 import org.junit.jupiter.api.*;
@@ -15,10 +14,6 @@ public class ZKClientTest {
   public void startZookeeper() throws Exception {
     // Choose an available port
     zkTestServer = new TestingServer();
-  }
-
-  @AfterAll
-  public void stopZookeeper() throws IOException {
   }
 
   @Test

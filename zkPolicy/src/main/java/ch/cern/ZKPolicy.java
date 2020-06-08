@@ -12,7 +12,7 @@ public final class ZKPolicy {
    * @param args CLI arguments.
    */
   public static void main(String[] args) {
-    zkpcli = new ZKPolicyCli(args);
+    zkpcli = new ZKPolicyCli();
 
     CommandLine commandLine = new CommandLine(zkpcli);
 

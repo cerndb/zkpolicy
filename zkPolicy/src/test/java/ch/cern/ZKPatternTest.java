@@ -16,9 +16,27 @@ public class ZKPatternTest {
 
   @Test
   public void testCreateGlobPatternList() {
-    String[] globList = { "world:*:*", "sasl:*:c?rw", "gl*b", "gl\\*b", "gl?b", "gl\\?b", "gl[-o]b", "gl\\[-o\\]b",
-        "gl[!a-n!p-z]b", "gl[[!a-n]!p-z]b", "gl[^o]b", "gl?*.()+|^$@%b", "gl[?*.()+|^$@%]b", "gl\\\\b", "\\Qglob\\E",
-        "{glob,regex}", "\\{glob\\}", "{glob\\,regex}," };
+    List<String> globList = new ArrayList<String>();
+    globList.add("world:*:*");
+    globList.add("sasl:*:c?rw");
+    globList.add("gl*b");
+    globList.add("gl\\*b");
+    globList.add("gl?b");
+    globList.add("gl\\?b");
+    globList.add("gl[-o]b");
+    globList.add("gl\\[-o\\]b");
+    globList.add("gl[!a-n!p-z]b");
+    globList.add("gl[[!a-n]!p-z]b");
+    globList.add("gl[^o]b");
+    globList.add("gl?*.()+|^$@%b");
+    globList.add("gl[?*.()+|^$@%]b");
+    globList.add("gl\\\\b");
+    globList.add("\\Qglob\\E");
+    globList.add("{glob,regex}");
+
+    globList.add("\\{glob\\}");
+    globList.add("{glob\\,regex},");
+
     List<Pattern> patternList = ZKPattern.createGlobPatternList(globList);
     List<String> expectedList = new ArrayList<String>();
 
@@ -43,7 +61,7 @@ public class ZKPatternTest {
     expectedList.add("(glob,regex),");
 
     assertEquals(expectedList.size(), patternList.size());
-    for (int i = 0; i < globList.length; i++) {
+    for (int i = 0; i < globList.size(); i++) {
       assertEquals(expectedList.get(i), patternList.get(i).pattern());
     }
   }

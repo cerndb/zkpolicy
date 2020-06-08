@@ -1,5 +1,6 @@
 package ch.cern;
 
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,5 +20,5 @@ public class ZKEnforcePolicyElement {
   private String title;
   private ZKQueryElement query;
   private boolean append;
-  private String[] acls;
+  private List<String> acls;
 }

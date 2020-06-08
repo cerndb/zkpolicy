@@ -81,13 +81,14 @@ public class ZKCheckTest {
   @AfterAll
   public void stopZookeeper() throws IOException, InterruptedException {
     this.zkClient.close();
-    zkTestServer.stop();
   }
 
   @Test
   public void testCheck() throws NoSuchMethodException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, NoSuchFieldException, KeeperException, InterruptedException {
-    String[] checkACLs = { "world:anyone:cdrwa" };
+    
+    List<String> checkACLs = new ArrayList<String>() ;
+    checkACLs.add("world:anyone:cdrwa");
     ZKCheckElement checkElement = new ZKCheckElement("TestTitle", "/", "/.*", checkACLs);
     List<ZKCheckElement> checksList = new ArrayList<ZKCheckElement>();
     Hashtable<Integer, List<String>> checksOutput = new Hashtable<Integer, List<String>>();
@@ -107,7 +108,8 @@ public class ZKCheckTest {
   @Test
   public void testNotExistingRootPath() throws NoSuchMethodException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, NoSuchFieldException, KeeperException, InterruptedException {
-    String[] checkACLs = { "world:anyone:cdrwa" };
+    List<String> checkACLs = new ArrayList<String>() ;
+    checkACLs.add("world:anyone:cdrwa");
     ZKCheckElement checkElement = new ZKCheckElement("TestTitle", "/not-existing-path", "/.*", checkACLs);
     List<ZKCheckElement> checksList = new ArrayList<ZKCheckElement>();
     Hashtable<Integer, List<String>> checksOutput = new Hashtable<Integer, List<String>>();
@@ -124,7 +126,8 @@ public class ZKCheckTest {
   @Test
   public void testInvalidRootPath() throws NoSuchMethodException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, NoSuchFieldException, KeeperException, InterruptedException {
-    String[] checkACLs = { "world:anyone:cdrwa" };
+    List<String> checkACLs = new ArrayList<String>() ;
+    checkACLs.add("world:anyone:cdrwa");
     ZKCheckElement checkElement = new ZKCheckElement("TestTitle", "invalid-root-path", "/.*", checkACLs);
     List<ZKCheckElement> checksList = new ArrayList<ZKCheckElement>();
     Hashtable<Integer, List<String>> checksOutput = new Hashtable<Integer, List<String>>();

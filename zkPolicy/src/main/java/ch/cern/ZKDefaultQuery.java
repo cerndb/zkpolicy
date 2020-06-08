@@ -2,7 +2,6 @@ package ch.cern;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -10,14 +9,11 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.zookeeper.data.ACL;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * ZKDefaultQuery Class that provides a basic set of queries for the ZNode tree.
  */
 public class ZKDefaultQuery {
-  private static Logger logger = LogManager.getLogger(ZKDefaultQuery.class);
 
   // Define default queries with appropriate names
   public ExactACLDef exactACL = new ExactACLDef();
@@ -49,18 +45,18 @@ public class ZKDefaultQuery {
   /**
    * Match nodes that have equal ACL with the passed.
    */
-  private class ExactACLDef implements ZKQuery {
-    public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, String[] queryACLs) {
+  private static class ExactACLDef implements ZKQuery {
+    public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
       // If the two provided lists do not have the same length, we are sure that the
       // query should fail
-      if (aclList == null || aclList.size() != queryACLs.length) {
+      if (aclList == null || aclList.size() != queryACLs.size()) {
         return false;
       }
 
       List<ACLAugment> aclListAugment = ACLAugment.generateACLAugmentList(aclList);
 
       // Get sublist removing the first argument (name of query)
-      List<String> queryACLsSub = Arrays.asList(queryACLs);
+      List<String> queryACLsSub = queryACLs;
       List<ACLAugment> queryACLString = new ArrayList<ACLAugment>();
       for (String queryACL : queryACLsSub) {
         ACLAugment tempACLAugment = new ACLAugment(queryACL);
@@ -78,8 +74,8 @@ public class ZKDefaultQuery {
   /**
    * Match nodes that have no ACL restrictions (world:anyone:crwda).
    */
-  private class NoACLDef implements ZKQuery {
-    public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, String[] queryACLs) {
+  private static class NoACLDef implements ZKQuery {
+    public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
 
       for (ACL aclElement : aclList) {
         ACLAugment aclAugment = new ACLAugment(aclElement);
@@ -95,8 +91,8 @@ public class ZKDefaultQuery {
   /**
    * Match nodes that do satisfy the passed ACL (logical match).
    */
-  private class SatisfyACLDef implements ZKQuery {
-    public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, String[] queryACLs) {
+  private static class SatisfyACLDef implements ZKQuery {
+    public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
       List<ACLAugment> aclListAugment = ACLAugment.generateACLAugmentList(aclList);
 
       // queryACL list
@@ -104,8 +100,9 @@ public class ZKDefaultQuery {
         ACLAugment temp = new ACLAugment(queryACLString);
         if (IterableUtils.contains(aclListAugment, temp, new ACLAugmentEquator())) {
           continue;
+        } else {
+          return false;
         }
-        return false;
       }
 
       return true;
@@ -115,8 +112,8 @@ public class ZKDefaultQuery {
   /**
    * Match nodes that wave ACL not complying with their parents ACL.
    */
-  private class ParentYesChildNoDef implements ZKQuery {
-    public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, String[] queryACLs) {
+  private static class ParentYesChildNoDef implements ZKQuery {
+    public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
       List<ACLAugment> myACLsAugment = null;
       List<ACLAugment> parentACLsAugment = null;
       myACLsAugment = ACLAugment.generateACLAugmentList(aclList);
@@ -132,8 +129,8 @@ public class ZKDefaultQuery {
   /**
    * Match nodes that have no ACL restrictions (world:anyone:crwda).
    */
-  private class DuplicateACLDef implements ZKQuery {
-    public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, String[] queryACLs) {
+  private static class DuplicateACLDef implements ZKQuery {
+    public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
       HashSet<ACLAugment> unique = new HashSet<ACLAugment>();
 
       for (ACL aclElement : aclList) {
@@ -149,9 +146,9 @@ public class ZKDefaultQuery {
   /**
    * Match nodes with ACLs matching the passed regular expressions.
    */
-  private class RegexMatchACLDef implements ZKQuery {
+  private static class RegexMatchACLDef implements ZKQuery {
     public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk,
-        String[] queryACLRegexList) {
+        List<String> queryACLRegexList) {
       List<Pattern> queryPatternList = ZKPattern.createRegexPatternList(queryACLRegexList);
 
       int queryListSentinel = queryPatternList.size();
@@ -177,9 +174,9 @@ public class ZKDefaultQuery {
   /**
    * Match nodes with ACLs matching the passed glob expressions.
    */
-  private class GlobMatchACLDef implements ZKQuery {
+  private static class GlobMatchACLDef implements ZKQuery {
     public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk,
-        String[] queryACLGlobList) {
+        List<String> queryACLGlobList) {
       List<Pattern> queryPatternList = ZKPattern.createGlobPatternList(queryACLGlobList);
 
       int queryListSentinel = queryPatternList.size();
@@ -205,10 +202,10 @@ public class ZKDefaultQuery {
   /**
    * Match nodes with ACLs matching the passed glob expressions.
    */
-  private class GlobMatchPathDef implements ZKQuery {
+  private static class GlobMatchPathDef implements ZKQuery {
     // We do expect only one glob expression to check for path match
     public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk,
-        String[] queryPathGlobList) {
+        List<String> queryPathGlobList) {
       List<Pattern> queryPatternList = ZKPattern.createGlobPatternList(queryPathGlobList);
 
       Matcher pathMatcher = queryPatternList.get(0).matcher(path);
@@ -222,10 +219,10 @@ public class ZKDefaultQuery {
   /**
    * Match nodes with ACLs matching the passed glob expressions.
    */
-  private class RegexMatchPathDef implements ZKQuery {
+  private static class RegexMatchPathDef implements ZKQuery {
     // We do expect only one glob expression to check for path match
     public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk,
-        String[] queryPathRegexList) {
+        List<String> queryPathRegexList) {
       List<Pattern> queryPatternList = ZKPattern.createRegexPatternList(queryPathRegexList);
       Matcher pathMatcher = queryPatternList.get(0).matcher(path);
       if (pathMatcher.matches()) {

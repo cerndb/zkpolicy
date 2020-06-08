@@ -1,6 +1,7 @@
 stages:
   - build-docker-image
-  - validate
+  - checkstyle
+  - static-code-analysis
   - test
   - build
   - build-rpm
@@ -31,13 +32,52 @@ build-docker:
     - docker-image-build
 
 checkstyle:
-  stage: validate
+  stage: checkstyle
   image: ${CI_REGISTRY_IMAGE}:mvn-builder
   script:
-    - mvn validate
+    - mvn clean checkstyle:checkstyle checkstyle:check
   artifacts:
     paths:
       - ${PROJECT_NAME_DIR}/target/checkstyle*
+      - ${PROJECT_NAME_DIR}/target/site/checkstyle*
+    expire_in: 1 week
+  tags:
+    - docker
+
+pmd:
+  stage: static-code-analysis
+  image: ${CI_REGISTRY_IMAGE}:mvn-builder
+  script:
+    - mvn clean pmd:pmd pmd:check
+  artifacts:
+    paths:
+      - ${PROJECT_NAME_DIR}/target/pmd*
+      - ${PROJECT_NAME_DIR}/target/site/pmd*
+    expire_in: 1 week
+  tags:
+    - docker
+
+cpd:
+  stage: static-code-analysis
+  image: ${CI_REGISTRY_IMAGE}:mvn-builder
+  script:
+    - mvn clean pmd:cpd pmd:cpd-check
+  artifacts:
+    paths:
+      - ${PROJECT_NAME_DIR}/target/cpd*
+      - ${PROJECT_NAME_DIR}/target/site/cpd*
+    expire_in: 1 week
+  tags:
+    - docker
+
+spotbugs:
+  stage: static-code-analysis
+  image: ${CI_REGISTRY_IMAGE}:mvn-builder
+  script:
+    - mvn clean compile spotbugs:check -Dpmd.skip=true -Dcpd.skip=true -Dcheckstyle.skip=true
+  artifacts:
+    paths:
+      - ${PROJECT_NAME_DIR}/target/spotbugs*
     expire_in: 1 week
   tags:
     - docker
@@ -46,7 +86,7 @@ test:
   stage: test
   image: ${CI_REGISTRY_IMAGE}:mvn-builder
   script:
-    - mvn --quiet test
+    - mvn --quiet test -Dpmd.skip=true -Dcpd.skip=true -Dcheckstyle.skip=true -Dspotbugs.skip=true
   artifacts:
     paths:
       - ${PROJECT_NAME_DIR}/target/surefire-reports

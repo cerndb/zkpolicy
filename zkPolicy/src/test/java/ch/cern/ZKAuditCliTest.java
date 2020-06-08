@@ -17,6 +17,7 @@ import org.apache.curator.test.TestingServer;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -142,8 +143,13 @@ public class ZKAuditCliTest {
 
     this.configPath = configFile.getCanonicalPath();
     this.auditConfigPath = auditConfigFile.getCanonicalPath();
-
   }
+
+  @AfterAll
+  public void stopZookeeper() throws IOException, InterruptedException {
+    this.zkClient.close();
+  }
+
 
   @BeforeEach
   public void setUpStreams() {
@@ -161,7 +167,7 @@ public class ZKAuditCliTest {
   public void testAuditSubCommand() throws IOException {
     String[] args = { "-c", configPath, "audit", "-i", auditConfigPath };
 
-    new CommandLine(new ZKPolicyCli(args)).execute(args);
+    new CommandLine(new ZKPolicyCli()).execute(args);
     assertTrue(!outContent.toString().isEmpty());
   }
 }

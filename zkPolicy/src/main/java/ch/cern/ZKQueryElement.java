@@ -1,5 +1,6 @@
 package ch.cern;
 
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +19,6 @@ public class ZKQueryElement {
 
   private String name;
   private String rootPath;
-  private String[] args;
+  private List<String> args;
   private ZKQuery query;
 }

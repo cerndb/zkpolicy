@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -83,6 +85,11 @@ public class ZKTreeTest {
     this.zkClient = new ZKClient(config);
     this.zkTree = new ZKTree(zkClient);
     zkDefaultQuery = new ZKDefaultQuery();
+  }
+
+  @AfterAll
+  public void stopZookeeper() throws IOException, InterruptedException {
+    this.zkClient.close();
   }
 
   @Test

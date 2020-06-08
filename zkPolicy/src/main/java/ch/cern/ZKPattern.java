@@ -12,7 +12,7 @@ public class ZKPattern {
    * @param globStringList Glob expression List
    * @return List of Pattern objects
    */
-  public static List<Pattern> createGlobPatternList(String[] globStringList) {
+  public static List<Pattern> createGlobPatternList(List<String> globStringList) {
     List<Pattern> queryPatternList = new ArrayList<Pattern>();
 
     for (String queryGlob : globStringList) {
@@ -29,7 +29,7 @@ public class ZKPattern {
    * @param regexStringList
    * @return List of Pattern objects
    */
-  public static List<Pattern> createRegexPatternList(String[] regexStringList) {
+  public static List<Pattern> createRegexPatternList(List<String> regexStringList) {
     List<Pattern> queryPatternList = new ArrayList<Pattern>();
 
     for (String queryRegEx : regexStringList) {
@@ -99,7 +99,7 @@ public class ZKPattern {
         case '$':
         case '@':
         case '%':
-          if (inClass == 0 || (firstIndexInClass == i && ch == '^'))
+          if (inClass == 0 || firstIndexInClass == i && ch == '^')
             sb.append('\\');
           sb.append(ch);
           break;

@@ -28,7 +28,7 @@ public class ZKEnforceCli implements Runnable {
 
   static class CliEnforceGroup {
     @Option(names = { "-P", "--policy" }, required = true, description = "Policies to enforce on matching nodes")
-    String[] policies;
+    List<String> policies;
 
     @Parameters(paramLabel = "[QUERY_NAME]",
         description = "Query to be executed: ${COMPLETION-CANDIDATES}",
@@ -36,10 +36,10 @@ public class ZKEnforceCli implements Runnable {
     String queryName;
 
     @Option(names = { "-p", "--root-path" }, required = false, description = "Path pattern to match")
-    String rootPath = null;
+    String rootPath;
 
     @Option(names = { "-a", "--args" }, required = false, description = "Query arguments")
-    String[] queryArgs;
+    List<String> queryArgs;
 
     @Option(names = { "-A",
         "--append" }, required = false, description = "Append policy ACLs to znode's ACL (default: false)")

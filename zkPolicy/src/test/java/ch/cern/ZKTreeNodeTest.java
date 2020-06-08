@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.test.TestingServer;
 import org.apache.zookeeper.data.ACL;
@@ -31,14 +33,20 @@ public class ZKTreeNodeTest {
     aclList.add(new ACL(30, new Id("world", "anyone")));
     aclList.add(new ACL(30, new Id("digest", "testuser:testpass")));
 
-    ZKTreeNode child1 = new ZKTreeNode("/path/child1", "child1 data".getBytes(), null, null, null);
-    ZKTreeNode child2 = new ZKTreeNode("/path/child2", "child2 data".getBytes(), null, null, null);
-    ZKTreeNode[] children = { child1, child2 };
+    List<Byte> child1Data = Arrays.asList(ArrayUtils.toObject("child1 data".getBytes()));
+    List<Byte> child2Data = Arrays.asList(ArrayUtils.toObject("child2 data".getBytes()));
 
-    ZKTreeNode zkTreeNode = new ZKTreeNode("/path", "test data".getBytes(), aclList, children, null);
+    ZKTreeNode child1 = new ZKTreeNode("/path/child1", child1Data, null, null, null);
+    ZKTreeNode child2 = new ZKTreeNode("/path/child2", child2Data, null, null, null);
+    List<ZKTreeNode> children = new ArrayList<ZKTreeNode>();
+    children.add(child1);
+    children.add(child2);
+
+    List<Byte> testData = Arrays.asList(ArrayUtils.toObject("test data".getBytes()));
+    ZKTreeNode zkTreeNode = new ZKTreeNode("/path", testData, aclList, children, null);
     assertAll(() -> assertEquals("/path", zkTreeNode.getPath()),
-        () -> assertArrayEquals("test data".getBytes(), zkTreeNode.getData()),
-        () -> assertArrayEquals(children, zkTreeNode.getChildren()),
+        () -> assertArrayEquals(testData.toArray(), zkTreeNode.getData().toArray()),
+        () -> assertArrayEquals(children.toArray(), zkTreeNode.getChildren().toArray()),
         () -> assertArrayEquals(aclList.toArray(), zkTreeNode.getAcl().toArray()));
   }
 }

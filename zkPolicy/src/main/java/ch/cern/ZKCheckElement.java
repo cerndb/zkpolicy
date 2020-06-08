@@ -1,5 +1,6 @@
 package ch.cern;
 
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -19,7 +20,8 @@ public class ZKCheckElement {
   private String title;
   private String rootPath;
   private String pathPattern;
-  private String[] acls;
+  List<String> acls;
+  //private String[] acls;
   //CHECKSTYLE.OFF: MemberName
   public boolean $status = true;
   //CHECKSTYLE.ON : MemberName

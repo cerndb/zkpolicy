@@ -9,11 +9,26 @@ FROM gitlab-registry.cern.ch/linuxsupport/cc7-base
 
 MAINTAINER CERN IT department <it-dep-db-sas.cern.ch>
 
+# Setting Maven Version that needs to be installed
+ARG MAVEN_VERSION=3.6.0
+
 RUN yum -y update; yum clean all
 
 RUN yum -y install \
-maven \
-java-1.8.0-openjdk
+java-1.8.0-openjdk \
+java-1.8.0-openjdk-devel \
+which
+
+# Maven
+RUN curl -fsSL https://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz | tar xzf - -C /usr/share \
+  && mv /usr/share/apache-maven-$MAVEN_VERSION /usr/share/maven \
+  && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
+
+ENV MAVEN_VERSION=${MAVEN_VERSION}
+ENV M2_HOME /usr/share/maven
+ENV maven.home $M2_HOME
+ENV M2 $M2_HOME/bin
+ENV PATH $M2:$PATH
 
 RUN mkdir /build
 WORKDIR /build

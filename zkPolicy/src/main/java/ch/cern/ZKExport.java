@@ -41,7 +41,7 @@ public class ZKExport {
         this.exportToJSON(outputFile, rootPath, compactMode);
         break;
       case yaml:
-        this.exportToYAML(outputFile, rootPath, compactMode);
+        this.exportToYAML(outputFile, rootPath);
         break;
       default:
         break;
@@ -76,7 +76,7 @@ public class ZKExport {
   /**
    * Export znode subtree to YAML.
    */
-  private void exportToYAML(File outputFile, String rootPath, boolean compactMode) {
+  private void exportToYAML(File outputFile, String rootPath) {
     ZKTreeNode root = new ZKTreeNode();
     try {
       this.toTreeStruct(rootPath, root);
@@ -86,7 +86,6 @@ public class ZKExport {
     }
 
     try {
-      // We ignore compactMode for YAML files
       ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
       mapper.writeValue(outputFile, root);
     } catch (Exception e) {
@@ -109,7 +108,11 @@ public class ZKExport {
     } catch (NoAuthException e) {
       return;
     }
-    currentNode.setData(data);
+    List<Byte> byteData = new ArrayList<Byte>();
+    for (byte dataItem : data) {
+      byteData.add(dataItem);
+    }
+    currentNode.setData(byteData);
     currentNode.setPath(path);
     currentNode.setAcl(acl);
     currentNode.setStat(stat);
@@ -135,7 +138,7 @@ public class ZKExport {
       this.toTreeStruct(path + "/" + child, childNode);
       childrenList.add(childNode);
     }
-    currentNode.setChildren(childrenList.toArray(new ZKTreeNode[childrenList.size()]));
+    currentNode.setChildren(childrenList);
   }
 
 }

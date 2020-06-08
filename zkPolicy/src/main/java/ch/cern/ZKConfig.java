@@ -47,7 +47,7 @@ public class ZKConfig {
    */
   public void setPropertyJaas() {
     if (this.jaas != null && !this.jaas.isEmpty()) {
-      java.lang.System.setProperty("java.security.auth.login.config", this.jaas);
+      System.setProperty("java.security.auth.login.config", this.jaas);
     }
   }
 }

@@ -63,7 +63,7 @@ public class ACLAugment {
    * @return True if ACL has the READ bit enabled.
    */
   public boolean hasRead() {
-    return (this.acl.getPerms() & ZooDefs.Perms.READ) > 0;
+    return (this.acl.getPerms() & ZooDefs.Perms.READ) != 0;
   }
 
   /**
@@ -72,7 +72,7 @@ public class ACLAugment {
    * @return True if ACL has the WRITE bit enabled.
    */
   public boolean hasWrite() {
-    return (this.acl.getPerms() & ZooDefs.Perms.WRITE) > 0;
+    return (this.acl.getPerms() & ZooDefs.Perms.WRITE) != 0;
   }
 
   /**
@@ -81,7 +81,7 @@ public class ACLAugment {
    * @return True if ACL has the CREATE bit enabled.
    */
   public boolean hasCreate() {
-    return (this.acl.getPerms() & ZooDefs.Perms.CREATE) > 0;
+    return (this.acl.getPerms() & ZooDefs.Perms.CREATE) != 0;
   }
 
   /**
@@ -90,7 +90,7 @@ public class ACLAugment {
    * @return True if ACL has the DELETE bit enabled.
    */
   public boolean hasDelete() {
-    return (this.acl.getPerms() & ZooDefs.Perms.DELETE) > 0;
+    return (this.acl.getPerms() & ZooDefs.Perms.DELETE) != 0;
   }
 
   /**
@@ -99,7 +99,7 @@ public class ACLAugment {
    * @return True if ACL has the ADMIN bit enabled.
    */
   public boolean hasAdmin() {
-    return (this.acl.getPerms() & ZooDefs.Perms.ADMIN) > 0;
+    return (this.acl.getPerms() & ZooDefs.Perms.ADMIN) != 0;
   }
 
   /**

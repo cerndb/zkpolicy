@@ -44,18 +44,20 @@ public class ZKTreeCli implements Runnable {
       logger.error("Exception occurred!", e);
     }
 
-    try (ZKClient zk = new ZKClient(config)) {
-      zktree = new ZKTree(zk);
-      zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
-    } catch (Exception e) {
-      System.out.println(e.toString());
-      logger.error("Exception occurred!", e);
+    if (config != null) {
+      try (ZKClient zk = new ZKClient(config)) {
+        zktree = new ZKTree(zk);
+        zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
+      } catch (Exception e) {
+        System.out.println(e.toString());
+        logger.error("Exception occurred!", e);
+      }
+      System.out.println(String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
     }
-    System.out.println(String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
   }
 
-  private class TreeAlwaysTrueQuery implements ZKQuery {
-    public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, String[] queryACLs) {
+  private static class TreeAlwaysTrueQuery implements ZKQuery {
+    public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
       return true;
     }
   }

@@ -1,8 +1,8 @@
 package ch.cern;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -25,9 +25,8 @@ public class ZKAuditCli implements Runnable {
   File outputFile = null;
 
   @Option(names = { "-i",
-      "--input" },
-      required = false, description = "Audit report configuration file (default: ${DEFAULT-VALUE})",
-      defaultValue = "/opt/zkpolicy/conf/audit.yml")
+      "--input" }, required = false,
+      description = "Audit report configuration file (default: ${DEFAULT-VALUE})", defaultValue = "/opt/zkpolicy/conf/audit.yml")
   File auditConfigFile;
 
   ZKConfig config;
@@ -35,10 +34,9 @@ public class ZKAuditCli implements Runnable {
 
   @Override
   public void run() {
+    OutputStreamWriter writer = null;
+    String outputString = "";
     try {
-      BufferedWriter writer = null;
-      String outputString = "";
-
       ZKAudit zkAudit = null;
 
       config = new ZKConfig(parent.configFile);
@@ -65,22 +63,21 @@ public class ZKAuditCli implements Runnable {
         logger.error("Exception occurred!", e);
       }
 
+      OutputStream writerStream;
       // Print in output file or stdout
       if (outputFile != null) {
-        writer = new BufferedWriter(new FileWriter(this.outputFile));
+        writerStream = new FileOutputStream(this.outputFile);
       } else {
-        writer = new BufferedWriter(new OutputStreamWriter(System.out));
+        writerStream = System.out;
       }
+      writer = new OutputStreamWriter(writerStream, "UTF-8");
       writer.write(outputString);
       writer.flush();
       writer.close();
-
-      // Decide whether this would be human readable or for enforcing later on
     } catch (Exception e) {
       System.out.println(e.toString());
       logger.error("Exception occurred!", e);
     }
-
   }
 
   private String addZKHeader() throws Exception {

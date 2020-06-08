@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.apache.curator.test.TestingServer;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -74,6 +76,11 @@ public class ZKAuditTest {
     List<ACL> aclListCC = new ArrayList<ACL>();
     aclListCC.add(new ACLAugment("world:anyone:crwda").getACL());
     zkClient.create("/c/cc", "cc".getBytes(), aclListCC, CreateMode.PERSISTENT);
+  }
+
+  @AfterAll
+  public void stopZookeeper() throws IOException, InterruptedException {
+    this.zkClient.close();
   }
 
   @Test

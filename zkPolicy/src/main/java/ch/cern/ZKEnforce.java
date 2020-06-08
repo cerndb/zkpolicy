@@ -31,7 +31,7 @@ public class ZKEnforce {
    * @throws InterruptedException
    * @throws NoSuchFieldException
    */
-  public void enforceDry(String queryName, String rootPath, String[] queryACLs)
+  public void enforceDry(String queryName, String rootPath, List<String> queryACLs)
       throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, KeeperException, InterruptedException, NoSuchFieldException {
 
@@ -58,7 +58,7 @@ public class ZKEnforce {
    * @throws KeeperException
    * @throws NoSuchFieldException
    */
-  public void enforce(String[] policies, String queryName, String rootPath, String[] queryACLs, boolean append)
+  public void enforce(List<String> policies, String queryName, String rootPath, List<String> queryACLs, boolean append)
       throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, InterruptedException, KeeperException, NoSuchFieldException {
 
@@ -70,7 +70,7 @@ public class ZKEnforce {
     enforceInner(policiesACL, rootPath, query, queryACLs, append);
   }
 
-  private void enforceInnerDry(String path, ZKQuery query, String[] queryACLs)
+  private void enforceInnerDry(String path, ZKQuery query, List<String> queryACLs)
       throws InterruptedException, KeeperException {
     // Apply regex to path
     List<ACL> znodeACLList = null;
@@ -99,7 +99,7 @@ public class ZKEnforce {
     }
   }
 
-  private void enforceInner(List<ACL> policies, String path, ZKQuery query, String[] queryACLs, boolean append)
+  private void enforceInner(List<ACL> policies, String path, ZKQuery query, List<String> queryACLs, boolean append)
       throws KeeperException, InterruptedException {
     // Apply regex to path
     List<ACL> znodeACLList = null;

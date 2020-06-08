@@ -16,11 +16,7 @@ import org.apache.zookeeper.KeeperException.NoAuthException;
 import org.apache.zookeeper.client.FourLetterWordMain;
 import org.apache.zookeeper.common.X509Exception.SSLContextException;
 import org.apache.zookeeper.data.ACL;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class ZKAudit {
   private ZKClient zk;
   private ZKAuditSet zkAuditSet;
@@ -172,7 +168,7 @@ public class ZKAudit {
     this.groupQueriesByRootPath();
 
     for (String rootPath : this.getRootPathKeys()) {
-      List<ZKQueryElement> currentBatch = this.getRootPathGroups().get(rootPath);
+      List<ZKQueryElement> currentBatch = this.rootPathGroups.get(rootPath);
       // Execute one for each batch of rootPaths
       zkTree.queryFind(rootPath, currentBatch, queriesOutput);
     }
@@ -186,7 +182,7 @@ public class ZKAudit {
     this.groupChecksByRootPath();
 
     for (String rootPath : this.getRootPathCheckKeys()) {
-      List<ZKCheckElement> currentBatch = this.getRootPathCheckGroups().get(rootPath);
+      List<ZKCheckElement> currentBatch = this.rootPathCheckGroups.get(rootPath);
       // Execute one for each batch of rootPaths
       zkCheck.check(rootPath, currentBatch, checksOutput);
     }
@@ -212,57 +208,59 @@ public class ZKAudit {
       NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException,
       InvocationTargetException, KeeperException, InterruptedException {
 
-    String outputString = "";
     int aggregateCheckSuccessNum = 0;
+    StringBuffer outputBuf = new StringBuffer();
 
     // Parse output buffers for queries
     if (zkAuditSet.getQueries() != null) {
       this.executeRootGroupQueries();
       for (ZKQueryElement queryElement : zkAuditSet.getQueries()) {
-        outputString += "\nQuery: " + queryElement.getName() + "\n";
-        outputString += "Root Path: " + queryElement.getRootPath() + "\n";
+        outputBuf.append("\nQuery: " + queryElement.getName() + "\n");
+        outputBuf.append("Root Path: " + queryElement.getRootPath() + "\n");
+
         if (queryElement.getArgs() != null) {
-          outputString += "Arguments:" + "\n- " + String.join("\n- ", queryElement.getArgs()) + "\n";
+          outputBuf.append("Arguments:" + "\n- " + String.join("\n- ", queryElement.getArgs()) + "\n");
         }
 
-        outputString += "\nResult:\n";
-        outputString += String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
-        outputString += ZKPolicyDefs.TerminalConstants.subSectionSeparator;
+        outputBuf.append("\nResult:\n");
+        outputBuf.append(String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
+        outputBuf.append(ZKPolicyDefs.TerminalConstants.subSectionSeparator);
       }
-
     }
 
     // Parse output buffers for checks
     if (zkAuditSet.getChecks() != null) {
       this.executeRootGroupChecks();
       for (ZKCheckElement checkElement : zkAuditSet.getChecks()) {
-        outputString += "\nCheck: " + checkElement.getTitle() + "\n";
-        outputString += "Root Path: " + checkElement.getRootPath() + "\n";
-        outputString += "Path Pattern: " + checkElement.getPathPattern() + "\n";
+        outputBuf.append("\nCheck: " + checkElement.getTitle() + "\n");
+        outputBuf.append("Root Path: " + checkElement.getRootPath() + "\n");
+        outputBuf.append("Path Pattern: " + checkElement.getPathPattern() + "\n");
+
         if (checkElement.getAcls() != null) {
-          outputString += "Arguments:" + "\n- " + String.join("\n- ", checkElement.getAcls()) + "\n";
+          outputBuf.append("Arguments:" + "\n- " + String.join("\n- ", checkElement.getAcls()) + "\n");
         }
 
         if (checkElement.$status) {
-          outputString += "\nResult: PASS\n";
+          outputBuf.append("\nResult: PASS\n");
           aggregateCheckSuccessNum++;
         } else {
-          outputString += "\nResult: FAIL\n";
+          outputBuf.append("\nResult: FAIL\n");
         }
-        outputString += String.join("\n", checksOutput.get(checkElement.hashCode())) + "\n";
-        outputString += ZKPolicyDefs.TerminalConstants.subSectionSeparator;
+        outputBuf.append(String.join("\n", checksOutput.get(checkElement.hashCode())) + "\n");
+        outputBuf.append(ZKPolicyDefs.TerminalConstants.subSectionSeparator);
       }
 
       // Add aggregate result for checks
       if (aggregateCheckSuccessNum == zkAuditSet.getChecks().size()) {
-        outputString += "\nOverall Check Result: PASS\n";
+        outputBuf.append("\nOverall Check Result: PASS\n");
       } else {
-        outputString += "\nOverall Check Result: FAIL\n";
-        outputString += "\nPASS: " + aggregateCheckSuccessNum + ", FAIL: "
-            + (zkAuditSet.getChecks().size() - aggregateCheckSuccessNum) + "\n";
+        outputBuf.append("\nOverall Check Result: FAIL\n");
+        outputBuf.append("\nPASS: " + aggregateCheckSuccessNum + ", FAIL: ");
+        outputBuf.append((zkAuditSet.getChecks().size() - aggregateCheckSuccessNum) + "\n");
       }
     }
-    return outputString;
+
+    return outputBuf.toString();
   }
 
   /**
@@ -284,19 +282,20 @@ public class ZKAudit {
       return;
     }
     // Add information for this znode in for path - ACL
-    String aclOutput = "";
+    StringBuffer aclOutput = new StringBuffer();
+    //String aclOutput = "";
     List<ACLAugment> aclAugmentList = ACLAugment.generateACLAugmentList(acl);
 
     Iterator<ACLAugment> aclAugmentIterator = aclAugmentList.iterator();
     while (aclAugmentIterator.hasNext()) {
       ACLAugment aclAugment = aclAugmentIterator.next();
-      aclOutput += aclAugment.getStringFromACL();
+      aclOutput.append(aclAugment.getStringFromACL());
       if (aclAugmentIterator.hasNext()) {
-        aclOutput += ", ";
+        aclOutput.append(", ");
       }
     }
 
-    output.add(path + " - " + aclOutput);
+    output.add(path + " - " + aclOutput.toString());
 
     Collections.sort(children);
 

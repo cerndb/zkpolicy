@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.apache.curator.test.TestingServer;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -117,10 +119,15 @@ public class ZKQueryCliTest {
     System.setErr(originalErr);
   }
 
+  @AfterAll
+  public void stopZookeeper() throws IOException, InterruptedException {
+    this.zkClient.close();
+  }
+
   @Test
   public void testQuerySubCommand() {
     String[] args = { "-c", this.configPath, "query", "noACL", "-p", "/", "-l" };
-    new CommandLine(new ZKPolicyCli(args)).execute(args);
+    new CommandLine(new ZKPolicyCli()).execute(args);
 
     String expectedOutput = "/\n" + "WARNING: No READ permission for /b, skipping subtree\n"
         + "WARNING: No READ permission for /c, skipping subtree\n" + "/zookeeper\n" + "/zookeeper/quota\n";
@@ -131,7 +138,7 @@ public class ZKQueryCliTest {
   @Test
   public void testQuerySubCommandInvalidQueryName() {
     String[] args = { "-c", this.configPath, "query", "invalidQuery", "-p", "/", "-l" };
-    new CommandLine(new ZKPolicyCli(args)).execute(args);
+    new CommandLine(new ZKPolicyCli()).execute(args);
 
     String expectedOutput = "No such method: invalidQuery\n"
         + "Please consult the list of default queries using query -h\n";

@@ -19,8 +19,9 @@ import lombok.AccessLevel;
 public class ZKTreeNode {
 
   private String path;
-  private byte[] data;
+  private List<Byte> data;
   private List<ACL> acl;
-  private ZKTreeNode[] children;
+  private List<ZKTreeNode> children;
   private Stat stat;
+
 }

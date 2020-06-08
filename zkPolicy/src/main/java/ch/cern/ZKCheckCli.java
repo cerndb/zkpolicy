@@ -25,7 +25,7 @@ public class ZKCheckCli implements Runnable {
   String pathPattern;
 
   @Option(names = { "-a", "--acls" }, description = "ACLs for checking against matching znodes")
-  String[] checkACLs;
+  List<String> checkACLs;
 
   @Override
   public void run() {
@@ -37,33 +37,34 @@ public class ZKCheckCli implements Runnable {
       logger.error("Exception occurred!", e);
     }
 
-    try (ZKClient zk = new ZKClient(config)) {
-      // Execute one check from CLI
-      ZKCheck zkCheck = new ZKCheck(zk);
+    if (config != null) {
+      try (ZKClient zk = new ZKClient(config)) {
+        // Execute one check from CLI
+        ZKCheck zkCheck = new ZKCheck(zk);
 
-      ZKCheckElement checkElement = new ZKCheckElement(null, this.rootPath, this.pathPattern, this.checkACLs);
-      List<ZKCheckElement> checksList = new ArrayList<ZKCheckElement>();
-      Hashtable<Integer, List<String>> checksOutput = new Hashtable<Integer, List<String>>();
+        ZKCheckElement checkElement = new ZKCheckElement(null, this.rootPath, this.pathPattern, this.checkACLs);
+        List<ZKCheckElement> checksList = new ArrayList<ZKCheckElement>();
+        Hashtable<Integer, List<String>> checksOutput = new Hashtable<Integer, List<String>>();
 
-      checksList.add(checkElement);
-      checksOutput.put(checkElement.hashCode(), new ArrayList<String>());
+        checksList.add(checkElement);
+        checksOutput.put(checkElement.hashCode(), new ArrayList<String>());
 
-      zkCheck.check(checkElement.getRootPath(), checksList, checksOutput);
+        zkCheck.check(checkElement.getRootPath(), checksList, checksOutput);
 
-      if (checkElement.$status) {
-        System.out.println(
-            "\n" + "Check Result: " + ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMatchColor()).getANSIValue()
-                + "PASS" + ZKPolicyDefs.Colors.RESET.getANSIValue());
-      } else {
-        System.out.println(
-            "\n" + "Check Result: " + ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMismatchColor()).getANSIValue()
-                + "FAIL" + ZKPolicyDefs.Colors.RESET.getANSIValue());
+        if (checkElement.$status) {
+          System.out.println(
+              "\n" + "Check Result: " + ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMatchColor()).getANSIValue()
+                  + "PASS" + ZKPolicyDefs.Colors.RESET.getANSIValue());
+        } else {
+          System.out.println(
+              "\n" + "Check Result: " + ZKPolicyDefs.Colors.valueOf(zk.getZKPConfig().getMismatchColor()).getANSIValue()
+                  + "FAIL" + ZKPolicyDefs.Colors.RESET.getANSIValue());
+        }
+        System.out.println("\n" + String.join("\n", checksOutput.get(checkElement.hashCode())) + "\n");
+      } catch (Exception e) {
+        System.out.println(e.toString());
+        logger.error("Exception occurred!", e);
       }
-      System.out.println("\n" + String.join("\n", checksOutput.get(checkElement.hashCode())) + "\n");
-
-    } catch (Exception e) {
-      System.out.println(e.toString());
-      logger.error("Exception occurred!", e);
     }
   }
 }

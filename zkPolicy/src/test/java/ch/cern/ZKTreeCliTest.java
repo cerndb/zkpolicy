@@ -14,6 +14,7 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,11 +102,16 @@ public class ZKTreeCliTest {
     System.setErr(originalErr);
   }
 
+  @AfterAll
+  public void stopZookeeper() throws IOException, InterruptedException {
+    this.zkClient.close();
+  }
+
   @Test
   public void testTreeSubCommand() throws IOException {
     String[] args = { "-c", this.configPath, "tree", "-p", "/" };
 
-    new CommandLine(new ZKPolicyCli(args)).execute(args);
+    new CommandLine(new ZKPolicyCli()).execute(args);
     String expectedOutput = String.join("\n", this.whiteColor + "/" + this.resetColor,
         "├─── " + this.whiteColor + "/a" + this.resetColor, "│     └─── " + this.whiteColor + "/aa" + this.resetColor,
         "├─── " + this.whiteColor + "/b" + this.resetColor, "│     └─── " + this.whiteColor + "/bb" + this.resetColor,

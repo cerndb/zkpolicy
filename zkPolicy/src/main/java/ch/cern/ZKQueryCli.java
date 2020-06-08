@@ -36,7 +36,7 @@ public class ZKQueryCli implements Runnable {
   String rootPath;
 
   @Option(names = { "-a", "--args" }, description = "Query arguments")
-  String[] queryACLs;
+  List<String> queryACLs;
 
   @Override
   public void run() {
@@ -88,6 +88,8 @@ public class ZKQueryCli implements Runnable {
   }
 
   static class DefaultQueryCandidates extends ArrayList<String> {
+    private static final long serialVersionUID = 7171497735085364947L;
+
     DefaultQueryCandidates() {
       super(Arrays.asList());
       Class<?> zkDefaultQueryClass = ZKDefaultQuery.class;

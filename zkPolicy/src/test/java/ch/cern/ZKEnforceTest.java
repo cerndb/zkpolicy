@@ -102,7 +102,9 @@ public class ZKEnforceTest {
   @Test
   public void testEnforceDry() throws NoSuchMethodException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, KeeperException, InterruptedException, NoSuchFieldException {
-    this.zkEnforce.enforceDry("satisfyACL", "/", new String[] { "ip:127.0.0.3:r" });
+        List<String> enforceACLs = new ArrayList<String>() ;
+        enforceACLs.add("ip:127.0.0.3:r");
+    this.zkEnforce.enforceDry("satisfyACL", "/", enforceACLs);
     String expectedResult = "/\n" + "WARNING: No READ permission for /a/bb, skipping subtree\n" + "/b\n" + "/b/bb\n"
         + "/c/cc\n" + "/zookeeper\n" + "/zookeeper/config\n" + "/zookeeper/quota\n";
     assertEquals(expectedResult, this.consoleContent.toString());
@@ -111,9 +113,13 @@ public class ZKEnforceTest {
   @Test
   public void testEnforce() throws NoSuchMethodException, KeeperException, InterruptedException, SecurityException,
       IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
-    String[] policies = { "world:anyone:ra", "ip:127.0.0.4:cda" };
-    this.zkEnforce.enforce(policies, "regexMatchACL", "/b", new String[] { "ip:127.0.0.3:.*", "world:anyone:.*" },
-        false);
+    List<String> enforceACLs = new ArrayList<String>() ;
+    enforceACLs.add("ip:127.0.0.3:.*");
+    enforceACLs.add("world:anyone:.*");
+    List<String> policies = new ArrayList<String>() ;
+    policies.add("world:anyone:ra");
+    policies.add("ip:127.0.0.4:cda");
+    this.zkEnforce.enforce(policies, "regexMatchACL", "/b", enforceACLs, false);
     List<ACL> alteredList = this.zkClient.getACL("/b/bb", null);
     List<ACL> expectedList = new ArrayList<ACL>();
     expectedList.add(new ACLAugment("world:anyone:ra").getACL());
@@ -125,8 +131,12 @@ public class ZKEnforceTest {
   public void testEnforceAppend()
       throws NoSuchMethodException, KeeperException, InterruptedException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
-    String[] policies = { "ip:127.0.0.3:cr" };
-    this.zkEnforce.enforce(policies, "regexMatchACL", "/", new String[] { "ip:127.0.0.4:.*", "world:anyone:.*" }, true);
+    List<String> enforceACLs = new ArrayList<String>() ;
+    enforceACLs.add("ip:127.0.0.4:.*");
+    enforceACLs.add("world:anyone:.*");
+    List<String> policies = new ArrayList<String>() ;
+    policies.add("ip:127.0.0.3:cr");
+    this.zkEnforce.enforce(policies, "regexMatchACL", "/", enforceACLs , true);
     List<ACL> alteredList = this.zkClient.getACL("/b/bb", null);
     List<ACL> expectedList = new ArrayList<ACL>();
     expectedList.add(new ACLAugment("world:anyone:ra").getACL());

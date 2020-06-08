@@ -82,7 +82,6 @@ public class ZKDefaultQueryTest {
   @AfterAll
   public void stopZookeeper() throws IOException, InterruptedException {
     this.zkClient.close();
-    zkTestServer.stop();
   }
 
   @Test
@@ -133,7 +132,9 @@ public class ZKDefaultQueryTest {
   @Test
   public void testExactACLTree() throws Exception {
     String tempDigest = DigestAuthenticationProvider.generateDigest("user2:passw2");
-    String[] arguments = new String[] { "digest:" + tempDigest + ":rcda", "ip:127.0.0.3:rda" };
+    List<String> arguments = new ArrayList<String>();
+    arguments.add("digest:" + tempDigest + ":rcda");
+    arguments.add("ip:127.0.0.3:rda");
     String actualOutput = this.executeTreeQuery("exactACL", "/", arguments);
 
     String expectedOutput = this.red + "/" + this.reset + "\n" + "├─── " + this.red + "/a" + this.reset + "\n"
@@ -148,7 +149,9 @@ public class ZKDefaultQueryTest {
   @Test
   public void testExactACLFind() throws Exception {
     String tempDigest = DigestAuthenticationProvider.generateDigest("user2:passw2");
-    String[] arguments = new String[] { "digest:" + tempDigest + ":rcda", "ip:127.0.0.3:rda" };
+    List<String> arguments = new ArrayList<String>();
+    arguments.add("digest:" + tempDigest + ":rcda");
+    arguments.add("ip:127.0.0.3:rda");
     String actualOutput = this.executeFindQuery("exactACL", "/", arguments);
 
     String expectedOutput = "/b\n" + "WARNING: No READ permission for /b/bb, skipping subtree";
@@ -157,7 +160,8 @@ public class ZKDefaultQueryTest {
 
   @Test
   public void testRegexMatchACLTree() throws Exception {
-    String[] arguments = new String[] { "digest:.*:.*r.*" };
+    List<String> arguments = new ArrayList<String>();
+    arguments.add("digest:.*:.*r.*");
     String actualOutput = this.executeTreeQuery("regexMatchACL", "/", arguments);
 
     String expectedOutput = this.red + "/" + this.reset + "\n" + "├─── " + this.green + "/a" + this.reset + "\n"
@@ -171,7 +175,8 @@ public class ZKDefaultQueryTest {
 
   @Test
   public void testRegexMatchACLFind() throws Exception {
-    String[] arguments = new String[] { "digest:.*:.*r.*" };
+    List<String> arguments = new ArrayList<String>();
+    arguments.add("digest:.*:.*r.*");
     String actualOutput = this.executeFindQuery("regexMatchACL", "/", arguments);
 
     String expectedOutput = "/a\n" + "/a/aa\n" + "/b\n" + "WARNING: No READ permission for /b/bb, skipping subtree\n"
@@ -182,7 +187,8 @@ public class ZKDefaultQueryTest {
 
   @Test
   public void testGlobMatchACLTree() throws Exception {
-    String[] arguments = new String[] { "digest:*:*r*" };
+    List<String> arguments = new ArrayList<String>();
+    arguments.add("digest:*:*r*");
     String actualOutput = this.executeTreeQuery("globMatchACL", "/", arguments);
 
     String expectedOutput = this.red + "/" + this.reset + "\n" + "├─── " + this.green + "/a" + this.reset + "\n"
@@ -196,7 +202,8 @@ public class ZKDefaultQueryTest {
 
   @Test
   public void testGlobMatchACLFind() throws Exception {
-    String[] arguments = new String[] { "digest:*:*r*" };
+    List<String> arguments = new ArrayList<String>();
+    arguments.add("digest:*:*r*");
     String actualOutput = this.executeFindQuery("globMatchACL", "/", arguments);
 
     String expectedOutput = "/a\n" + "/a/aa\n" + "/b\n" + "WARNING: No READ permission for /b/bb, skipping subtree\n"
@@ -206,7 +213,8 @@ public class ZKDefaultQueryTest {
 
   @Test
   public void testGlobMatchPathTree() throws Exception {
-    String[] arguments = new String[] { "{/a*,/zookeep*}" };
+    List<String> arguments = new ArrayList<String>();
+    arguments.add("{/a*,/zookeep*}");
     String actualOutput = this.executeTreeQuery("globMatchPath", "/", arguments);
 
     String expectedOutput = this.red + "/" + this.reset + "\n" + "├─── " + this.green + "/a" + this.reset + "\n"
@@ -220,7 +228,8 @@ public class ZKDefaultQueryTest {
 
   @Test
   public void testGlobMatchPathFind() throws Exception {
-    String[] arguments = new String[] { "{/a*,/zookeep*}" };
+    List<String> arguments = new ArrayList<String>();
+    arguments.add("{/a*,/zookeep*}");
     String actualOutput = this.executeFindQuery("globMatchPath", "/", arguments);
 
     String expectedOutput = "/a\n" + "/a/aa\n" + "WARNING: No READ permission for /b/bb, skipping subtree\n"
@@ -231,7 +240,8 @@ public class ZKDefaultQueryTest {
 
   @Test
   public void testRegexMatchPathTree() throws Exception {
-    String[] arguments = new String[] { "(/a.*|/zookeep.*)" };
+    List<String> arguments = new ArrayList<String>();
+    arguments.add("(/a.*|/zookeep.*)");
     String actualOutput = this.executeTreeQuery("regexMatchPath", "/", arguments);
 
     String expectedOutput = this.red + "/" + this.reset + "\n" + "├─── " + this.green + "/a" + this.reset + "\n"
@@ -245,7 +255,8 @@ public class ZKDefaultQueryTest {
 
   @Test
   public void testRegexMatchPathFind() throws Exception {
-    String[] arguments = new String[] { "(/a.*|/zookeep.*)" };
+    List<String> arguments = new ArrayList<String>();
+    arguments.add("(/a.*|/zookeep.*)");
     String actualOutput = this.executeFindQuery("regexMatchPath", "/", arguments);
 
     String expectedOutput = "/a\n" + "/a/aa\n" + "WARNING: No READ permission for /b/bb, skipping subtree\n"
@@ -254,7 +265,7 @@ public class ZKDefaultQueryTest {
     assertEquals(expectedOutput, actualOutput);
   }
 
-  private String executeTreeQuery(String name, String path, String[] args)
+  private String executeTreeQuery(String name, String path, List<String> args)
       throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
       NoSuchMethodException, InvocationTargetException, KeeperException, InterruptedException {
     ZKQuery query = zkDefaultQuery.getValueOf(name);
@@ -269,7 +280,7 @@ public class ZKDefaultQueryTest {
     return String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n";
   }
 
-  private String executeFindQuery(String name, String path, String[] args)
+  private String executeFindQuery(String name, String path, List<String> args)
       throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
       NoSuchMethodException, InvocationTargetException, KeeperException, InterruptedException {
     ZKQuery query = zkDefaultQuery.getValueOf(name);
