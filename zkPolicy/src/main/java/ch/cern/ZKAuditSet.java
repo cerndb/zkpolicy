@@ -25,9 +25,25 @@ public class ZKAuditSet {
 
   private List<ZKQueryElement> queries;
   private List<ZKCheckElement> checks;
+  private ZKPolicyReportSections sections;
 
   public ZKAuditSet(File auditConfigFile) throws JsonParseException, JsonMappingException, IOException {
     ObjectMapper om = new ObjectMapper(new YAMLFactory());
     om.readerForUpdating(this).readValue(auditConfigFile);
+  }
+
+  /**
+   * Structure of report that defines which sections to be included.
+   */
+  @Getter
+  @Setter
+  @NoArgsConstructor
+  @AllArgsConstructor(access = AccessLevel.PROTECTED)
+  public static class ZKPolicyReportSections {
+    private boolean generalInformation;
+    private boolean fourLetterWordCommands;
+    private boolean queryResults;
+    private boolean checkResults;
+    private boolean aclOverview;
   }
 }

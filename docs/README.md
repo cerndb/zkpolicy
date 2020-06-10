@@ -11,7 +11,7 @@ Welcome to zkPolicy documentation!
             * [Using the RPM package](#using-the-rpm-package)
             * [Building from source](#building-from-source)
         * [Java docs generation](#java-docs-generation)
-        * [Manpages generation](#manpages-generation) 
+        * [Manpages generation](#manpages-generation)
 3. [Main Concepts](#main-concepts)
 4. [User Guide](#user-guide)
     * [Usage](#usage)
@@ -37,12 +37,16 @@ zkPolicy is a ZooKeeper tool that provides:
 ##### Requirements
 * ZooKeeper >= 3.4.13
 * Java SDK >= 1.8
-* Maven 3
 
 ##### Using the RPM package
-Installation instructions using the RPM package [TODO after package creation]
+zkpolicy is packaged in RPM and can be installed using:
+```
+yum install cerndb-sw-zkpolicy
+```
 
 ##### Building from source
+###### Requirements
+* Maven >= 3.6
 
 The project is built using `maven`. In order to build the project:
 
@@ -62,7 +66,7 @@ mvn javadoc:javadoc
 ```
 
 #### Manpages generation
-Using picocli [auto usage documentation generation](https://picocli.info/#_generate_man_page_documentation), manpages are generated on project build and are located at `target/generated-docs`. 
+Using picocli [auto usage documentation generation](https://picocli.info/#_generate_man_page_documentation), manpages are generated on project build and are located at `target/generated-docs`.
 
 ## Main concepts
 zkPolicy introduces several concepts as described [here](main_concepts/README.md).
@@ -72,7 +76,7 @@ zkPolicy introduces several concepts as described [here](main_concepts/README.md
 In this section we are going to outline the usage of zkPolicy for the main functionality of the tool. For complete information and usage guides for zkPolicy, please consult the tool man pages.
 
 #### Auditing
-Using the zkPolicy auditing functionality, a user can generate useful reports for the ACLs defined throughout a ZooKeeper instance. Those reports include the results for queries and checks defined at the audit configuration file as well as additional information regarding the ZooKeeper Server (List of ACL definitions for every znode accessible by the tool user, Four Letter Words information and ZooKeeper instance connection details). 
+Using the zkPolicy auditing functionality, a user can generate useful reports for the ACLs defined throughout a ZooKeeper instance. Those reports include the results for queries and checks defined at the audit configuration file as well as additional information regarding the ZooKeeper Server (List of ACL definitions for every znode accessible by the tool user, Four Letter Words information and ZooKeeper instance connection details).
 
 ```bash
 zkpolicy -c config.yml audit -i [audit_config.yml]
@@ -86,7 +90,7 @@ zkPolicy offers policy enforcing functionality. Using its CLI, a user can either
 ##### Enforce a single policy
 Enforce a specific set of ACL elements on every znode matching a specific query:
 ```bash
-zkpolicy -c config.yml enforce -P acl_1 -P acl_2... noACL -p / 
+zkpolicy -c config.yml enforce -P acl_1 -P acl_2... noACL -p /
 ```
 
 With the previous command the ACL `[acl_1,acl_2]` is applied recursively to all nodes satisfying the `noACL` query, starting from the zNode tree root.

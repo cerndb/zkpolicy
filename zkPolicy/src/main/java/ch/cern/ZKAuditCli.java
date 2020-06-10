@@ -45,19 +45,31 @@ public class ZKAuditCli implements Runnable {
         this.zk = zk;
         zkAudit = new ZKAudit(zk, this.auditConfigFile);
 
-        // First construct the header
-        outputString += this.addZKHeader();
-        outputString += ZKPolicyDefs.TerminalConstants.sectionSeparator;
+        ZKAuditSet.ZKPolicyReportSections sections = zkAudit.getZkAuditSet().getSections();
 
-        outputString += zkAudit.getFourLetterWordOverview();
-        outputString += ZKPolicyDefs.TerminalConstants.sectionSeparator;
+        if (sections.isGeneralInformation()) {
+          outputString += this.addZKHeader();
+          outputString += ZKPolicyDefs.TerminalConstants.sectionSeparator;
+        }
 
-        outputString += zkAudit.generateHumanReadableAuditReport();
-        outputString += ZKPolicyDefs.TerminalConstants.sectionSeparator;
+        if (sections.isFourLetterWordCommands()) {
+          outputString += zkAudit.getFourLetterWordOverview();
+          outputString += ZKPolicyDefs.TerminalConstants.sectionSeparator;
+        }
 
-        // Then get ACL Overview in footer
-        outputString += zkAudit.getACLOverview();
+        if (sections.isQueryResults()) {
+          outputString += zkAudit.generateQueriesSection();
+          outputString += ZKPolicyDefs.TerminalConstants.sectionSeparator;
+        }
 
+        if (sections.isCheckResults()) {
+          outputString += zkAudit.generateChecksSection();
+          outputString += ZKPolicyDefs.TerminalConstants.sectionSeparator;
+        }
+
+        if (sections.isAclOverview()) {
+          outputString += zkAudit.getACLOverview();
+        }
       } catch (Exception e) {
         System.out.println(e.toString());
         logger.error("Exception occurred!", e);

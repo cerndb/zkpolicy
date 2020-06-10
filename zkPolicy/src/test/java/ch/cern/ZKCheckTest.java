@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -84,10 +85,11 @@ public class ZKCheckTest {
   }
 
   @Test
-  public void testCheck() throws NoSuchMethodException, SecurityException, IllegalAccessException,
-      IllegalArgumentException, InvocationTargetException, NoSuchFieldException, KeeperException, InterruptedException {
-    
-    List<String> checkACLs = new ArrayList<String>() ;
+  public void testCheck()
+      throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
+      InvocationTargetException, NoSuchFieldException, KeeperException, InterruptedException, NoSuchAlgorithmException {
+
+    List<String> checkACLs = new ArrayList<String>();
     checkACLs.add("world:anyone:cdrwa");
     ZKCheckElement checkElement = new ZKCheckElement("TestTitle", "/", "/.*", checkACLs);
     List<ZKCheckElement> checksList = new ArrayList<ZKCheckElement>();
@@ -96,11 +98,21 @@ public class ZKCheckTest {
     checksList.add(checkElement);
     checksOutput.put(checkElement.hashCode(), new ArrayList<String>());
 
-    zkCheck.check("/", checksList, checksOutput);
+    try {
+      zkCheck.check("/", checksList, checksOutput);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
 
-    String expectedOutput = "/ : PASS\n" + "/a : FAIL\n" + "/a/aa : FAIL\n" + "/b : FAIL\n"
-        + "WARNING: No READ permission for /b/bb, skipping subtree\n" + "/b/bb : FAIL\n" + "/c : FAIL\n"
-        + "/c/cc : PASS\n" + "/zookeeper : PASS\n" + "/zookeeper/config : FAIL\n" + "/zookeeper/quota : PASS\n";
+    String tempDigest1 = DigestAuthenticationProvider.generateDigest("user1:passw1");
+    String tempDigest2 = DigestAuthenticationProvider.generateDigest("user2:passw2");
+
+    String expectedOutput = "/ : PASS\n" + "/a : FAIL (actual: digest:" + tempDigest1 + ":cdrwa)\n"
+        + "/a/aa : FAIL (actual: digest:" + tempDigest1 + ":cdrwa)\n" + "/b : FAIL (actual: digest:"
+        + tempDigest2 + ":cdra, ip:127.0.0.3:dra)\n" + "/b/bb : FAIL (No permission for subtree)\n"
+        + "/c : FAIL (actual: digest:" + tempDigest2 + ":cdra, digest:" + tempDigest1 + ":cdra)\n"
+        + "/c/cc : PASS\n" + "/zookeeper : PASS\n" + "/zookeeper/config : FAIL (actual: world:anyone:r)\n"
+        + "/zookeeper/quota : PASS\n";
 
     assertEquals(expectedOutput, String.join("\n", checksOutput.get(checkElement.hashCode())) + "\n");
   }
@@ -108,7 +120,7 @@ public class ZKCheckTest {
   @Test
   public void testNotExistingRootPath() throws NoSuchMethodException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, NoSuchFieldException, KeeperException, InterruptedException {
-    List<String> checkACLs = new ArrayList<String>() ;
+    List<String> checkACLs = new ArrayList<String>();
     checkACLs.add("world:anyone:cdrwa");
     ZKCheckElement checkElement = new ZKCheckElement("TestTitle", "/not-existing-path", "/.*", checkACLs);
     List<ZKCheckElement> checksList = new ArrayList<ZKCheckElement>();
@@ -126,7 +138,7 @@ public class ZKCheckTest {
   @Test
   public void testInvalidRootPath() throws NoSuchMethodException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, NoSuchFieldException, KeeperException, InterruptedException {
-    List<String> checkACLs = new ArrayList<String>() ;
+    List<String> checkACLs = new ArrayList<String>();
     checkACLs.add("world:anyone:cdrwa");
     ZKCheckElement checkElement = new ZKCheckElement("TestTitle", "invalid-root-path", "/.*", checkACLs);
     List<ZKCheckElement> checksList = new ArrayList<ZKCheckElement>();

@@ -109,6 +109,12 @@ public class ZKAuditCliTest {
 
     fw = new FileWriter(auditConfigFile);
     fw.write("---\n");
+    fw.write("sections:\n");
+    fw.write("  generalInformation: true\n");
+    fw.write("  fourLetterWordCommands: true\n");
+    fw.write("  queryResults: true\n");
+    fw.write("  checkResults: true\n");
+    fw.write("  aclOverview: true\n");
     fw.write("queries:\n");
     fw.write(" -\n");
     fw.write("  name: \"globMatchACL\"\n");

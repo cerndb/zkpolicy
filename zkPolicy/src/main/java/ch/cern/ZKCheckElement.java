@@ -1,5 +1,6 @@
 package ch.cern;
 
+import java.util.Iterator;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -21,8 +22,30 @@ public class ZKCheckElement {
   private String rootPath;
   private String pathPattern;
   List<String> acls;
-  //private String[] acls;
-  //CHECKSTYLE.OFF: MemberName
+
+  // Ignore chekstyle violation because lombok uses `$` prefix
+  // to indicate member fields to be ignored from code generation.
+  @SuppressWarnings("checkstyle:membername")
   public boolean $status = true;
-  //CHECKSTYLE.ON : MemberName
+
+  /**
+   * Generate a human readable description of the check.
+   * 
+   * @return Description based on the check parameters
+   */
+  public String generateDescription() {
+    StringBuffer outputBuf = new StringBuffer();
+    outputBuf.append("Check if znodes under " + rootPath + " matching the " + pathPattern + " pattern"
+        + " have the exact following ACL definition: ");
+
+    Iterator<String> aclIterator = acls.iterator();
+    while (aclIterator.hasNext()) {
+      String acl = aclIterator.next();
+      outputBuf.append(acl);
+      if (aclIterator.hasNext()) {
+        outputBuf.append(", ");
+      }
+    }
+    return outputBuf.toString();
+  }
 }

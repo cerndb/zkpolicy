@@ -44,6 +44,14 @@ public class ZKAudit {
   }
 
   /**
+   * Return audit configuration object.
+   * @return
+   */
+  public ZKAuditSet getZkAuditSet() {
+    return this.zkAuditSet;
+  }
+
+  /**
    * Construct ZKAudit object for audit reports generation.
    * 
    * @param zk              ZooKeeper Client connected to a ZooKeeper Server
@@ -145,7 +153,8 @@ public class ZKAudit {
   }
 
   /**
-   * Execute queries defined by the user in groups by their root path for optimal execution.
+   * Execute queries defined by the user in groups by their root path for optimal
+   * execution.
    * 
    * @throws JsonParseException
    * @throws JsonMappingException
@@ -189,9 +198,9 @@ public class ZKAudit {
   }
 
   /**
-   * Generate query result section.
+   * Generate queries result section.
    * 
-   * @return Audit report section with query results
+   * @return Audir report section with queries results
    * @throws JsonParseException
    * @throws JsonMappingException
    * @throws IOException
@@ -204,11 +213,10 @@ public class ZKAudit {
    * @throws KeeperException
    * @throws InterruptedException
    */
-  public String generateHumanReadableAuditReport() throws JsonParseException, JsonMappingException, IOException,
+  public String generateQueriesSection() throws JsonParseException, JsonMappingException, IOException,
       NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException,
       InvocationTargetException, KeeperException, InterruptedException {
 
-    int aggregateCheckSuccessNum = 0;
     StringBuffer outputBuf = new StringBuffer();
 
     // Parse output buffers for queries
@@ -222,11 +230,38 @@ public class ZKAudit {
           outputBuf.append("Arguments:" + "\n- " + String.join("\n- ", queryElement.getArgs()) + "\n");
         }
 
+        outputBuf.append("Description: " + queryElement.generateDescription() + "\n");
+
         outputBuf.append("\nResult:\n");
         outputBuf.append(String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
         outputBuf.append(ZKPolicyDefs.TerminalConstants.subSectionSeparator);
       }
     }
+    return outputBuf.toString();
+  }
+
+  /**
+   * Generate checks result section.
+   * 
+   * @return Audit report section with check results
+   * @throws JsonParseException
+   * @throws JsonMappingException
+   * @throws IOException
+   * @throws NoSuchFieldException
+   * @throws SecurityException
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   * @throws NoSuchMethodException
+   * @throws InvocationTargetException
+   * @throws KeeperException
+   * @throws InterruptedException
+   */
+  public String generateChecksSection() throws JsonParseException, JsonMappingException, IOException,
+      NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException,
+      InvocationTargetException, KeeperException, InterruptedException {
+
+    int aggregateCheckSuccessNum = 0;
+    StringBuffer outputBuf = new StringBuffer();
 
     // Parse output buffers for checks
     if (zkAuditSet.getChecks() != null) {
@@ -239,6 +274,8 @@ public class ZKAudit {
         if (checkElement.getAcls() != null) {
           outputBuf.append("Arguments:" + "\n- " + String.join("\n- ", checkElement.getAcls()) + "\n");
         }
+
+        outputBuf.append("Description: " + checkElement.generateDescription() + "\n");
 
         if (checkElement.$status) {
           outputBuf.append("\nResult: PASS\n");
@@ -283,7 +320,6 @@ public class ZKAudit {
     }
     // Add information for this znode in for path - ACL
     StringBuffer aclOutput = new StringBuffer();
-    //String aclOutput = "";
     List<ACLAugment> aclAugmentList = ACLAugment.generateACLAugmentList(acl);
 
     Iterator<ACLAugment> aclAugmentIterator = aclAugmentList.iterator();

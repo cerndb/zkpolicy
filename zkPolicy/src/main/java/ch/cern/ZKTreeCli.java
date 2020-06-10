@@ -57,6 +57,9 @@ public class ZKTreeCli implements Runnable {
   }
 
   private static class TreeAlwaysTrueQuery implements ZKQuery {
+    public String getDescription(){
+      return "Query matching every node of a subtree";
+    }
     public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
       return true;
     }

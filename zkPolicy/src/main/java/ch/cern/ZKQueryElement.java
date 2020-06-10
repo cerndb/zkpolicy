@@ -21,4 +21,16 @@ public class ZKQueryElement {
   private String rootPath;
   private List<String> args;
   private ZKQuery query;
+
+  /**
+   * Generate a human readable description of the query.
+   * 
+   * @return Description based on the query parameters
+   */
+  public String generateDescription() {
+    StringBuffer description = new StringBuffer();
+    description.append("Znodes under " + rootPath + " that satisfy the " + name + " query\n");
+    description.append(" * "+ name+ ": "+ query.getDescription());
+    return description.toString();
+  }
 }

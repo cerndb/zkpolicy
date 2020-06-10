@@ -2,6 +2,7 @@ package ch.cern;
 
 import lombok.EqualsAndHashCode;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.ACL;
@@ -205,4 +206,23 @@ public class ACLAugment {
     return toReturnList;
   }
 
+  /**
+   * Create String from ACL list.
+   * @param aclList
+   * @return Comma separated string of ACL entries
+   */
+  public static String generateACLStringList(List<ACL> aclList) {
+    StringBuffer outputBuf = new StringBuffer();
+    Iterator<ACL> iterator = aclList.iterator();
+
+    while (iterator.hasNext()) {
+      ACLAugment tempACL = new ACLAugment(iterator.next());
+      if (iterator.hasNext()) {
+        outputBuf.append(tempACL.getStringFromACL() + ", ");
+      } else {
+        outputBuf.append(tempACL.getStringFromACL());
+      }
+    }
+    return outputBuf.toString();
+  }
 }

@@ -15,16 +15,13 @@ public class ACLAugmentEquator implements Equator<ACLAugment> {
     boolean check_perms;
     // world:anyone is the most permissive scheme:id combination so only
     // check if permissions are logically satisfied
+    check_perms =  (o1.getPerms() & o2.getPerms()) == o1.getPerms();
     if (o2.getScheme().equals("world") && o2.getId().equals("anyone")) {
-      check_perms = (o1.getPerms() & o2.getPerms()) == o1.getPerms()
-          || (o1.getPerms() & o2.getPerms()) == o2.getPerms();
       check_scheme = true;
       check_id = true;
     } else {
       check_scheme = o1.getScheme().equals(o2.getScheme());
       check_id = o1.getId().equals(o2.getId());
-      check_perms = (o1.getPerms() & o2.getPerms()) == o1.getPerms()
-          || (o1.getPerms() & o2.getPerms()) == o2.getPerms();
     }
     return check_scheme && check_id && check_perms;
   }

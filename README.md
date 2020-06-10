@@ -27,12 +27,16 @@ Contributions of any form are welcome, provided that they adhere to the [contrib
 ### Requirements
 * ZooKeeper >= 3.4.13
 * Java SDK >= 1.8
-* Maven 3
 
 ### Using the RPM package
-Installation instructions using the RPM package [TODO after package creation]
+zkpolicy is packaged in RPM and can be installed using:
+```
+yum install cerndb-sw-zkpolicy
+```
 
 ### Building from source
+###### Requirements
+* Maven >= 3.6
 
 The project is built using `maven`. In order to build the project:
 
@@ -44,7 +48,7 @@ The project is built using `maven`. In order to build the project:
 
 This commands generates the wanted `.jar` in the `zkPolicy/target/` directory.
 
-To test zkPolicy:
+To test zkpolicy:
 
 ```bash
 mvn test

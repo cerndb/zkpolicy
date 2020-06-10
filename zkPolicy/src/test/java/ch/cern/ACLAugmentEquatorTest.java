@@ -20,7 +20,8 @@ public class ACLAugmentEquatorTest {
     ACLAugment o1 = new ACLAugment("sasl:test:crwda");
     ACLAugment o2 = new ACLAugment("world:anyone:crw");
 
-    assertTrue(equator.equate(o1, o2));
+    assertFalse(equator.equate(o1, o2));
+    assertFalse(equator.equate(o2, o1));
 
     o1 = new ACLAugment("sasl:test:crw");
     o2 = new ACLAugment("world:anyone:da");
@@ -37,6 +38,10 @@ public class ACLAugmentEquatorTest {
 
     assertFalse(equator.equate(o1, o2));
 
+    o1 = new ACLAugment("world:anyone:crw");
+    o2 = new ACLAugment("sasl:test:c");
+
+    assertTrue(equator.equate(o2, o1));
   }
 
   @Test

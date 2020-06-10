@@ -222,17 +222,25 @@ public class ZKAuditTest {
     assertNotNull(zkAudit);
 
     String expectedOutput = String.join("\n", "", "Query: globMatchACL", "Root Path: /a", "Arguments:", "- digest:*:*",
-        "", "Result:", "/a", "/a/aa", "", "---------------------------------------------------------------------", "",
-        "Query: exactACL", "Root Path: /zookeeper/quota", "Arguments:", "- world:anyone:r", "", "Result:", "", "",
+        "Description: Znodes under /a that satisfy the globMatchACL query",
+        " * globMatchACL: Match nodes with ACL entries matching the passed glob expressions", "", "Result:", "/a",
+        "/a/aa", "", "---------------------------------------------------------------------", "", "Query: exactACL",
+        "Root Path: /zookeeper/quota", "Arguments:", "- world:anyone:r",
+        "Description: Znodes under /zookeeper/quota that satisfy the exactACL query",
+        " * exactACL: Satisfied by nodes with exact matching ACL to the passed ACL", "", "Result:", "", "",
         "---------------------------------------------------------------------", "", "Query: noACL", "Root Path: /b",
-        "", "Result:", "WARNING: No READ permission for /b/bb, skipping subtree", "",
+        "Description: Znodes under /b that satisfy the noACL query",
+        " * noACL: Satisfied by nodes with no ACL restrictions (world:anyone:cdrwa)", "", "Result:",
+        "WARNING: No READ permission for /b/bb, skipping subtree", "",
         "---------------------------------------------------------------------", "", "Query: globMatchACL",
-        "Root Path: /b", "Arguments:", "- *:*:*", "", "Result:", "/b",
+        "Root Path: /b", "Arguments:", "- *:*:*", "Description: Znodes under /b that satisfy the globMatchACL query",
+        " * globMatchACL: Match nodes with ACL entries matching the passed glob expressions", "", "Result:", "/b",
         "WARNING: No READ permission for /b/bb, skipping subtree", "",
         "---------------------------------------------------------------------", "", "Query: regexMatchACL",
-        "Root Path: /zookeeper", "Arguments:", "- sasl:.*:.*", "", "Result:", "", "",
+        "Root Path: /zookeeper", "Arguments:", "- sasl:.*:.*", "Description: Znodes under /zookeeper that satisfy the regexMatchACL query",
+        " * regexMatchACL: Match nodes with ACL entries matching the passed regular expressions", "", "Result:", "", "",
         "---------------------------------------------------------------------", "");
 
-    assertEquals(expectedOutput, zkAudit.generateHumanReadableAuditReport());
+    assertEquals(expectedOutput, zkAudit.generateQueriesSection());
   }
 }

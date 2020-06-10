@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.zookeeper.KeeperException;
@@ -18,6 +20,7 @@ import org.apache.zookeeper.data.ACL;
 public class ZKCheck {
   private ZKClient zk;
   private ZKDefaultQuery defaultQueries = new ZKDefaultQuery();
+  private static Logger logger = LogManager.getLogger(ZKCheck.class);
 
   public ZKCheck(ZKClient zk) {
     this.zk = zk;
@@ -81,10 +84,7 @@ public class ZKCheck {
       children = this.zk.getChildren(path, null);
       znodeACLList = this.zk.getACL(path, null);
     } catch (NoAuthException e) {
-      for (ZKCheckElement zkCheckElement : checkElements) {
-        checksOutput.get(zkCheckElement.hashCode())
-            .add("WARNING: No READ permission for " + path + ", skipping subtree");
-      }
+      logger.info("WARNING: No READ permission for " + path + ", skipping subtree");
     }
 
     for (ZKCheckElement zkCheckElement : checkElements) {
@@ -98,7 +98,12 @@ public class ZKCheck {
         if (exactACL.query(znodeACLList, null, path, zk, zkCheckElement.getAcls())) {
           checksOutput.get(zkCheckElement.hashCode()).add(path + " : " + "PASS");
         } else {
-          checksOutput.get(zkCheckElement.hashCode()).add(path + " : " + "FAIL");
+          // Check if there was permission for this subtree
+          if (znodeACLList == null) {
+            checksOutput.get(zkCheckElement.hashCode()).add(path + " : " + "FAIL (No permission for subtree)");
+          } else {
+            checksOutput.get(zkCheckElement.hashCode()).add(path + " : " + "FAIL (actual: " + ACLAugment.generateACLStringList(znodeACLList)+ ")");
+          }
           zkCheckElement.$status = false;
         }
       }
