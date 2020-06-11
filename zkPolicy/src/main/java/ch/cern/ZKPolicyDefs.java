@@ -56,6 +56,64 @@ public class ZKPolicyDefs {
     }
   }
 
+  static class Cli {
+    static class ZkPolicy {
+      static final String DESCRIPTION = "ZooKeeper policy auditing tool";
+      static final String CONFIG_DESCRIPTION = "YAML configuration file to use (default: ${DEFAULT-VALUE})";
+      static final String CONFIG_DEFAULT = "/opt/zkpolicy/conf/config.yml";
+    }
+
+    static class Audit {
+      static final String DESCRIPTION = "Generate full audit report";
+      static final String INPUT_DESCRIPTION = "Audit report configuration file (default: ${DEFAULT-VALUE})";
+      static final String INPUT_DEFAULT = "/opt/zkpolicy/conf/audit.yml";
+      static final String OUTPUT_DESCRIPTION = "Audit report output file";
+    }
+
+    static class Check {
+      static final String DESCRIPTION = "Check specific znodes for ACL match";
+      static final String ROOT_PATH_DESCRIPTION = "Root path to execute query";
+      static final String PATH_PATTERN_DESCRIPTION = "Path pattern that must be satisfied to check node";
+      static final String ACLS_DESCRIPTION = "ACLs for checking against matching znodes";
+      static final String DESCR_DESCRIPTION = "Include check description in output (default: disabled)";
+    }
+
+    static class Enforce {
+      static final String DESCRIPTION = "Enforce policy on znodes";
+      static final String INPUT_DESCRIPTION = "File with policy definitions to enforce";
+      static final String POLICY_DESCRIPTION = "Policies to enforce on matching nodes";
+      static final String QUERY_NAME_DESCRIPTION = "Query to be executed: ${COMPLETION-CANDIDATES}";
+      static final String ROOT_PATH_DESCRIPTION = "Root path to execute query before applying policy";
+      static final String ARGS_DESCRIPTION = "Query arguments";
+      static final String APPEND_DESCRIPTION = "Append policy ACLs to matching znode's ACL (default: false)";
+      static final String DRY_RUN_DESCRIPTION = "Execute enforce in dry-run (show affected nodes without applying changes)";
+    }
+
+    static class Export {
+      static final String DESCRIPTION = "Export the znode tree";
+      static final String TYPE_DESCRIPTION = "Output file format ${COMPLETION-CANDIDATES} (default: json)";
+      static final String COMPACT_DESCRIPTION = "Minified export (default: false)";
+      static final String OUTPUT_DESCRIPTION = "Output file destination";
+      static final String OUTPUT_DEFAULT = "./zkpolicy_export.out";
+      static final String ROOT_PATH_DESCRIPTION = "Root path for exported subtree";
+    }
+
+    static class Query {
+      static final String DESCRIPTION = "Query the znode tree";
+      static final String QUERY_NAME_DESCRIPTION = "Query to be executed: ${COMPLETION-CANDIDATES}";
+      static final String ROOT_PATH_DESCRIPTION = "Query execution root path";
+      static final String ARGS_DESCRIPTION = "Query arguments";
+      static final String DESCR_DESCRIPTION = "Include query description in output (default: disabled)";
+      static final String COLOR_DESCR_DESCRIPTION = "Include color description in output (default: disabled)";
+      static final String LIST_DESCRIPTION = "Return list with query matching znode paths (default: disabled)";
+    }
+
+    static class Tree {
+      static final String DESCRIPTION = "Visualize znode tree";
+      static final String ROOT_PATH_DESCRIPTION = "Root path of requested subtree";
+    }
+  }
+
   interface TerminalConstants {
     String lastChildIndent = "└─── ";
     String innerChildIndent = "├─── ";

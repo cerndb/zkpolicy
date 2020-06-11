@@ -9,16 +9,17 @@ import org.apache.logging.log4j.Logger;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
+import ch.cern.ZKPolicyDefs.Cli.Tree;
 
 @Command(name = "tree", aliases = {
-    "t" }, description = "tree command for ZooKeeper", helpCommand = true, mixinStandardHelpOptions = true)
+    "t" }, description = Tree.DESCRIPTION, helpCommand = true, mixinStandardHelpOptions = true)
 public class ZKTreeCli implements Runnable {
   private static Logger logger = LogManager.getLogger(ZKTreeCli.class);
 
   @ParentCommand
   private ZKPolicyCli parent;
 
-  @Option(names = { "-p", "--path" }, required = true, description = "Root path to execute query")
+  @Option(names = { "-p", "--root-path" }, required = true, description = Tree.ROOT_PATH_DESCRIPTION)
   String rootPath;
 
   @Override

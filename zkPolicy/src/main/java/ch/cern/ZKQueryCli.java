@@ -16,9 +16,10 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
+import ch.cern.ZKPolicyDefs.Cli.Query;
 
 @Command(name = "query", aliases = {
-    "q" }, description = "Query the znode tree", helpCommand = true, mixinStandardHelpOptions = true)
+    "q" }, description = Query.DESCRIPTION, helpCommand = true, mixinStandardHelpOptions = true)
 public class ZKQueryCli implements Runnable {
   private static Logger logger = LogManager.getLogger(ZKQueryCli.class);
 
@@ -26,26 +27,26 @@ public class ZKQueryCli implements Runnable {
   private ZKPolicyCli parent;
 
   @Parameters(paramLabel = "[QUERY_NAME]",
-      description = "Query to be executed: ${COMPLETION-CANDIDATES}",
+      description = Query.QUERY_NAME_DESCRIPTION,
       completionCandidates = ZKQueryCli.DefaultQueryCandidates.class)
   String queryName;
 
-  @Option(names = { "-p", "--path" }, required = true, description = "Query execution root path")
+  @Option(names = { "-p", "--root-path" }, required = true, description = Query.ROOT_PATH_DESCRIPTION)
   String rootPath;
 
-  @Option(names = { "-a", "--args" }, description = "Query arguments")
+  @Option(names = { "-a", "--args" }, description = Query.ARGS_DESCRIPTION)
   List<String> queryACLs;
 
-  @Option(names = {"-D", "--description"}, description = "Include query description in output (default: disabled)")
+  @Option(names = {"-D", "--description"}, description = Query.DESCR_DESCRIPTION)
   Boolean description = false;
 
   static class TreeQueryGroup {
-    @Option(names = {"--colorDescription"}, description = "Include color description in output (default: disabled)")
+    @Option(names = {"--colorDescription"}, description = Query.COLOR_DESCR_DESCRIPTION)
     Boolean colorDescription = false;
   }
 
   static class ListQueryGroup {
-    @Option(names = { "-l", "--list" }, description = "Enable list mode (default: disabled)")
+    @Option(names = { "-l", "--list" }, description = Query.LIST_DESCRIPTION)
     Boolean listMode = false;
   }
 

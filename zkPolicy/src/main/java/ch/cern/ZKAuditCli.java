@@ -13,20 +13,21 @@ import org.apache.logging.log4j.Logger;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
+import ch.cern.ZKPolicyDefs.Cli.Audit;
 
-@Command(name = "audit", aliases = { "a" }, description = "Generate full audit report", mixinStandardHelpOptions = true)
+@Command(name = "audit", aliases = { "a" }, description = Audit.DESCRIPTION, mixinStandardHelpOptions = true)
 public class ZKAuditCli implements Runnable {
   private static Logger logger = LogManager.getLogger(ZKAuditCli.class);
 
   @ParentCommand
   private ZKPolicyCli parent;
 
-  @Option(names = { "-o", "--output" }, required = false, description = "Audit report output file")
+  @Option(names = { "-o", "--output" }, required = false, description = Audit.OUTPUT_DESCRIPTION)
   File outputFile = null;
 
   @Option(names = { "-i",
       "--input" }, required = false,
-      description = "Audit report configuration file (default: ${DEFAULT-VALUE})", defaultValue = "/opt/zkpolicy/conf/audit.yml")
+      description = Audit.INPUT_DESCRIPTION, defaultValue = Audit.INPUT_DEFAULT)
   File auditConfigFile;
 
   ZKConfig config;

@@ -12,9 +12,10 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
+import ch.cern.ZKPolicyDefs.Cli.Enforce;
 
 @Command(name = "enforce", aliases = {
-    "f" }, description = "Enforce policy on znodes", helpCommand = true, mixinStandardHelpOptions = true)
+    "f" }, description = Enforce.DESCRIPTION, helpCommand = true, mixinStandardHelpOptions = true)
 public class ZKEnforceCli implements Runnable {
   private static Logger logger = LogManager.getLogger(ZKEnforceCli.class);
 
@@ -22,35 +23,35 @@ public class ZKEnforceCli implements Runnable {
   private ZKPolicyCli parent;
 
   static class FileEnforceGroup {
-    @Option(names = { "-i", "--input" }, required = true, description = "File with policy definitions to enforce")
+    @Option(names = { "-i", "--input" }, required = true, description = Enforce.INPUT_DESCRIPTION)
     File policiesFile;
   }
 
   static class CliEnforceGroup {
-    @Option(names = { "-P", "--policy" }, required = true, description = "Policies to enforce on matching nodes")
+    @Option(names = { "-P", "--policy" }, required = true, description = Enforce.POLICY_DESCRIPTION)
     List<String> policies;
 
     @Parameters(paramLabel = "[QUERY_NAME]",
-        description = "Query to be executed: ${COMPLETION-CANDIDATES}",
+        description = Enforce.QUERY_NAME_DESCRIPTION,
         completionCandidates = ZKQueryCli.DefaultQueryCandidates.class)
     String queryName;
 
-    @Option(names = { "-p", "--root-path" }, required = false, description = "Path pattern to match")
+    @Option(names = { "-p", "--root-path" }, required = false, description = Enforce.ROOT_PATH_DESCRIPTION)
     String rootPath;
 
-    @Option(names = { "-a", "--args" }, required = false, description = "Query arguments")
+    @Option(names = { "-a", "--args" }, required = false, description = Enforce.ARGS_DESCRIPTION)
     List<String> queryArgs;
 
     @Option(names = { "-A",
-        "--append" }, required = false, description = "Append policy ACLs to znode's ACL (default: false)")
+        "--append" }, required = false, description = Enforce.APPEND_DESCRIPTION)
     boolean append = false;
   }
 
+  @Option(names = { "-d", "--dry-run" }, required = false, description = Enforce.DRY_RUN_DESCRIPTION)
+  boolean dryRun = false;
+
   @ArgGroup(exclusive = true, multiplicity = "1")
   Exclusive exclusive;
-
-  @Option(names = { "-d", "--dry-run" }, required = false, description = "Dry run execution")
-  boolean dryRun = false;
 
   static class Exclusive {
     @ArgGroup(exclusive = false)

@@ -4,23 +4,24 @@ import java.io.File;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
+import ch.cern.ZKPolicyDefs.Cli.Export;
 
-@Command(name = "export", aliases = { "e" }, description = "Export the znode tree", mixinStandardHelpOptions = true)
+@Command(name = "export", aliases = { "e" }, description = Export.DESCRIPTION, mixinStandardHelpOptions = true)
 public class ZKExportCli implements Runnable {
   @ParentCommand
   private ZKPolicyCli parent;
 
   @Option(names = { "-t",
-      "--type" }, required = true, description = "Export format ${COMPLETION-CANDIDATES} (default: json)")
+      "--type" }, required = true, description = Export.TYPE_DESCRIPTION)
   ZKPolicyDefs.ExportFormats format = ZKPolicyDefs.ExportFormats.json;
 
-  @Option(names = { "-C", "--compact" }, description = "Minified export (default: false)")
+  @Option(names = { "-C", "--compact" }, description = Export.COMPACT_DESCRIPTION)
   Boolean compactMode = false;
 
-  @Option(names = { "-o", "--output" }, required = true, description = "Output file")
-  File outputFile = new File("./zkpolicy_export.out");
+  @Option(names = { "-o", "--output" }, required = true, description = Export.OUTPUT_DESCRIPTION)
+  File outputFile = new File(Export.OUTPUT_DEFAULT);
 
-  @Option(names = { "-p", "--path" }, required = true, description = "Root path to export")
+  @Option(names = { "-p", "--root-path" }, required = true, description = Export.ROOT_PATH_DESCRIPTION)
   String rootPath;
 
   @Override

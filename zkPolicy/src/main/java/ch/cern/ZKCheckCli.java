@@ -8,26 +8,27 @@ import org.apache.logging.log4j.Logger;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParentCommand;
+import ch.cern.ZKPolicyDefs.Cli.Check;
 
 @Command(name = "check", aliases = {
-    "c" }, description = "Check specific znodes for ACL match", helpCommand = true, mixinStandardHelpOptions = true)
+    "c" }, description = Check.DESCRIPTION, helpCommand = true, mixinStandardHelpOptions = true)
 public class ZKCheckCli implements Runnable {
   private static Logger logger = LogManager.getLogger(ZKCheckCli.class);
 
   @ParentCommand
   private ZKPolicyCli parent;
 
-  @Option(names = { "-p", "--root-path" }, required = true, description = "Root path to execute query")
+  @Option(names = { "-p", "--root-path" }, required = true, description = Check.ROOT_PATH_DESCRIPTION)
   String rootPath;
 
   @Option(names = { "-e",
-      "--path-pattern" }, required = true, description = "Path pattern that must be satisfied to check node")
+      "--path-pattern" }, required = true, description = Check.PATH_PATTERN_DESCRIPTION)
   String pathPattern;
 
-  @Option(names = { "-a", "--acls" }, description = "ACLs for checking against matching znodes")
+  @Option(names = { "-a", "--acls" }, description = Check.ACLS_DESCRIPTION)
   List<String> checkACLs;
 
-  @Option(names = {"-D", "--description"}, description = "Include query description in output (default: disabled)")
+  @Option(names = {"-D", "--description"}, description = Check.DESCR_DESCRIPTION)
   Boolean description = false;
 
   @Override

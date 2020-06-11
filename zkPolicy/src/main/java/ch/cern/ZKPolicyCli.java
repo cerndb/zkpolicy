@@ -8,9 +8,11 @@ import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
+import ch.cern.ZKPolicyDefs.Cli.ZkPolicy;
+
 
 @Command(name = "zkpolicy",
-    description = "ZooKeeper policy auditing tool",
+    description = ZkPolicy.DESCRIPTION,
     versionProvider = ZKPolicyCli.PropertiesVersionProvider.class,
     subcommands = {
         ZKQueryCli.class,
@@ -29,9 +31,9 @@ import picocli.CommandLine.ScopeType;
 public class ZKPolicyCli implements Runnable {
   @Option(names = { "-c",
       "--config" }, required = false,
-      description = "YAML configuration file to use (default: ${DEFAULT-VALUE})",
+      description = ZkPolicy.CONFIG_DESCRIPTION,
       scope = ScopeType.INHERIT,
-      defaultValue = "/opt/zkpolicy/conf/config.yml")
+      defaultValue = ZkPolicy.CONFIG_DEFAULT)
   public File configFile;
 
   @Override
