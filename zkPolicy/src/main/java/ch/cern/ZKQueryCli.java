@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
@@ -24,9 +25,6 @@ public class ZKQueryCli implements Runnable {
   @ParentCommand
   private ZKPolicyCli parent;
 
-  @Option(names = { "-l", "--list" }, description = "Enable list mode (default: disabled)")
-  Boolean listMode = false;
-
   @Parameters(paramLabel = "[QUERY_NAME]",
       description = "Query to be executed: ${COMPLETION-CANDIDATES}",
       completionCandidates = ZKQueryCli.DefaultQueryCandidates.class)
@@ -37,6 +35,30 @@ public class ZKQueryCli implements Runnable {
 
   @Option(names = { "-a", "--args" }, description = "Query arguments")
   List<String> queryACLs;
+
+  @Option(names = {"-D", "--description"}, description = "Include query description in output (default: disabled)")
+  Boolean description = false;
+
+  static class TreeQueryGroup {
+    @Option(names = {"--colorDescription"}, description = "Include color description in output (default: disabled)")
+    Boolean colorDescription = false;
+  }
+
+  static class ListQueryGroup {
+    @Option(names = { "-l", "--list" }, description = "Enable list mode (default: disabled)")
+    Boolean listMode = false;
+  }
+
+  @ArgGroup(exclusive = true, multiplicity = "0..1")
+  Exclusive exclusive;
+
+  static class Exclusive {
+    @ArgGroup(exclusive = false)
+    TreeQueryGroup treeQueryGroup;
+
+    @ArgGroup(exclusive = false)
+    ListQueryGroup listQueryGroup;
+  }
 
   @Override
   public void run() {
@@ -55,7 +77,7 @@ public class ZKQueryCli implements Runnable {
 
     try (ZKClient zk = new ZKClient(config)) {
       zktree = new ZKTree(zk);
-
+      StringBuffer outputBuf = new StringBuffer();
       ZKDefaultQuery zkDefaultQuery = new ZKDefaultQuery();
 
       // Get query to execute
@@ -63,21 +85,32 @@ public class ZKQueryCli implements Runnable {
 
       ZKQueryElement queryElement = new ZKQueryElement(this.queryName, this.rootPath, this.queryACLs, query);
       List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
-      Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
-
       queriesList.add(queryElement);
+
+      Hashtable<Integer, List<String>> queriesOutput = new Hashtable<Integer, List<String>>();
       queriesOutput.put(queryElement.hashCode(), new ArrayList<String>());
-      if (this.listMode) {
+
+      // Output query description
+      if (this.description) {
+        outputBuf.append("Description: "+ queryElement.generateDescription() + "\n\n");
+      }
+
+      // Output query result
+      if (this.exclusive != null && this.exclusive.listQueryGroup != null && this.exclusive.listQueryGroup.listMode) {
         zktree.queryFind(queryElement.getRootPath(), queriesList, queriesOutput);
-        List<String> queryOutput = queriesOutput.get(queryElement.hashCode());
-        if (queryOutput.size() > 0) {
-          System.out.println(String.join("\n", queryOutput));
-        }
       } else {
         zktree.queryTree(queryElement.getRootPath(), queriesList, queriesOutput);
-        System.out.println(
-            zktree.colorCodeExplanation() + String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
+        if (this.exclusive != null && this.exclusive.treeQueryGroup != null && this.exclusive.treeQueryGroup.colorDescription) {
+          outputBuf.append(zktree.colorCodeExplanation() + "\n");
+        }
       }
+
+      List<String> queryOutput = queriesOutput.get(queryElement.hashCode());
+      if (queryOutput.size() > 0) {
+        outputBuf.append(String.join("\n", queryOutput));
+      }
+
+      System.out.println(outputBuf.toString());
     } catch (NoSuchMethodException | NoSuchFieldException | SecurityException e) {
       System.out.println("No such method: " + this.queryName);
       System.out.println("Please consult the list of default queries using query -h");
