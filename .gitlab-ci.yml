@@ -22,6 +22,7 @@ build-docker:
       - ITHADOOP_767 # TODO: remove after testing
       - testing
       - qa
+      - devops/koji-build
   script:
     - echo 'Build docker image...'
     - echo ${STAGE}
@@ -116,7 +117,7 @@ build:
 build-rpm-testing:
   <<: *koji_deps
   stage: build-rpm
-  image: gitlab-registry.cern.ch/db/cc7-base-koji
+  image: ${CI_REGISTRY_IMAGE}:mvn-builder
   when: manual
   except:
     - qa
@@ -132,7 +133,7 @@ build-rpm-testing:
 tag-qa:
   <<: *koji_deps
   stage: deploy
-  image: gitlab-registry.cern.ch/db/cc7-base-koji
+  image: ${CI_REGISTRY_IMAGE}:mvn-builder
   when: manual
   only:
     - qa
@@ -147,7 +148,7 @@ tag-qa:
 tag-stable:
   <<: *koji_deps
   stage: deploy
-  image: gitlab-registry.cern.ch/db/cc7-base-koji
+  image: ${CI_REGISTRY_IMAGE}:mvn-builder
   when: manual
   only:
     - master
