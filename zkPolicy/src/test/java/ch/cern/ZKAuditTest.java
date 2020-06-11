@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.io.TempDir;
+import ch.cern.ZKPolicyDefs.Queries;
 
 @TestInstance(Lifecycle.PER_CLASS)
 public class ZKAuditTest {
@@ -223,22 +224,22 @@ public class ZKAuditTest {
 
     String expectedOutput = String.join("\n", "", "Query: globMatchACL", "Root Path: /a", "Arguments:", "- digest:*:*",
         "Description: Znodes under /a that satisfy the globMatchACL query",
-        " * globMatchACL: Match nodes with ACL entries matching the passed glob expressions", "", "Result:", "/a",
+        " * globMatchACL: " + Queries.GLOB_MATCH_ACL_DESCRIPTION, "", "Result:", "/a",
         "/a/aa", "", "---------------------------------------------------------------------", "", "Query: exactACL",
         "Root Path: /zookeeper/quota", "Arguments:", "- world:anyone:r",
         "Description: Znodes under /zookeeper/quota that satisfy the exactACL query",
-        " * exactACL: Satisfied by nodes with exact matching ACL to the passed ACL", "", "Result:", "", "",
+        " * exactACL: " + Queries.EXACT_ACL_DESCRIPTION, "", "Result:", "", "",
         "---------------------------------------------------------------------", "", "Query: noACL", "Root Path: /b",
         "Description: Znodes under /b that satisfy the noACL query",
-        " * noACL: Satisfied by nodes with no ACL restrictions (world:anyone:cdrwa)", "", "Result:",
+        " * noACL: " + Queries.NO_ACL_DESCRIPTION, "", "Result:",
         "WARNING: No READ permission for /b/bb, skipping subtree", "",
         "---------------------------------------------------------------------", "", "Query: globMatchACL",
         "Root Path: /b", "Arguments:", "- *:*:*", "Description: Znodes under /b that satisfy the globMatchACL query",
-        " * globMatchACL: Match nodes with ACL entries matching the passed glob expressions", "", "Result:", "/b",
+        " * globMatchACL: " + Queries.GLOB_MATCH_ACL_DESCRIPTION, "", "Result:", "/b",
         "WARNING: No READ permission for /b/bb, skipping subtree", "",
         "---------------------------------------------------------------------", "", "Query: regexMatchACL",
         "Root Path: /zookeeper", "Arguments:", "- sasl:.*:.*", "Description: Znodes under /zookeeper that satisfy the regexMatchACL query",
-        " * regexMatchACL: Match nodes with ACL entries matching the passed regular expressions", "", "Result:", "", "",
+        " * regexMatchACL: " + Queries.REGEX_MATCH_ACL_DESCRIPTION, "", "Result:", "", "",
         "---------------------------------------------------------------------", "");
 
     assertEquals(expectedOutput, zkAudit.generateQueriesSection());

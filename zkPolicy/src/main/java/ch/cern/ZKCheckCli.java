@@ -28,6 +28,9 @@ public class ZKCheckCli implements Runnable {
   @Option(names = { "-a", "--acls" }, description = Check.ACLS_DESCRIPTION)
   List<String> checkACLs;
 
+  @Option(names = { "-n", "--negate" }, description = Check.NEGATE_DESCRIPTION)
+  Boolean negate = false;
+
   @Option(names = {"-D", "--description"}, description = Check.DESCR_DESCRIPTION)
   Boolean description = false;
 
@@ -45,7 +48,7 @@ public class ZKCheckCli implements Runnable {
       try (ZKClient zk = new ZKClient(config)) {
         StringBuffer outputBuf = new StringBuffer();
 
-        ZKCheckElement checkElement = new ZKCheckElement(null, this.rootPath, this.pathPattern, this.checkACLs);
+        ZKCheckElement checkElement = new ZKCheckElement(null, this.rootPath, this.pathPattern, this.negate, this.checkACLs);
         List<ZKCheckElement> checksList = new ArrayList<ZKCheckElement>();
         checksList.add(checkElement);
 

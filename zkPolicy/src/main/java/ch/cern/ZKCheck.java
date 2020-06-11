@@ -92,10 +92,16 @@ public class ZKCheck {
       Pattern pathPatternRegex = Pattern.compile(zkCheckElement.getPathPattern());
       Matcher currentMatcher = pathPatternRegex.matcher(path);
       if (currentMatcher.matches()) {
-        // If the path name matches check the ACLs with the ones provided by the check
-        // element
-        ZKQuery exactACL = defaultQueries.exactACL;
-        if (exactACL.query(znodeACLList, null, path, zk, zkCheckElement.getAcls())) {
+        // If the path name matches check whether negate is enabled and execute query
+
+        ZKQuery checkQuery;
+        if (zkCheckElement.getNegate()) {
+          checkQuery = defaultQueries.noSatisfyACL;
+        } else {
+          checkQuery = defaultQueries.exactACL;
+        }
+
+        if (checkQuery.query(znodeACLList, null, path, zk, zkCheckElement.getAcls())) {
           checksOutput.get(zkCheckElement.hashCode()).add(path + " : " + "PASS");
         } else {
           // Check if there was permission for this subtree

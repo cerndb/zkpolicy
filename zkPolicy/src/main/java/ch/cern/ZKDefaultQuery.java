@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.zookeeper.data.ACL;
+import ch.cern.ZKPolicyDefs.Queries;
 
 /**
  * ZKDefaultQuery Class that provides a basic set of queries for the ZNode tree.
@@ -19,6 +20,7 @@ public class ZKDefaultQuery {
   public ExactACLDef exactACL = new ExactACLDef();
   public NoACLDef noACL = new NoACLDef();
   public SatisfyACLDef satisfyACL = new SatisfyACLDef();
+  public NoSatisfyACLDef noSatisfyACL = new NoSatisfyACLDef();
   public ParentYesChildNoDef parentYesChildNo = new ParentYesChildNoDef();
   public DuplicateACLDef duplicateACL = new DuplicateACLDef();
   public RegexMatchACLDef regexMatchACL = new RegexMatchACLDef();
@@ -43,11 +45,11 @@ public class ZKDefaultQuery {
   }
 
   /**
-   * Match nodes that have equal ACL with the passed.
+   * Match znodes with ACL equal to the passed ACL argument.
    */
   private static class ExactACLDef implements ZKQuery {
     public String getDescription(){
-      return "Satisfied by nodes with exact matching ACL to the passed ACL";
+      return Queries.EXACT_ACL_DESCRIPTION;
     }
 
     public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
@@ -76,11 +78,11 @@ public class ZKDefaultQuery {
   }
 
   /**
-   * Match nodes that have no ACL restrictions (world:anyone:crwda).
+   * Match znodes with no access control restrictions (ACL equals [world:anyone:cdrwa]).
    */
   private static class NoACLDef implements ZKQuery {
     public String getDescription(){
-      return "Satisfied by nodes with no ACL restrictions (world:anyone:cdrwa)";
+      return Queries.NO_ACL_DESCRIPTION;
     }
 
     public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
@@ -96,11 +98,11 @@ public class ZKDefaultQuery {
   }
 
   /**
-   * Match nodes satisfying the passed ACL (logical match).
+   * Match znodes are accessible by clients with the passed authentication info arguments (logical match).
    */
   private static class SatisfyACLDef implements ZKQuery {
     public String getDescription(){
-      return "Match nodes satisfying the passed ACL (logical match)";
+      return Queries.SATISFY_ACL_DESCRIPTION;
     }
 
     public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
@@ -121,11 +123,34 @@ public class ZKDefaultQuery {
   }
 
   /**
-   * Match nodes with ACL not not equal to their parents ACL.
+   * Match znodes that are not accessible by clients with the passed authentication info arguments.
+   */
+  private static class NoSatisfyACLDef implements ZKQuery {
+    public String getDescription(){
+      return Queries.NO_SATISFY_ACL_DESCRIPTION;
+    }
+
+    public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
+      List<ACLAugment> aclListAugment = ACLAugment.generateACLAugmentList(aclList);
+
+      // queryACL list
+      for (String queryACLString : queryACLs) {
+        ACLAugment temp = new ACLAugment(queryACLString);
+        if (IterableUtils.contains(aclListAugment, temp, new ACLAugmentEquator())) {
+          continue;
+        } else {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+  /**
+   * Match znodes with ACL not equal to their parent's ACL.
    */
   private static class ParentYesChildNoDef implements ZKQuery {
     public String getDescription(){
-      return "Match nodes with ACL not not equal to their parents ACL";
+      return Queries.PARENT_YES_CHILD_NO_DESCRIPTION;
     }
 
     public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
@@ -142,11 +167,11 @@ public class ZKDefaultQuery {
   }
 
   /**
-   * Match nodes with duplicate ACL entries.
+   * Match znodes with duplicate ACL entries.
    */
   private static class DuplicateACLDef implements ZKQuery {
     public String getDescription(){
-      return "Match nodes with duplicate ACL entries";
+      return Queries.DUPLICATE_ACL_DESCRIPTION;
     }
 
     public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
@@ -163,11 +188,11 @@ public class ZKDefaultQuery {
   }
 
   /**
-   * Match nodes with ACL entries matching the passed regular expressions.
+   * Match znodes with ACL entries matching the passed regular expression arguments.
    */
   private static class RegexMatchACLDef implements ZKQuery {
     public String getDescription(){
-      return "Match nodes with ACL entries matching the passed regular expressions";
+      return Queries.REGEX_MATCH_ACL_DESCRIPTION;
     }
 
     public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk,
@@ -195,11 +220,11 @@ public class ZKDefaultQuery {
   }
 
   /**
-   * Match nodes with ACL entries matching the passed glob expressions.
+   * Match znodes with ACL entries matching the passed glob pattern arguments.
    */
   private static class GlobMatchACLDef implements ZKQuery {
     public String getDescription(){
-      return "Match nodes with ACL entries matching the passed glob expressions";
+      return Queries.GLOB_MATCH_ACL_DESCRIPTION;
     }
 
     public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk,
@@ -227,11 +252,11 @@ public class ZKDefaultQuery {
   }
 
   /**
-   * Match nodes with path matching the passed glob expression.
+   * Match znodes with paths matching the passed glob pattern argument.
    */
   private static class GlobMatchPathDef implements ZKQuery {
     public String getDescription(){
-      return "Match nodes with path matching the passed glob expression";
+      return Queries.GLOB_MATCH_PATH_DESCRIPTION;
     }
 
     // We expect only one glob expression to check for path match
@@ -248,11 +273,11 @@ public class ZKDefaultQuery {
   }
 
   /**
-   * Match nodes with path matching the passed regular expression.
+   * Match znodes with paths matching the passed regular expression argument.
    */
   private static class RegexMatchPathDef implements ZKQuery {
     public String getDescription(){
-      return "Match nodes with path matching the passed regular expression";
+      return Queries.REGEX_MATCH_PATH_DESCRIPTION;
     }
 
     // We do expect only one glob expression to check for path match

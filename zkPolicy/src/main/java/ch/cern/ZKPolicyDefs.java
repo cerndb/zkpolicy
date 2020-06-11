@@ -76,6 +76,7 @@ public class ZKPolicyDefs {
       static final String PATH_PATTERN_DESCRIPTION = "Path pattern that must be satisfied to check node";
       static final String ACLS_DESCRIPTION = "ACLs for checking against matching znodes";
       static final String DESCR_DESCRIPTION = "Include check description in output (default: disabled)";
+      static final String NEGATE_DESCRIPTION = "Negate result by checking if passed ACLs are not satisfying znode ACL (default: disabled)";
     }
 
     static class Enforce {
@@ -112,6 +113,20 @@ public class ZKPolicyDefs {
       static final String DESCRIPTION = "Visualize znode tree";
       static final String ROOT_PATH_DESCRIPTION = "Root path of requested subtree";
     }
+  }
+
+  static class Queries {
+    static final String EXACT_ACL_DESCRIPTION = "Match znodes with ACL equal to the passed ACL argument";
+    static final String NO_ACL_DESCRIPTION = "Match znodes with no access control restrictions (ACL equals [world:anyone:cdrwa])";
+    static final String SATISFY_ACL_DESCRIPTION = "Match znodes are accessible by clients with the passed"
+        + " authentication info arguments (logical match)";
+    static final String NO_SATISFY_ACL_DESCRIPTION = "Match znodes that are not accessible by clients with the passed authentication info arguments";
+    static final String PARENT_YES_CHILD_NO_DESCRIPTION = "Match znodes with ACL not equal to their parent's ACL";
+    static final String DUPLICATE_ACL_DESCRIPTION = "Match znodes with duplicate ACL entries";
+    static final String REGEX_MATCH_ACL_DESCRIPTION = "Match znodes with ACL entries matching the passed regular expression arguments";
+    static final String GLOB_MATCH_ACL_DESCRIPTION = "Match znodes with ACL entries matching the passed glob pattern arguments";
+    static final String GLOB_MATCH_PATH_DESCRIPTION = "Match znodes with paths matching the passed glob pattern argument";
+    static final String REGEX_MATCH_PATH_DESCRIPTION = "Match znodes with paths matching the passed regular expression argument";
   }
 
   interface TerminalConstants {

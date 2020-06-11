@@ -91,7 +91,7 @@ public class ZKCheckTest {
 
     List<String> checkACLs = new ArrayList<String>();
     checkACLs.add("world:anyone:cdrwa");
-    ZKCheckElement checkElement = new ZKCheckElement("TestTitle", "/", "/.*", checkACLs);
+    ZKCheckElement checkElement = new ZKCheckElement("TestTitle", "/", "/.*", false, checkACLs);
     List<ZKCheckElement> checksList = new ArrayList<ZKCheckElement>();
     Hashtable<Integer, List<String>> checksOutput = new Hashtable<Integer, List<String>>();
 
@@ -122,7 +122,7 @@ public class ZKCheckTest {
       IllegalArgumentException, InvocationTargetException, NoSuchFieldException, KeeperException, InterruptedException {
     List<String> checkACLs = new ArrayList<String>();
     checkACLs.add("world:anyone:cdrwa");
-    ZKCheckElement checkElement = new ZKCheckElement("TestTitle", "/not-existing-path", "/.*", checkACLs);
+    ZKCheckElement checkElement = new ZKCheckElement("TestTitle", "/not-existing-path", "/.*", false, checkACLs);
     List<ZKCheckElement> checksList = new ArrayList<ZKCheckElement>();
     Hashtable<Integer, List<String>> checksOutput = new Hashtable<Integer, List<String>>();
 
@@ -140,7 +140,7 @@ public class ZKCheckTest {
       IllegalArgumentException, InvocationTargetException, NoSuchFieldException, KeeperException, InterruptedException {
     List<String> checkACLs = new ArrayList<String>();
     checkACLs.add("world:anyone:cdrwa");
-    ZKCheckElement checkElement = new ZKCheckElement("TestTitle", "invalid-root-path", "/.*", checkACLs);
+    ZKCheckElement checkElement = new ZKCheckElement("TestTitle", "invalid-root-path", "/.*", false, checkACLs);
     List<ZKCheckElement> checksList = new ArrayList<ZKCheckElement>();
     Hashtable<Integer, List<String>> checksOutput = new Hashtable<Integer, List<String>>();
 

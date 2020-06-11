@@ -21,6 +21,7 @@ public class ZKCheckElement {
   private String title;
   private String rootPath;
   private String pathPattern;
+  private Boolean negate;
   List<String> acls;
 
   // Ignore chekstyle violation because lombok uses `$` prefix
@@ -35,15 +36,20 @@ public class ZKCheckElement {
    */
   public String generateDescription() {
     StringBuffer outputBuf = new StringBuffer();
-    outputBuf.append("Check if znodes under " + rootPath + " matching the " + pathPattern + " pattern"
-        + " have the exact following ACL definition: ");
+    if (this.negate) {
+      outputBuf.append("Check if the subset of znodes under " + rootPath + " with path that matches the " + pathPattern
+          + " pattern are not accessible by clients with the following authentication credentials:\n");
+    } else {
+      outputBuf.append("Check if the subset of znodes under " + rootPath + " with path that matches the " + pathPattern
+          + " pattern have the following ACL definition set:\n");
+    }
 
     Iterator<String> aclIterator = acls.iterator();
     while (aclIterator.hasNext()) {
       String acl = aclIterator.next();
-      outputBuf.append(acl);
+      outputBuf.append("- " + acl);
       if (aclIterator.hasNext()) {
-        outputBuf.append(", ");
+        outputBuf.append("\n");
       }
     }
     return outputBuf.toString();
