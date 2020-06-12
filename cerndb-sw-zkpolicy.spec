@@ -2,7 +2,7 @@
 # SPEC file for zkpolicy tool
 #
 
-%define version     1.0.0
+%define version     1.0.1
 %define name        cerndb-sw-zkpolicy
 %define release     %{_release}%{?dist}
 %define repodir     %{name}-%{version}
@@ -77,5 +77,12 @@ rm -rf $RPM_BUILD_ROOT
 %postun -p /bin/sh
 
 %changelog
-* Mon Apr 03 2020 Emil Kleszcz <emil.kleszcz@cern.ch> 1.0.0 
+* Fri Jun 12 2020 Christos Arvanitis <christos.arvanitis@cern.ch> 1.0.1-1
+- Update to 1.0.1
+- Add query and check descriptions in CLI results
+- Add configuration options to exclude audit report sections
+- Add negate functionality for checks
+- Minor changes in CLI option descriptions
+
+* Mon Apr 03 2020 Emil Kleszcz <emil.kleszcz@cern.ch> 1.0.0-1
 - The first release of the ZK Policy Audit tool
