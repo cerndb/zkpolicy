@@ -109,9 +109,12 @@ public class ZKExport {
       return;
     }
     List<Byte> byteData = new ArrayList<Byte>();
-    for (byte dataItem : data) {
-      byteData.add(dataItem);
+    if (data != null) {
+      for (byte dataItem : data) {
+        byteData.add(dataItem);
+      }
     }
+
     currentNode.setData(byteData);
     currentNode.setPath(path);
     currentNode.setAcl(acl);
