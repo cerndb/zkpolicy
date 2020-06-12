@@ -98,11 +98,7 @@ public class ZKCheckTest {
     checksList.add(checkElement);
     checksOutput.put(checkElement.hashCode(), new ArrayList<String>());
 
-    try {
-      zkCheck.check("/", checksList, checksOutput);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    zkCheck.check("/", checksList, checksOutput);
 
     String tempDigest1 = DigestAuthenticationProvider.generateDigest("user1:passw1");
     String tempDigest2 = DigestAuthenticationProvider.generateDigest("user2:passw2");

@@ -1,6 +1,7 @@
 package ch.cern;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.curator.framework.CuratorFramework;
@@ -34,7 +35,7 @@ public class ACLAugmentEquatorTest {
     assertFalse(equator.equate(o1, o2));
 
     o1 = new ACLAugment("sasl:test:crw");
-    o2 = new ACLAugment("ip:anyone:crw");
+    o2 = new ACLAugment("ip:0.0.0.0:crw");
 
     assertFalse(equator.equate(o1, o2));
 
@@ -53,19 +54,40 @@ public class ACLAugmentEquatorTest {
     assertFalse(equator.equate(o1, o2));
 
     o1 = new ACLAugment("sasl:test:crw");
-    o2 = new ACLAugment("ip:anyone:crw");
+    o2 = new ACLAugment("ip:0.0.0.0:crw");
+
+    assertFalse(equator.equate(o1, o2));
+  }
+
+  @Test
+  public void testSubnetEquate() {
+    ACLAugmentEquator equator = new ACLAugmentEquator();
+    ACLAugment o1 = new ACLAugment("ip:127.0.0.4:d");
+    ACLAugment o2 = new ACLAugment("ip:127.0.0.0/24:cdra");
+
+    assertTrue(equator.equate(o1, o2));
+
+    o1 = new ACLAugment("ip:127.0.1.4:d");
+    o2 = new ACLAugment("ip:127.0.0.0/24:cdra");
 
     assertFalse(equator.equate(o1, o2));
 
+    o1 = new ACLAugment("ip:127.0.0.0:d");
+    o2 = new ACLAugment("ip:127.0.0.0/24:cdra");
+
+    assertFalse(equator.equate(o1, o2));
+
+    assertThrows(IllegalArgumentException.class, () -> {
+      equator.equate(new ACLAugment("ip:127.0.0.0/24:d"), new ACLAugment("ip:127.0.0.0/24:cdra"));
+    });
   }
 
   @Test
   public void testNonWorldAnyoneEquate() {
     ACLAugmentEquator equator = new ACLAugmentEquator();
     ACLAugment o1 = new ACLAugment("sasl:test:crw");
-    ACLAugment o2 = new ACLAugment("ip:anyone:crw");
+    ACLAugment o2 = new ACLAugment("ip:0.0.0.0:crw");
 
     assertFalse(equator.equate(o1, o2));
-
   }
 }
