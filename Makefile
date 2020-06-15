@@ -9,7 +9,7 @@ USERNAME=$(shell klist|grep "principal:"|cut -d ' ' -f 3|cut -d '@' -f 1)
 
 # Get all the package info from the corresponding spec file
 PKGVERSION=$(shell awk '/^%define version/ { print $$3 }' ${SPECFILE})
-PKGRELEASE=1
+PKGRELEASE=2
 PKGNAME=$(shell awk '/^%define name/ { print $$3 }' ${SPECFILE})
 PKGID=$(PKGNAME)-$(PKGVERSION)
 TARFILE=$(PKGID).tar.gz

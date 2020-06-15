@@ -77,6 +77,9 @@ rm -rf $RPM_BUILD_ROOT
 %postun -p /bin/sh
 
 %changelog
+* Mon Jun 15 2020 Christos Arvanitis <christos.arvanitis@cern.ch> 1.0.1-2
+- Add support for logical equation of ip subnets and addresses
+
 * Fri Jun 12 2020 Christos Arvanitis <christos.arvanitis@cern.ch> 1.0.1-1
 - Update to 1.0.1
 - Add query and check descriptions in CLI results
