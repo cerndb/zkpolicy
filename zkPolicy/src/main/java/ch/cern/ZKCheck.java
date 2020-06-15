@@ -65,6 +65,7 @@ public class ZKCheck {
     }
 
     for (ZKCheckElement zkQueryElement : invalidChecks) {
+      zkQueryElement.$status = false;
       checkElements.remove(zkQueryElement);
     }
 
