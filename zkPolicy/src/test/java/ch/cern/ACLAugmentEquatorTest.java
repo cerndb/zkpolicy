@@ -17,7 +17,7 @@ public class ACLAugmentEquatorTest {
 
   @Test
   public void testEquate() {
-    ACLAugmentEquator equator = new ACLAugmentEquator();
+    ACLAugmentSatisfyEquator equator = new ACLAugmentSatisfyEquator();
     ACLAugment o1 = new ACLAugment("sasl:test:crwda");
     ACLAugment o2 = new ACLAugment("world:anyone:crw");
 
@@ -47,7 +47,7 @@ public class ACLAugmentEquatorTest {
 
   @Test
   public void testComplementaryEquate() {
-    ACLAugmentEquator equator = new ACLAugmentEquator();
+    ACLAugmentSatisfyEquator equator = new ACLAugmentSatisfyEquator();
     ACLAugment o1 = new ACLAugment("sasl:test:crw");
     ACLAugment o2 = new ACLAugment("world:test:da");
 
@@ -61,7 +61,7 @@ public class ACLAugmentEquatorTest {
 
   @Test
   public void testSubnetEquate() {
-    ACLAugmentEquator equator = new ACLAugmentEquator();
+    ACLAugmentSatisfyEquator equator = new ACLAugmentSatisfyEquator();
     ACLAugment o1 = new ACLAugment("ip:127.0.0.4:d");
     ACLAugment o2 = new ACLAugment("ip:127.0.0.0/24:cdra");
 
@@ -84,7 +84,7 @@ public class ACLAugmentEquatorTest {
 
   @Test
   public void testNonWorldAnyoneEquate() {
-    ACLAugmentEquator equator = new ACLAugmentEquator();
+    ACLAugmentSatisfyEquator equator = new ACLAugmentSatisfyEquator();
     ACLAugment o1 = new ACLAugment("sasl:test:crw");
     ACLAugment o2 = new ACLAugment("ip:0.0.0.0:crw");
 

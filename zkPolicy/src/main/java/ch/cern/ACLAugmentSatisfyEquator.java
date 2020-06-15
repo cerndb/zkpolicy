@@ -7,7 +7,7 @@ import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 /**
  * Equator used for logical matching of ACLs.
  */
-public class ACLAugmentEquator implements Equator<ACLAugment> {
+public class ACLAugmentSatisfyEquator implements Equator<ACLAugment> {
 
   // Check if o2 ACL logically satisfies o1 ACL
   @Override

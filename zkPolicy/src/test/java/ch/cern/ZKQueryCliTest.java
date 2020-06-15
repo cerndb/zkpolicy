@@ -30,9 +30,6 @@ public class ZKQueryCliTest {
   private TestingServer zkTestServer;
   private ZKConfig config;
   private ZKClient zkClient;
-  private String green;
-  private String reset;
-  private String red;
 
   private ByteArrayOutputStream outContent = new ByteArrayOutputStream();
   private ByteArrayOutputStream errContent = new ByteArrayOutputStream();
@@ -85,10 +82,6 @@ public class ZKQueryCliTest {
     List<ACL> aclListCC = new ArrayList<ACL>();
     aclListCC.add(new ACLAugment("world:anyone:crwda").getACL());
     zkClient.create("/c/cc", "cc".getBytes(), aclListCC, CreateMode.PERSISTENT);
-
-    this.green = ZKPolicyDefs.Colors.GREEN.getANSIValue();
-    this.red = ZKPolicyDefs.Colors.RED.getANSIValue();
-    this.reset = ZKPolicyDefs.Colors.RESET.getANSIValue();
 
     // Setup config file
     File configFile = new File(testTempDir, "conf_tmp.yml");

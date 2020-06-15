@@ -111,7 +111,7 @@ public class ZKDefaultQuery {
       // queryACL list
       for (String queryACLString : queryACLs) {
         ACLAugment temp = new ACLAugment(queryACLString);
-        if (IterableUtils.contains(aclListAugment, temp, new ACLAugmentEquator())) {
+        if (IterableUtils.contains(aclListAugment, temp, new ACLAugmentSatisfyEquator())) {
           continue;
         } else {
           return false;
@@ -136,7 +136,7 @@ public class ZKDefaultQuery {
       // queryACL list
       for (String queryACLString : queryACLs) {
         ACLAugment temp = new ACLAugment(queryACLString);
-        if (IterableUtils.contains(aclListAugment, temp, new ACLAugmentEquator())) {
+        if (IterableUtils.contains(aclListAugment, temp, new ACLAugmentSatisfyEquator())) {
           continue;
         } else {
           return true;
