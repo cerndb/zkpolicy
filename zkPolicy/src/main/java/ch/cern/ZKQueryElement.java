@@ -29,8 +29,8 @@ public class ZKQueryElement {
    */
   public String generateDescription() {
     StringBuffer description = new StringBuffer();
-    description.append("Znodes under " + rootPath + " that satisfy the " + name + " query\n");
-    description.append(" * "+ name+ ": "+ query.getDescription());
+    description.append(String.format(ZKPolicyDefs.Query.DESCRIPTION_FORMAT, rootPath, name) + "\n");
+    description.append(" * "+ name + ": "+ query.getDescription());
     return description.toString();
   }
 }

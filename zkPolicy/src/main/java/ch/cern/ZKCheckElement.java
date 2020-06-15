@@ -37,11 +37,9 @@ public class ZKCheckElement {
   public String generateDescription() {
     StringBuffer outputBuf = new StringBuffer();
     if (this.negate) {
-      outputBuf.append("Check if the subset of znodes under " + rootPath + " with path that matches the " + pathPattern
-          + " pattern are not accessible by clients with the following authentication credentials:\n");
+      outputBuf.append(String.format(ZKPolicyDefs.Check.NEGATE_DESCRIPTION_FORMAT, rootPath, pathPattern) + "\n");
     } else {
-      outputBuf.append("Check if the subset of znodes under " + rootPath + " with path that matches the " + pathPattern
-          + " pattern have the following ACL definition set:\n");
+      outputBuf.append(String.format(ZKPolicyDefs.Check.DESCRIPTION_FORMAT, rootPath, pathPattern) + "\n");
     }
 
     Iterator<String> aclIterator = acls.iterator();

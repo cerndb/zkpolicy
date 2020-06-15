@@ -129,6 +129,17 @@ public class ZKPolicyDefs {
     static final String REGEX_MATCH_PATH_DESCRIPTION = "Match znodes with paths matching the passed regular expression argument";
   }
 
+  static class Check {
+    static final String DESCRIPTION_FORMAT = "Check if the subset of znodes under %s with path that matches the %s"
+        + " pattern have the following ACL definition set:";
+    static final String NEGATE_DESCRIPTION_FORMAT = "Check if the subset of znodes under %s with path that matches the %s"
+        + " pattern are not accessible by clients with the following authentication credentials:";
+  }
+
+  static class Query {
+    static final String DESCRIPTION_FORMAT = "Znodes under %s that satisfy the %s query";
+  }
+
   interface TerminalConstants {
     String lastChildIndent = "└─── ";
     String innerChildIndent = "├─── ";
