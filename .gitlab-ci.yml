@@ -107,7 +107,7 @@ build:
     - qa
     - master
   script:
-    - mvn --quiet package -DskipTests
+    - mvn --quiet package -DskipTests -Dpmd.skip=true -Dcpd.skip=true -Dcheckstyle.skip=true -Dspotbugs.skip=true
   tags:
     - docker
   artifacts:

@@ -45,7 +45,7 @@ install -d $RPM_BUILD_ROOT/etc/bash_completion.d
 install -d $RPM_BUILD_ROOT%{_mandir}/man1
 install -d $RPM_BUILD_ROOT%{install_path}/conf
 
-install %{name}-%{version}-uber.jar $RPM_BUILD_ROOT%{install_path}/%{name}.jar
+install %{name}-%{version}-%{_release}-uber.jar $RPM_BUILD_ROOT%{install_path}/%{name}.jar
 
 # Wrapper script for jar file
 install bin/zkpolicy $RPM_BUILD_ROOT%{_bindir}
@@ -77,6 +77,9 @@ rm -rf $RPM_BUILD_ROOT
 %postun -p /bin/sh
 
 %changelog
+* Wed Jun 17 2020 Christos Arvanitis <christos.arvanitis@cern.ch> 1.0.1-3
+- Add support for logical equation of IPv4 subnets and addresses
+
 * Mon Jun 15 2020 Christos Arvanitis <christos.arvanitis@cern.ch> 1.0.1-2
 - Add support for logical equation of ip subnets and addresses
 

@@ -6,10 +6,11 @@ REPOPREFIX=/db
 REPONAME=zookeeper-policy-audit-tool
 # Username
 USERNAME=$(shell klist|grep "principal:"|cut -d ' ' -f 3|cut -d '@' -f 1)
+POMFILE=zkPolicy/pom.xml
 
 # Get all the package info from the corresponding spec file
-PKGVERSION=$(shell awk '/^%define version/ { print $$3 }' ${SPECFILE})
-PKGRELEASE=2
+PKGVERSION=$(shell sed -nr 's/.*<version>(.*)-(.*)<\/version>/\1/p' $(POMFILE))
+PKGRELEASE=$(shell sed -nr 's/.*<version>(.*)-(.*)<\/version>/\2/p' $(POMFILE))
 PKGNAME=$(shell awk '/^%define name/ { print $$3 }' ${SPECFILE})
 PKGID=$(PKGNAME)-$(PKGVERSION)
 TARFILE=$(PKGID).tar.gz
@@ -17,7 +18,7 @@ TARFILE=$(PKGID).tar.gz
 DIST_RPM=hdp7
 
 package:
-	cd zkPolicy ; mvn package -DskipTests
+	cd zkPolicy ; mvn clean package -DskipTests -Dspotbugs.skip -Dpmd.skip -Dcpd.skip -Dcheckstyle.skip
 
 sources:
 	@echo $(PKGVERSION)
@@ -34,20 +35,20 @@ sources:
 
 	# Uber .jar file
 	cp zkPolicy/target/${JARFILE} /tmp/$(PKGID)
-	
+
 	# Manpages
 	cp -R zkPolicy/target/generated-docs/*.1 /tmp/$(PKGID)/manpages
-	
+
 	# Autocomplete script
 	cp zkPolicy/target/zkpolicy_autocomplete /tmp/$(PKGID)
-	
+
 	# .jar wrapper script
 	cp zkPolicy/bin/zkpolicy /tmp/$(PKGID)/bin
-	
+
 	# default configuration files
 	cp configs/default/* /tmp/$(PKGID)/conf
 
-	# create archive 
+	# create archive
 	cd /tmp ; pwd ; ls -la ; tar -cvzf $(TARFILE) $(PKGID)
 
 	mv /tmp/$(TARFILE) .
@@ -59,13 +60,13 @@ clean:
 	rm $(TARFILE)
 
 spec:
-	sed -e 's/%{_release}/${PKGRELEASE}/g' ${SPECFILE} > /tmp/${SPECFILE}
+	sed -e 's/%{_release}/${PKGRELEASE}/g; s/%{_version}/${PKGVERSION}/g' ${SPECFILE} > /tmp/${SPECFILE}
 
 srpm: all spec
-	rpmbuild -bs --define '_sourcedir $(PWD)' /tmp/${SPECFILE}
+	ls -la /builds/db/zookeeper-policy-audit-tool/; rpmbuild -bs --define '_sourcedir $(PWD)' /tmp/${SPECFILE}
 
 rpm: all spec
-	rpmbuild -ba --define "_release ${PKGRELEASE}" --define '_sourcedir $(PWD)' /tmp/${SPECFILE}
+	rpmbuild -ba --define "_release ${PKGRELEASE}" --define '_sourcedir $(PWD)' /tmp/${SPECFILE} 
 
 scratch:
 	koji build ${DIST_RPM} --nowait --scratch ${REPOURL}${REPOPREFIX}/${REPONAME}.git#$(shell git rev-parse HEAD)
