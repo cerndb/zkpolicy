@@ -35,26 +35,22 @@ public class ACLAugment {
       throw new IllegalArgumentException("Null stringACL provided");
     }
 
-    long count = stringACL.chars().filter(ch -> ch == ':').count();
-    if (count < 2 || count > 3) {
+    int firstColon = stringACL.indexOf(':');
+    int lastColon = stringACL.lastIndexOf(':');
+    if (firstColon == -1 || lastColon == -1 || firstColon == lastColon) {
       throw new IllegalArgumentException(stringACL + " does not have the form scheme:id:perm");
     }
+    String scheme = stringACL.substring(0, firstColon);
 
-    String[] aclSegments = stringACL.split(":");
-
-    if (!ZKPolicyDefs.Schemes.includes(aclSegments[0])) {
-      throw new IllegalArgumentException(aclSegments[0] + " is not a valid scheme type");
+    if (!ZKPolicyDefs.Schemes.includes(scheme)) {
+      throw new IllegalArgumentException(scheme + " is not a valid scheme type");
     }
 
+    String id = stringACL.substring(firstColon + 1, lastColon);
+    String perms = stringACL.substring(lastColon + 1);
     ACL newAcl = new ACL();
-    if (count == 3) {
-      newAcl.setId(new Id(aclSegments[0], aclSegments[1] + ":" + aclSegments[2]));
-      newAcl.setPerms(getPermFromString(aclSegments[3]));
-    } else {
-      newAcl.setId(new Id(aclSegments[0], aclSegments[1]));
-      newAcl.setPerms(getPermFromString(aclSegments[2]));
-    }
-
+    newAcl.setId(new Id(scheme, id));
+    newAcl.setPerms(getPermFromString(perms));
     this.acl = newAcl;
   }
 

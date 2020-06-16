@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
@@ -39,33 +37,6 @@ public class ZKPolicyUtils {
       returnOutput.put(checkElement.hashCode(), new ArrayList<String>());
     }
     return returnOutput;
-  }
-
-  /**
-   * Check if address is subnet range.
-   * 
-   * @param address Address string to be checked
-   * @return
-   */
-  public static Boolean isIPV4SubnetAddress(String address) {
-    String owaspPattern = "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\."
-        + "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|1[0-9]|[0-9])$";
-    Pattern subnetRegex = Pattern.compile(owaspPattern);
-    Matcher patternMatcher = subnetRegex.matcher(address);
-    return patternMatcher.matches();
-  }
-
-  /**
-   * Validate IPv4 address.
-   * @param address Address string to be checked
-   * @return
-   */
-  public static Boolean isIPV4Address(String address) {
-    String owaspPattern = "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\."
-        + "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
-    Pattern subnetRegex = Pattern.compile(owaspPattern);
-    Matcher patternMatcher = subnetRegex.matcher(address);
-    return patternMatcher.matches();
   }
 
   /**

@@ -75,10 +75,10 @@ public class ACLAugmentEquatorTest {
     o1 = new ACLAugment("ip:127.0.0.0:d");
     o2 = new ACLAugment("ip:127.0.0.0/24:cdra");
 
-    assertFalse(equator.equate(o1, o2));
+    assertTrue(equator.equate(o1, o2));
 
     assertThrows(IllegalArgumentException.class, () -> {
-      equator.equate(new ACLAugment("ip:127.0.0.0/24:d"), new ACLAugment("ip:127.0.0.0/24:cdra"));
+      equator.equate(new ACLAugment("ip:127.0.0a.0:d"), new ACLAugment("ip:127.0.0.0/24:cdra"));
     });
   }
 
