@@ -188,6 +188,12 @@
                 <argument>--outdir=${project.build.directory}/generated-picocli-docs</argument>
                 <argument>ch.cern.ZKPolicyCli</argument>
               </arguments>
+              <systemProperties>
+                <systemProperty>
+                  <key>log4j.configurationFile</key>
+                  <value>file:src/test/resources/log4j2.properties</value>
+                </systemProperty>
+              </systemProperties>
             </configuration>
           </execution>
           <execution>
