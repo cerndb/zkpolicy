@@ -17,7 +17,3 @@ mismatchColor: "RED"
 # Absolute path pointing to the JAAS configuration required
 # for ZooKeeper authentication and authorization
 jaas: "/path/to/jaas.conf"
-
-# Absolute path of file that will be used when the audit sub-command
-# is executed without defining a specific audit configuration file.
-defaultAuditPath: "/path/to/defaultAudit.yaml"
