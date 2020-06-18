@@ -7,107 +7,100 @@ sections:
   aclOverview: true
 
 queries:
-  # Hbase
-  # https://docs.cloudera.com/HDPDocuments/HDP3/HDP-3.1.5/zookeeper-acls/content/zookeeper_acls_best_practices_hbase.html
-  - name: "exactACL"
-    rootPath: "/hbase"
-    args:
-      - "sasl:hbase:cdrwa"
-
+  # Fetch duplicate ACL entries
   - name: "duplicateACL"
     rootPath: "/hbase"
 
-  # HDFS/WebHDFS
-  # https://docs.cloudera.com/HDPDocuments/HDP3/HDP-3.1.5/zookeeper-acls/content/zookeeper_acls_best_practices_hdfs_webhdfs.html
-  - name: "exactACL"
-    rootPath: "/hadoop-ha"
-    args:
-      - "sasl:hdfs:cdrwa"
+  # Fetch znodes not aligning with their parent ACL definition
+  - name: "parentYesChildNo"
+    rootPath: "/"
 
-  # Hive/HCatalog
-  # https://docs.cloudera.com/HDPDocuments/HDP3/HDP-3.1.5/zookeeper-acls/content/zookeeper_acls_best_practices_hive_hcatalog.html
-  - name: "exactACL"
-    rootPath: "/hiveserver2"
-    args:
-      - "world:anyone:r"
-      - "sasl:hive:cdrwa"
-
-  - name: "exactACL"
-    rootPath: "/hivedelegation"
-    args:
-      - "world:anyone:r"
-      - "sasl:hive:cdrwa"
-
-  - name: "exactACL"
-    rootPath: "/hive_zookeeper_namespace"
-    args:
-      - "world:anyone:cdrwa"
-
-  - name: "exactACL"
-    rootPath: "/llap-sasl"
-    args:
-      - "world:anyone:r"
-      - "sasl:hive:cdrwa"
-
-  - name: "exactACL"
-    rootPath: "/llap-unsecure"
-    args:
-      - "world:anyone:cdrwa"
+  # Fetch znodes that are open to any connected client
+  - name: "noACL"
+    rootPath: "/"
 
 checks:
   # HBase
-  - title: "Hbase Unsecure Check"
-    rootPath: "/hbase-unsecure"
+  - title: "Hbase Check, Open for global read, write protected"
+    rootPath: "/hbase"
+    pathPattern: "/hbase(?:|/master|/meta-region-server|/hbaseid|/table|/table/.*|/rs)"
+    negate: false
     acls:
-    pathPattern: "/hbase-unsecure.*"
-      - "world:anyone:cdrwa"
+      - "world:anyone:r"
+      - "sasl:hbase:cdrwa"
 
-  - title: "HDFS/WebHDFS Check"
+  - title: "Hbase Check, No global read, r/w protected"
+    rootPath: "/hbase"
+    pathPattern: "/hbase/(?:acl|rs|namespace|backup-masters|online-snapshot|draining|replication|region-in-transition|splitWAL|table-lock|recovering-regions|running|tokenauth).*"
+    negate: false
+    acls:
+      - "sasl:hbase:cdrwa"
+
+  # HDFS
+  - title: "HDFS/WebHDFS Check, No global read, r/w protected"
     rootPath: "/hadoop-ha"
-    pathPattern: "/hadoop-ha"
+    pathPattern: "/hadoop-ha.*"
+    negate: false
     acls:
       - "sasl:hdfs:cdrwa"
 
-  - title: "Hive/HCatalog Check"
+  # Hive
+  - title: "Hive/HCatalog Check, Open for global read, write protected"
     rootPath: "/"
-    pathPattern: "/(?:hiveserver2|hivedelegation|/llap-sasl/user-).*"
+    pathPattern: "/(?:hiveserver2|hivedelegation|llap-sasl/user-).*"
+    negate: false
     acls:
       - "world:anyone:r"
       - "sasl:hive:cdrwa"
 
-  - title: "Hive/HCatalog Check"
+  - title: "Hive/HCatalog Check, Completely open"
     rootPath: "/"
     pathPattern: "/(?:hive_zookeeper_namespace|llap-unsecure/user-).*"
+    negate: false
     acls:
       - "world:anyone:cdrwa"
 
-  - title: "Hive/HCatalog Check"
+  - title: "Hive/HCatalog Check, No global read, r/w protected"
     rootPath: "/"
     pathPattern: "/zkdtsm_[^/ ]+/ZKDTSMRoot/.*"
+    negate: false
     acls:
       - "sasl:hive:cdrwa"
 
-  - title: "Kafka Check"
+  # Kafka
+  - title: "Kafka Check, Open for global read, write protected"
     rootPath: "/"
     pathPattern: "/(?:controller|isr_change_notification).*"
+    negate: false
     acls:
       - "world:anyone:r"
       - "sasl:kafka:cdrwa"
 
-  - title: "Kafka Check"
+  - title: "Kafka Check, Completely open"
     rootPath: "/"
     pathPattern: "/(?:brokers|admin|controller_epoch|consumers|config).*"
+    negate: false
     acls:
       - "world:anyone:cdrwa"
 
-  - title: "Kafka Check"
+  - title: "Kafka Check, No global read, r/w protected"
     rootPath: "/"
     pathPattern: "/kafka-acl.*"
+    negate: false
     acls:
       - "sasl:kafka:cdrwa"
 
-  - title: "Ooozie Check"
+  - title: "Ooozie Check, No global read, r/w protected"
     rootPath: "/oozie"
     pathPattern: "/oozie.*"
+    negate: false
     acls:
       - "sasl:oozie:cdrwa"
+
+  - title: "YARN Check, Open for global read, write protected"
+    rootPath: "/"
+    pathPattern: "/(?:yarn-leader-election|rmstore).*"
+    negate: false
+    acls:
+      - "world:anyone:r"
+      - "sasl:rm:cdrwa"

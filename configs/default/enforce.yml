@@ -1,0 +1,116 @@
+---
+policies:
+    - title: "Hbase, Open for global read, write protected"
+      query:
+          name: "regexMatchPath"
+          rootPath: "/hbase"
+          args:
+              - "/hbase(?:|/master|/meta-region-server|/hbaseid|/table|/table/.*|/rs)"
+      append: false
+      acls:
+          - "world:anyone:r"
+          - "sasl:hbase:cdrwa"
+
+    - title: "Hbase, No global read, r/w protected"
+      query:
+          name: "regexMatchPath"
+          rootPath: "/hbase"
+          args:
+              - "/hbase/(?:acl|rs|namespace|backup-masters|online-snapshot|draining|replication|region-in-transition|splitWAL|table-lock|recovering-regions|running|tokenauth).*"
+      append: false
+      acls:
+          - "sasl:hbase:cdrwa"
+
+    - title: "HDFS/WebHDFS, No global read, r/w protected"
+      query:
+          name: "regexMatchPath"
+          rootPath: "/hadoop-ha"
+          args:
+              - "/hadoop-ha.*"
+      append: false
+      acls:
+          - "sasl:hdfs:cdrwa"
+
+    - title: "Hive/HCatalog, Open for global read, write protected"
+      query:
+          name: "regexMatchPath"
+          rootPath: "/"
+          args:
+              - "/(?:hiveserver2|hivedelegation|llap-sasl/user-).*"
+      append: false
+      acls:
+          - "world:anyone:r"
+          - "sasl:hive:cdrwa"
+
+    - title: "Hive/HCatalog, Completely open"
+      query:
+          name: "regexMatchPath"
+          rootPath: "/"
+          args:
+              - "/(?:hive_zookeeper_namespace|llap-unsecure/user-).*"
+      append: false
+      acls:
+          - "world:anyone:cdrwa"
+
+    - title: "Hive/HCatalog, No global read, r/w protected"
+      query:
+          name: "regexMatchPath"
+          rootPath: "/"
+          args:
+              - "/zkdtsm_[^/ ]+/ZKDTSMRoot/.*"
+      append: false
+      acls:
+          - "sasl:hive:cdrwa"
+
+    - title: "Kafka, Open for global read, write protected"
+      query:
+          name: "regexMatchPath"
+          rootPath: "/"
+          args:
+              - "/(?:controller|isr_change_notification).*"
+      append: false
+      acls:
+          - "world:anyone:r"
+          - "sasl:kafka:cdrwa"
+
+    - title: "Kafka, Completely open"
+      query:
+          name: "regexMatchPath"
+          rootPath: "/"
+          args:
+              - "/(?:brokers|admin|controller_epoch|consumers|config).*"
+      append: false
+      acls:
+          - "world:anyone:cdrwa"
+
+    - title: "Kafka, No global read, r/w protected"
+      query:
+          name: "regexMatchPath"
+          rootPath: "/"
+          args:
+              - "/kafka-acl.*"
+      append: false
+      acls:
+          - "sasl:kafka:cdrwa"
+
+    - title: "Ooozie, No global read, r/w protected"
+      query:
+          name: "regexMatchPath"
+          rootPath: "/oozie"
+          args:
+              - "/oozie.*"
+      append: false
+      acls:
+          - "sasl:oozie:cdrwa"
+
+    - title: YARN, Open for global read, write protected"
+      query:
+          name: "regexMatchPath"
+          rootPath: "/"
+          args:
+              - "/(?:yarn-leader-election|rmstore).*"
+      append: false
+      acls:
+          - "world:anyone:r"
+          - "sasl:rm:cdrwa"
+
