@@ -96,6 +96,7 @@ test:
   artifacts:
     paths:
       - ${PROJECT_NAME_DIR}/target/surefire-reports
+      - ${PROJECT_NAME_DIR}/target/zkpolicy_test.log
     expire_in: 1 week
   tags:
     - docker
