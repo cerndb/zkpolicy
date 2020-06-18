@@ -67,6 +67,24 @@ install conf/* $RPM_BUILD_ROOT%{install_path}/conf
 %{_mandir}/man1/zkpolicy*
 %{install_path}/conf/*
 
+%pre -p /bin/sh
+
+# Creating groups and users
+getent group zookeeper 2>/dev/null >/dev/null || /usr/sbin/groupadd -r zookeeper
+getent group zkpolicy 2>/dev/null >/dev/null || /usr/sbin/groupadd -r zkpolicy
+getent passwd zkpolicy 2>&1 > /dev/null || /usr/sbin/useradd -c "ZKPolicy" -s /bin/bash -g zkpolicy -G zookeeper -r zkpolicy 2> /dev/null || :
+
+# Create log directory if it does not exist
+if [[ ! -e "/var/log/zkpolicy" ]]; then
+  /usr/bin/install -d -o zkpolicy -g zkpolicy -m 0755 /var/log/zkpolicy
+fi
+
+if [[ ! -e "/var/log/zkpolicy/zkpolicy.log" ]]; then
+  /usr/bin/touch /var/log/zkpolicy/zkpolicy.log
+  /usr/bin/chown zkpolicy.zkpolicy /var/log/zkpolicy/zkpolicy.log
+  /usr/bin/chmod og+rw /var/log/zkpolicy/zkpolicy.log
+fi
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
