@@ -134,9 +134,6 @@ zkServers: "127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181"
 matchColor: "GREEN"
 mismatchColor: "RED"
 jaas: "/path/to/jaas.conf"
-
-# This path will be used when the audit subcommand is executed without any further arguments.
-defaultAuditPath: "/path/to/defaultAudit.yml"
 ```
 
 An example configuration file can be found [here](../configs/examples/config_example.yml).

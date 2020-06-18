@@ -25,7 +25,7 @@ public class ZKCheckCli implements Runnable {
       "--path-pattern" }, required = true, description = Check.PATH_PATTERN_DESCRIPTION)
   String pathPattern;
 
-  @Option(names = { "-a", "--acls" }, description = Check.ACLS_DESCRIPTION)
+  @Option(names = { "-a", "--acls" }, required = true, description = Check.ACLS_DESCRIPTION)
   List<String> checkACLs;
 
   @Option(names = { "-n", "--negate" }, description = Check.NEGATE_DESCRIPTION)

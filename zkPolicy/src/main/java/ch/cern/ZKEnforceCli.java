@@ -23,7 +23,8 @@ public class ZKEnforceCli implements Runnable {
   private ZKPolicyCli parent;
 
   static class FileEnforceGroup {
-    @Option(names = { "-i", "--input" }, required = true, description = Enforce.INPUT_DESCRIPTION)
+    @Option(names = { "-i",
+        "--input" }, required = true, description = Enforce.INPUT_DESCRIPTION, defaultValue = Enforce.INPUT_DEFAULT)
     File policiesFile;
   }
 
@@ -31,8 +32,7 @@ public class ZKEnforceCli implements Runnable {
     @Option(names = { "-P", "--policy" }, required = true, description = Enforce.POLICY_DESCRIPTION)
     List<String> policies;
 
-    @Parameters(paramLabel = "[QUERY_NAME]",
-        description = Enforce.QUERY_NAME_DESCRIPTION,
+    @Parameters(paramLabel = "[QUERY_NAME]", description = Enforce.QUERY_NAME_DESCRIPTION,
         completionCandidates = ZKQueryCli.DefaultQueryCandidates.class)
     String queryName;
 
@@ -42,8 +42,7 @@ public class ZKEnforceCli implements Runnable {
     @Option(names = { "-a", "--args" }, required = false, description = Enforce.ARGS_DESCRIPTION)
     List<String> queryArgs;
 
-    @Option(names = { "-A",
-        "--append" }, required = false, description = Enforce.APPEND_DESCRIPTION)
+    @Option(names = { "-A", "--append" }, required = false, description = Enforce.APPEND_DESCRIPTION)
     boolean append = false;
   }
 

@@ -82,6 +82,7 @@ public class ZKPolicyDefs {
     static class Enforce {
       static final String DESCRIPTION = "Enforce policy on znodes";
       static final String INPUT_DESCRIPTION = "File with policy definitions to enforce";
+      static final String INPUT_DEFAULT = "/opt/zkpolicy/conf/enforce.yml";
       static final String POLICY_DESCRIPTION = "Policies to enforce on matching nodes";
       static final String QUERY_NAME_DESCRIPTION = "Query to be executed: ${COMPLETION-CANDIDATES}";
       static final String ROOT_PATH_DESCRIPTION = "Root path to execute query before applying policy";
@@ -130,9 +131,9 @@ public class ZKPolicyDefs {
   }
 
   static class Check {
-    static final String DESCRIPTION_FORMAT = "Check if the subset of znodes under %s with path that matches the %s"
+    static final String DESCRIPTION_FORMAT = "Check if the subset of znodes under %s with path that match the %s"
         + " pattern have the following ACL definition set:";
-    static final String NEGATE_DESCRIPTION_FORMAT = "Check if the subset of znodes under %s with path that matches the %s"
+    static final String NEGATE_DESCRIPTION_FORMAT = "Check if the subset of znodes under %s with path that match the %s"
         + " pattern are not accessible by clients with the following authentication credentials:";
   }
 
