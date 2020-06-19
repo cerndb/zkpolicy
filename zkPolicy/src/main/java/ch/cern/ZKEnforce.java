@@ -35,6 +35,10 @@ public class ZKEnforce {
       throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, KeeperException, InterruptedException, NoSuchFieldException {
 
+    if (this.zk.exists(rootPath, null) == null) {
+      System.out.println("The path " + rootPath + " does not exist.");
+      return;
+    }
     ZKDefaultQuery zkDefaultQuery = new ZKDefaultQuery();
     ZKQuery query = zkDefaultQuery.getValueOf(queryName);
     enforceInnerDry(rootPath, query, queryACLs);
@@ -62,6 +66,10 @@ public class ZKEnforce {
       throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, InterruptedException, KeeperException, NoSuchFieldException {
 
+    if (this.zk.exists(rootPath, null) == null) {
+      System.out.println("The path " + rootPath + " does not exist.");
+      return;
+    }
     List<ACL> policiesACL = new ArrayList<ACL>();
     for (String policyACLString : policies) {
       policiesACL.add(new ACLAugment(policyACLString).getACL());
