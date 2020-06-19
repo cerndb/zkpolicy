@@ -234,7 +234,7 @@ public class ZKAudit {
 
         outputBuf.append("\nResult:\n");
         outputBuf.append(String.join("\n", queriesOutput.get(queryElement.hashCode())) + "\n");
-        outputBuf.append(ZKPolicyDefs.TerminalConstants.subSectionSeparator);
+        outputBuf.append("\n" + ZKPolicyDefs.TerminalConstants.subSectionSeparator + "\n");
       }
     }
     return outputBuf.toString();
@@ -283,8 +283,16 @@ public class ZKAudit {
         } else {
           outputBuf.append("\nResult: FAIL\n");
         }
-        outputBuf.append(String.join("\n", checksOutput.get(checkElement.hashCode())) + "\n");
-        outputBuf.append(ZKPolicyDefs.TerminalConstants.subSectionSeparator);
+
+        List<String> checkOutput = checksOutput.get(checkElement.hashCode());
+        if (checkOutput.size() == 0) {
+          outputBuf.append("No znodes matching the requested path pattern found.");
+        }
+        else {
+          outputBuf.append(String.join("\n", checkOutput) + "\n");
+        }
+
+        outputBuf.append("\n" + ZKPolicyDefs.TerminalConstants.subSectionSeparator + "\n");
       }
 
       // Add aggregate result for checks

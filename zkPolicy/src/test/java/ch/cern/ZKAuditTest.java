@@ -224,24 +224,84 @@ public class ZKAuditTest {
 
     String expectedOutput = String.join("\n", "", "Query: globMatchACL", "Root Path: /a", "Arguments:", "- digest:*:*",
         "Description: Znodes under /a that satisfy the globMatchACL query",
-        " * globMatchACL: " + Queries.GLOB_MATCH_ACL_DESCRIPTION, "", "Result:", "/a",
-        "/a/aa", "", "---------------------------------------------------------------------", "", "Query: exactACL",
+        " * globMatchACL: " + Queries.GLOB_MATCH_ACL_DESCRIPTION, "", "Result:", "/a", "/a/aa", "",
+        "---------------------------------------------------------------------", "", "Query: exactACL",
         "Root Path: /zookeeper/quota", "Arguments:", "- world:anyone:r",
         "Description: Znodes under /zookeeper/quota that satisfy the exactACL query",
         " * exactACL: " + Queries.EXACT_ACL_DESCRIPTION, "", "Result:", "", "",
         "---------------------------------------------------------------------", "", "Query: noACL", "Root Path: /b",
-        "Description: Znodes under /b that satisfy the noACL query",
-        " * noACL: " + Queries.NO_ACL_DESCRIPTION, "", "Result:",
-        "WARNING: No READ permission for /b/bb, skipping subtree", "",
+        "Description: Znodes under /b that satisfy the noACL query", " * noACL: " + Queries.NO_ACL_DESCRIPTION, "",
+        "Result:", "WARNING: No READ permission for /b/bb, skipping subtree", "",
         "---------------------------------------------------------------------", "", "Query: globMatchACL",
         "Root Path: /b", "Arguments:", "- *:*:*", "Description: Znodes under /b that satisfy the globMatchACL query",
         " * globMatchACL: " + Queries.GLOB_MATCH_ACL_DESCRIPTION, "", "Result:", "/b",
         "WARNING: No READ permission for /b/bb, skipping subtree", "",
         "---------------------------------------------------------------------", "", "Query: regexMatchACL",
-        "Root Path: /zookeeper", "Arguments:", "- sasl:.*:.*", "Description: Znodes under /zookeeper that satisfy the regexMatchACL query",
+        "Root Path: /zookeeper", "Arguments:", "- sasl:.*:.*",
+        "Description: Znodes under /zookeeper that satisfy the regexMatchACL query",
         " * regexMatchACL: " + Queries.REGEX_MATCH_ACL_DESCRIPTION, "", "Result:", "", "",
         "---------------------------------------------------------------------", "");
 
     assertEquals(expectedOutput, zkAudit.generateQueriesSection());
+  }
+
+  @Test
+  public void testNoNodesFoundForPathPatternCheck() throws Exception {
+    File file = new File(testTempDir, "audit_tmp.yml");
+
+    FileWriter fw = new FileWriter(file);
+    fw.write("---\n");
+    fw.write("checks:\n");
+    fw.write("  - title: \"Check 1 title\"\n");
+    fw.write("    rootPath: \"/a\"\n");
+    fw.write("    pathPattern: \"/noexistingpattern\"\n");
+    fw.write("    negate: false\n");
+    fw.write("    acls:\n");
+    fw.write("      - \"world:anyone:r\"\n");
+
+    fw.flush();
+    fw.close();
+
+    ZKAudit zkAudit = new ZKAudit(this.zkClient, file);
+    assertNotNull(zkAudit);
+
+    String expectedOutput = String.join("\n", "", "Check: Check 1 title", "Root Path: /a",
+        "Path Pattern: /noexistingpattern", "Arguments:", "- world:anyone:r",
+        "Description: Check if the subset of znodes under /a with"
+            + " path that match the /noexistingpattern pattern have the following ACL definition set:",
+        "- world:anyone:r", "", "Result: PASS", "No znodes matching the requested path pattern found.",
+        ZKPolicyDefs.TerminalConstants.subSectionSeparator, "", "Overall Check Result: PASS", "");
+
+    assertEquals(expectedOutput, zkAudit.generateChecksSection());
+  }
+
+  @Test
+  public void testInvalidRootPathCheck() throws Exception {
+    File file = new File(testTempDir, "audit_tmp.yml");
+
+    FileWriter fw = new FileWriter(file);
+    fw.write("---\n");
+    fw.write("checks:\n");
+    fw.write("  - title: \"Check 1 title\"\n");
+    fw.write("    rootPath: \"/invalidRootPath\"\n");
+    fw.write("    pathPattern: \".*\"\n");
+    fw.write("    negate: false\n");
+    fw.write("    acls:\n");
+    fw.write("      - \"world:anyone:r\"\n");
+
+    fw.flush();
+    fw.close();
+
+    ZKAudit zkAudit = new ZKAudit(this.zkClient, file);
+    assertNotNull(zkAudit);
+
+    String expectedOutput = String.join("\n", "", "Check: Check 1 title", "Root Path: /invalidRootPath",
+        "Path Pattern: .*", "Arguments:", "- world:anyone:r",
+        "Description: Check if the subset of znodes under /invalidRootPath with"
+            + " path that match the .* pattern have the following ACL definition set:",
+        "- world:anyone:r", "", "Result: FAIL", "The path /invalidRootPath does not exist.", "",
+        ZKPolicyDefs.TerminalConstants.subSectionSeparator, "", "Overall Check Result: FAIL", "", "PASS: 0, FAIL: 1", "");
+
+    assertEquals(expectedOutput, zkAudit.generateChecksSection());
   }
 }

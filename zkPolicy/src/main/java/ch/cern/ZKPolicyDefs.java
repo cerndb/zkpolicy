@@ -13,6 +13,10 @@ public class ZKPolicyDefs {
     json, yaml
   }
 
+  enum CheckResults {
+    pass, fail, invalidRootPath, notExistingRootPath
+  }
+
   @AllArgsConstructor(access = AccessLevel.PROTECTED)
   enum Colors {
     // This will call enum constructor with one
@@ -150,6 +154,6 @@ public class ZKPolicyDefs {
 
     // Audit report CLI constants
     String sectionSeparator = "\n===============================================\n";
-    String subSectionSeparator = "\n---------------------------------------------------------------------\n";
+    String subSectionSeparator = "---------------------------------------------------------------------";
   }
 }

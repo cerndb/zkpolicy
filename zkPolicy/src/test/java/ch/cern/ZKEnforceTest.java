@@ -102,8 +102,8 @@ public class ZKEnforceTest {
   @Test
   public void testEnforceDry() throws NoSuchMethodException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, KeeperException, InterruptedException, NoSuchFieldException {
-        List<String> enforceACLs = new ArrayList<String>() ;
-        enforceACLs.add("ip:127.0.0.3:r");
+    List<String> enforceACLs = new ArrayList<String>();
+    enforceACLs.add("ip:127.0.0.3:r");
     this.zkEnforce.enforceDry("satisfyACL", "/", enforceACLs);
     String expectedResult = "/\n" + "WARNING: No READ permission for /a/bb, skipping subtree\n" + "/b\n" + "/b/bb\n"
         + "/c/cc\n" + "/zookeeper\n" + "/zookeeper/config\n" + "/zookeeper/quota\n";
@@ -113,10 +113,10 @@ public class ZKEnforceTest {
   @Test
   public void testEnforce() throws NoSuchMethodException, KeeperException, InterruptedException, SecurityException,
       IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
-    List<String> enforceACLs = new ArrayList<String>() ;
+    List<String> enforceACLs = new ArrayList<String>();
     enforceACLs.add("ip:127.0.0.3:.*");
     enforceACLs.add("world:anyone:.*");
-    List<String> policies = new ArrayList<String>() ;
+    List<String> policies = new ArrayList<String>();
     policies.add("world:anyone:ra");
     policies.add("ip:127.0.0.4:cda");
     this.zkEnforce.enforce(policies, "regexMatchACL", "/b", enforceACLs, false);
@@ -131,12 +131,12 @@ public class ZKEnforceTest {
   public void testEnforceAppend()
       throws NoSuchMethodException, KeeperException, InterruptedException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
-    List<String> enforceACLs = new ArrayList<String>() ;
+    List<String> enforceACLs = new ArrayList<String>();
     enforceACLs.add("ip:127.0.0.4:.*");
     enforceACLs.add("world:anyone:.*");
-    List<String> policies = new ArrayList<String>() ;
+    List<String> policies = new ArrayList<String>();
     policies.add("ip:127.0.0.3:cr");
-    this.zkEnforce.enforce(policies, "regexMatchACL", "/", enforceACLs , true);
+    this.zkEnforce.enforce(policies, "regexMatchACL", "/", enforceACLs, true);
     List<ACL> alteredList = this.zkClient.getACL("/b/bb", null);
     List<ACL> expectedList = new ArrayList<ACL>();
     expectedList.add(new ACLAugment("world:anyone:ra").getACL());
@@ -145,4 +145,32 @@ public class ZKEnforceTest {
     assertEquals(expectedList, alteredList);
   }
 
+  @Test
+  public void testEnforceInvalidRootPath()
+      throws NoSuchMethodException, KeeperException, InterruptedException, SecurityException, IllegalAccessException,
+      IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+    List<String> enforceACLs = new ArrayList<String>();
+    enforceACLs.add("ip:127.0.0.3:.*");
+    enforceACLs.add("world:anyone:.*");
+    List<String> policies = new ArrayList<String>();
+    policies.add("world:anyone:ra");
+    policies.add("ip:127.0.0.4:cda");
+    this.zkEnforce.enforce(policies, "regexMatchACL", "/invalidRootPath", enforceACLs, false);
+    String expectedResult = "The path /invalidRootPath does not exist.\n";
+    assertEquals(expectedResult, this.consoleContent.toString());
+  }
+
+  public void testEnforceInvalidRootPathDryRun()
+      throws NoSuchMethodException, KeeperException, InterruptedException, SecurityException, IllegalAccessException,
+      IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+    List<String> enforceACLs = new ArrayList<String>();
+    enforceACLs.add("ip:127.0.0.3:.*");
+    enforceACLs.add("world:anyone:.*");
+    List<String> policies = new ArrayList<String>();
+    policies.add("world:anyone:ra");
+    policies.add("ip:127.0.0.4:cda");
+    this.zkEnforce.enforceDry("regexMatchACL", "/invalidRootPath", enforceACLs);
+    String expectedResult = "The path /invalidRootPath does not exist.\n";
+    assertEquals(expectedResult, this.consoleContent.toString());
+  }
 }
