@@ -31,7 +31,7 @@ checks:
 
   - title: "Hbase Check, No global read, r/w protected"
     rootPath: "/hbase"
-    pathPattern: "/hbase/(?:acl|rs|namespace|backup-masters|online-snapshot|draining|replication|region-in-transition|splitWAL|table-lock|recovering-regions|running|tokenauth).*"
+    pathPattern: "/hbase/(?:acl|rs/|namespace|backup-masters|online-snapshot|draining|replication|region-in-transition|splitWAL|table-lock|recovering-regions|running|tokenauth).*"
     negate: false
     acls:
       - "sasl:hbase:cdrwa"

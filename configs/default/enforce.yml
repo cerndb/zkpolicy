@@ -16,7 +16,7 @@ policies:
           name: "regexMatchPath"
           rootPath: "/hbase"
           args:
-              - "/hbase/(?:acl|rs|namespace|backup-masters|online-snapshot|draining|replication|region-in-transition|splitWAL|table-lock|recovering-regions|running|tokenauth).*"
+              - "/hbase/(?:acl|rs/|namespace|backup-masters|online-snapshot|draining|replication|region-in-transition|splitWAL|table-lock|recovering-regions|running|tokenauth).*"
       append: false
       acls:
           - "sasl:hbase:cdrwa"
