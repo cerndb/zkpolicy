@@ -123,7 +123,7 @@ public class ZKPolicyDefs {
   static class Queries {
     static final String EXACT_ACL_DESCRIPTION = "Match znodes with ACL equal to the passed ACL argument";
     static final String NO_ACL_DESCRIPTION = "Match znodes with no access control restrictions (ACL equals [world:anyone:cdrwa])";
-    static final String SATISFY_ACL_DESCRIPTION = "Match znodes are accessible by clients with the passed"
+    static final String SATISFY_ACL_DESCRIPTION = "Match znodes that are accessible by clients with the passed"
         + " authentication info arguments (logical match)";
     static final String NO_SATISFY_ACL_DESCRIPTION = "Match znodes that are not accessible by clients with the passed authentication info arguments";
     static final String PARENT_YES_CHILD_NO_DESCRIPTION = "Match znodes with ACL not equal to their parent's ACL";
@@ -135,9 +135,9 @@ public class ZKPolicyDefs {
   }
 
   static class Check {
-    static final String DESCRIPTION_FORMAT = "Check if the subset of znodes under %s with path that match the %s"
+    static final String DESCRIPTION_FORMAT = "Check if znodes under %s with paths matching the %s"
         + " pattern have the following ACL definition set:";
-    static final String NEGATE_DESCRIPTION_FORMAT = "Check if the subset of znodes under %s with path that match the %s"
+    static final String NEGATE_DESCRIPTION_FORMAT = "Check if znodes under %s with paths matching the %s"
         + " pattern are not accessible by clients with the following authentication credentials:";
   }
 

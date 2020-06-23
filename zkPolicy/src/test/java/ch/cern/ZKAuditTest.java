@@ -267,8 +267,7 @@ public class ZKAuditTest {
 
     String expectedOutput = String.join("\n", "", "Check: Check 1 title", "Root Path: /a",
         "Path Pattern: /noexistingpattern", "Arguments:", "- world:anyone:r",
-        "Description: Check if the subset of znodes under /a with"
-            + " path that match the /noexistingpattern pattern have the following ACL definition set:",
+        "Description: " + String.format(ZKPolicyDefs.Check.DESCRIPTION_FORMAT, "/a", "/noexistingpattern"),
         "- world:anyone:r", "", "Result: PASS", "No znodes matching the requested path pattern found.",
         ZKPolicyDefs.TerminalConstants.subSectionSeparator, "", "Overall Check Result: PASS", "");
 
@@ -297,10 +296,10 @@ public class ZKAuditTest {
 
     String expectedOutput = String.join("\n", "", "Check: Check 1 title", "Root Path: /invalidRootPath",
         "Path Pattern: .*", "Arguments:", "- world:anyone:r",
-        "Description: Check if the subset of znodes under /invalidRootPath with"
-            + " path that match the .* pattern have the following ACL definition set:",
+        "Description: " + String.format(ZKPolicyDefs.Check.DESCRIPTION_FORMAT, "/invalidRootPath", ".*"),
         "- world:anyone:r", "", "Result: FAIL", "The path /invalidRootPath does not exist.", "",
-        ZKPolicyDefs.TerminalConstants.subSectionSeparator, "", "Overall Check Result: FAIL", "", "PASS: 0, FAIL: 1", "");
+        ZKPolicyDefs.TerminalConstants.subSectionSeparator, "", "Overall Check Result: FAIL", "", "PASS: 0, FAIL: 1",
+        "");
 
     assertEquals(expectedOutput, zkAudit.generateChecksSection());
   }

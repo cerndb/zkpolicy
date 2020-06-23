@@ -35,13 +35,13 @@ public class ZKQueryCli implements Runnable {
   String rootPath;
 
   @Option(names = { "-a", "--args" }, description = Query.ARGS_DESCRIPTION)
-  List<String> queryACLs;
+  List<String> queryArgs;
 
   @Option(names = {"-D", "--description"}, description = Query.DESCR_DESCRIPTION)
   Boolean description = false;
 
   static class TreeQueryGroup {
-    @Option(names = {"--colorDescription"}, description = Query.COLOR_DESCR_DESCRIPTION)
+    @Option(names = {"--color-description"}, description = Query.COLOR_DESCR_DESCRIPTION)
     Boolean colorDescription = false;
   }
 
@@ -84,7 +84,7 @@ public class ZKQueryCli implements Runnable {
       // Get query to execute
       ZKQuery query = zkDefaultQuery.getValueOf(this.queryName);
 
-      ZKQueryElement queryElement = new ZKQueryElement(this.queryName, this.rootPath, this.queryACLs, query);
+      ZKQueryElement queryElement = new ZKQueryElement(this.queryName, this.rootPath, this.queryArgs, query);
       List<ZKQueryElement> queriesList = new ArrayList<ZKQueryElement>();
       queriesList.add(queryElement);
 

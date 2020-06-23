@@ -103,7 +103,7 @@ policies:
       acls:
           - "sasl:oozie:cdrwa"
 
-    - title: YARN, Open for global read, write protected"
+    - title: "YARN, Open for global read, write protected"
       query:
           name: "regexMatchPath"
           rootPath: "/"
@@ -114,3 +114,12 @@ policies:
           - "world:anyone:r"
           - "sasl:rm:cdrwa"
 
+    - title: "No ACL restricted znodes, Open for global read, write"
+      query:
+          name: "noACL"
+          rootPath: "/"
+          args:
+              - "/.*"
+      append: false
+      acls:
+          - "world:anyone:crw"
