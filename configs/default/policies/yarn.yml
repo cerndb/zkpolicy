@@ -1,0 +1,12 @@
+---
+policies:
+  - title: "YARN, Open for global read, write protected"
+    query:
+      name: "regexMatchPath"
+      rootPath: "/"
+      args:
+        - "/(?:yarn-leader-election|rmstore)"
+    append: false
+    acls:
+      - "world:anyone:r"
+      - "sasl:rm:cdrwa"

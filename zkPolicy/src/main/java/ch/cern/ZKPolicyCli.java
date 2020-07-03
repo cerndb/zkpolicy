@@ -21,6 +21,7 @@ import ch.cern.ZKPolicyDefs.Cli.ZkPolicy;
         ZKEnforceCli.class,
         ZKAuditCli.class,
         ZKCheckCli.class,
+        ZKRollbackCli.class,
         HelpCommand.class
       },
     mixinStandardHelpOptions = true)

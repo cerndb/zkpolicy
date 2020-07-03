@@ -35,3 +35,8 @@ TODO
 # Others
 #
 .factorypath
+
+#
+# Log files
+#
+*.log

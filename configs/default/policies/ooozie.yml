@@ -1,0 +1,11 @@
+---
+policies:
+  - title: "Ooozie, No global read, r/w protected"
+    query:
+      name: "regexMatchPath"
+      rootPath: "/oozie"
+      args:
+        - "/oozie.*"
+    append: false
+    acls:
+      - "sasl:oozie:cdrwa"

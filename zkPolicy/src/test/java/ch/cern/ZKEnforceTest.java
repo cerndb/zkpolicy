@@ -102,9 +102,16 @@ public class ZKEnforceTest {
   @Test
   public void testEnforceDry() throws NoSuchMethodException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, KeeperException, InterruptedException, NoSuchFieldException {
-    List<String> enforceACLs = new ArrayList<String>();
-    enforceACLs.add("ip:127.0.0.3:r");
-    this.zkEnforce.enforceDry("satisfyACL", "/", enforceACLs);
+    List<String> queryArgs = new ArrayList<String>();
+    queryArgs.add("ip:127.0.0.3:r");
+
+    ZKQueryElement query = new ZKQueryElement();
+    query.setName("satisfyACL");
+    query.setRootPath("/");
+    query.setArgs(queryArgs);
+    ZKEnforcePolicyElement policy = new ZKEnforcePolicyElement();
+    policy.setQuery(query);
+    this.zkEnforce.enforceDry(policy);
     String expectedResult = "/\n" + "WARNING: No READ permission for /a/bb, skipping subtree\n" + "/b\n" + "/b/bb\n"
         + "/c/cc\n" + "/zookeeper\n" + "/zookeeper/config\n" + "/zookeeper/quota\n";
     assertEquals(expectedResult, this.consoleContent.toString());
@@ -113,13 +120,23 @@ public class ZKEnforceTest {
   @Test
   public void testEnforce() throws NoSuchMethodException, KeeperException, InterruptedException, SecurityException,
       IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
-    List<String> enforceACLs = new ArrayList<String>();
-    enforceACLs.add("ip:127.0.0.3:.*");
-    enforceACLs.add("world:anyone:.*");
+    List<String> queryArgs = new ArrayList<String>();
+    queryArgs.add("ip:127.0.0.3:.*");
+    queryArgs.add("world:anyone:.*");
     List<String> policies = new ArrayList<String>();
     policies.add("world:anyone:ra");
     policies.add("ip:127.0.0.4:cda");
-    this.zkEnforce.enforce(policies, "regexMatchACL", "/b", enforceACLs, false);
+
+    ZKQueryElement query = new ZKQueryElement();
+    query.setName("regexMatchACL");
+    query.setRootPath("/b");
+    query.setArgs(queryArgs);
+    ZKEnforcePolicyElement policy = new ZKEnforcePolicyElement();
+    policy.setAcls(policies);
+    policy.setQuery(query);
+    policy.setAppend(false);
+
+    this.zkEnforce.enforce(policy);
     List<ACL> alteredList = this.zkClient.getACL("/b/bb", null);
     List<ACL> expectedList = new ArrayList<ACL>();
     expectedList.add(new ACLAugment("world:anyone:ra").getACL());
@@ -131,12 +148,23 @@ public class ZKEnforceTest {
   public void testEnforceAppend()
       throws NoSuchMethodException, KeeperException, InterruptedException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
-    List<String> enforceACLs = new ArrayList<String>();
-    enforceACLs.add("ip:127.0.0.4:.*");
-    enforceACLs.add("world:anyone:.*");
+    List<String> queryArgs = new ArrayList<String>();
+    queryArgs.add("ip:127.0.0.4:.*");
+    queryArgs.add("world:anyone:.*");
     List<String> policies = new ArrayList<String>();
     policies.add("ip:127.0.0.3:cr");
-    this.zkEnforce.enforce(policies, "regexMatchACL", "/", enforceACLs, true);
+
+
+    ZKQueryElement query = new ZKQueryElement();
+    query.setName("regexMatchACL");
+    query.setRootPath("/");
+    query.setArgs(queryArgs);
+    ZKEnforcePolicyElement policy = new ZKEnforcePolicyElement();
+    policy.setAcls(policies);
+    policy.setQuery(query);
+    policy.setAppend(true);
+
+    this.zkEnforce.enforce(policy);
     List<ACL> alteredList = this.zkClient.getACL("/b/bb", null);
     List<ACL> expectedList = new ArrayList<ACL>();
     expectedList.add(new ACLAugment("world:anyone:ra").getACL());
@@ -149,13 +177,23 @@ public class ZKEnforceTest {
   public void testEnforceInvalidRootPath()
       throws NoSuchMethodException, KeeperException, InterruptedException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
-    List<String> enforceACLs = new ArrayList<String>();
-    enforceACLs.add("ip:127.0.0.3:.*");
-    enforceACLs.add("world:anyone:.*");
+    List<String> queryArgs = new ArrayList<String>();
+    queryArgs.add("ip:127.0.0.3:.*");
+    queryArgs.add("world:anyone:.*");
     List<String> policies = new ArrayList<String>();
     policies.add("world:anyone:ra");
     policies.add("ip:127.0.0.4:cda");
-    this.zkEnforce.enforce(policies, "regexMatchACL", "/invalidRootPath", enforceACLs, false);
+
+    ZKQueryElement query = new ZKQueryElement();
+    query.setName("regexMatchACL");
+    query.setRootPath("/invalidRootPath");
+    query.setArgs(queryArgs);
+    ZKEnforcePolicyElement policy = new ZKEnforcePolicyElement();
+    policy.setAcls(policies);
+    policy.setQuery(query);
+    policy.setAppend(false);
+
+    this.zkEnforce.enforce(policy);
     String expectedResult = "The path /invalidRootPath does not exist.\n";
     assertEquals(expectedResult, this.consoleContent.toString());
   }
@@ -163,13 +201,23 @@ public class ZKEnforceTest {
   public void testEnforceInvalidRootPathDryRun()
       throws NoSuchMethodException, KeeperException, InterruptedException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
-    List<String> enforceACLs = new ArrayList<String>();
-    enforceACLs.add("ip:127.0.0.3:.*");
-    enforceACLs.add("world:anyone:.*");
+    List<String> queryArgs = new ArrayList<String>();
+    queryArgs.add("ip:127.0.0.3:.*");
+    queryArgs.add("world:anyone:.*");
     List<String> policies = new ArrayList<String>();
     policies.add("world:anyone:ra");
     policies.add("ip:127.0.0.4:cda");
-    this.zkEnforce.enforceDry("regexMatchACL", "/invalidRootPath", enforceACLs);
+
+    ZKQueryElement query = new ZKQueryElement();
+    query.setName("regexMatchACL");
+    query.setRootPath("/invalidRootPath");
+    query.setArgs(queryArgs);
+    ZKEnforcePolicyElement policy = new ZKEnforcePolicyElement();
+    policy.setAcls(policies);
+    policy.setQuery(query);
+    policy.setAppend(false);
+
+    this.zkEnforce.enforceDry(policy);
     String expectedResult = "The path /invalidRootPath does not exist.\n";
     assertEquals(expectedResult, this.consoleContent.toString());
   }

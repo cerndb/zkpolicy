@@ -106,6 +106,17 @@ An example policies configuration file can be found [here](../configs/examples/p
 ##### Dry run execution
 Enforcing policies is a nonreversible operation so an admin has to be sure about the changes to be imposed. For this reason, both execution ways of enforcing can be executed in a `dry-run` mode. For `dry-run`, please append `-d` to the previous commands.
 
+#### Rollback enforced policies
+In case of incorrect enforcing, rollback functionality is provided by zkpolicy. Before enforcing a policy, zkpolicy creates by a rollback state file (by default `/opt/zkpolicy/rollback/ROLLBACK_STATE_<DATETIME>.yml`). The rollback state path can be changed using the `--rollback-export` option of the `enforce` subcommand.
+
+In order to rollback to a pre enforce state, use the `rollback` subcommand:
+
+```bash
+zkpolicy -c config.yml rollback -i /opt/zkpolicy/rollback/ROLLBACK_STATE_<DATETIME>.yml
+```
+
+**Warning:** It is advised to execute `rollback` only when authenticated as superuser to the ZooKeeper server or being sure that you have read and admin permissions for all nodes that where affected by the previous `enforce` operation.
+
 #### Visualization
 To get an visual representation of the ZooKeeper tree structure, zkPolicy offers the `tree` subcommand:
 

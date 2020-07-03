@@ -1,0 +1,11 @@
+---
+policies:
+  - title: "HDFS/WebHDFS, No global read, r/w protected"
+    query:
+      name: "regexMatchPath"
+      rootPath: "/hadoop-ha"
+      args:
+        - "/hadoop-ha.*"
+    append: false
+    acls:
+      - "sasl:hdfs:cdrwa"

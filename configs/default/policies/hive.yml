@@ -1,0 +1,32 @@
+---
+policies:
+  - title: "Hive/HCatalog, Open for global read, write protected"
+    query:
+      name: "regexMatchPath"
+      rootPath: "/"
+      args:
+        - "/(?:hiveserver2|hivedelegation|llap-sasl/user-).*"
+    append: false
+    acls:
+      - "world:anyone:r"
+      - "sasl:hive:cdrwa"
+
+  - title: "Hive/HCatalog, Completely open"
+    query:
+      name: "regexMatchPath"
+      rootPath: "/"
+      args:
+        - "/(?:hive_zookeeper_namespace|llap-unsecure/user-).*"
+    append: false
+    acls:
+      - "world:anyone:cdrwa"
+
+  - title: "Hive/HCatalog, No global read, r/w protected"
+    query:
+      name: "regexMatchPath"
+      rootPath: "/"
+      args:
+        - "/zkdtsm_[^/ ]+/ZKDTSMRoot/.*"
+    append: false
+    acls:
+      - "sasl:hive:cdrwa"

@@ -44,6 +44,7 @@ install -d $RPM_BUILD_ROOT%{_bindir}
 install -d $RPM_BUILD_ROOT/etc/bash_completion.d
 install -d $RPM_BUILD_ROOT%{_mandir}/man1
 install -d $RPM_BUILD_ROOT%{install_path}/conf
+install -d $RPM_BUILD_ROOT%{install_path}/conf/policies
 
 install %{name}-%{version}-%{_release}-uber.jar $RPM_BUILD_ROOT%{install_path}/%{name}.jar
 
@@ -57,7 +58,7 @@ install zkpolicy_autocomplete $RPM_BUILD_ROOT/etc/bash_completion.d
 install manpages/* $RPM_BUILD_ROOT%{_mandir}/man1
 
 # Default config files
-install conf/* $RPM_BUILD_ROOT%{install_path}/conf
+cp -a conf/* $RPM_BUILD_ROOT%{install_path}/conf
 
 %files
 %config(noreplace) %dir %attr(0755, root, root) %{install_path}
@@ -82,6 +83,11 @@ if [[ ! -e "/var/log/zkpolicy/zkpolicy.log" ]]; then
   /usr/bin/touch /var/log/zkpolicy/zkpolicy.log
   /usr/bin/chown zkpolicy:zookeeper /var/log/zkpolicy/zkpolicy.log
   /usr/bin/chmod og+rw /var/log/zkpolicy/zkpolicy.log
+fi
+
+# Create rollback directory if it does not exist
+if [[ ! -e "/opt/zkpolicy/rollback" ]]; then
+  /usr/bin/install -d -o zkpolicy -g zookeeper -m 0755 /opt/zkpolicy/rollback
 fi
 
 %clean

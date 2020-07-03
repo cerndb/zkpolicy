@@ -1,5 +1,6 @@
 package ch.cern;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,18 +11,22 @@ import org.apache.zookeeper.data.ACL;
 public class ZKEnforce {
   private ZKClient zk;
   private ZKDefaultQuery zkDefaultQuery = new ZKDefaultQuery();
+  private ZKRollbackSet rollbackSet = new ZKRollbackSet();
 
   public ZKEnforce(ZKClient zk) {
     this.zk = zk;
+  }
+
+  public ZKEnforce(ZKClient zk, File rollbackStateFile) {
+    this.zk = zk;
+    this.rollbackSet.setOutputFile(rollbackStateFile);
   }
 
   /**
    * Execute the query in dry-run mode returning the znodes to be altered from
    * normal execution.
    * 
-   * @param queryName Query to be recursively executed.
-   * @param rootPath  Path to start recursive traversal from.
-   * @param queryACLs Arguments for the query to be executed.
+   * @param policy Policy to be enforced
    * @throws NoSuchMethodException     When the query provided is not implemented.
    * @throws SecurityException
    * @throws IllegalAccessException
@@ -31,28 +36,24 @@ public class ZKEnforce {
    * @throws InterruptedException
    * @throws NoSuchFieldException
    */
-  public void enforceDry(String queryName, String rootPath, List<String> queryACLs)
+  public void enforceDry(ZKEnforcePolicyElement policy)
       throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, KeeperException, InterruptedException, NoSuchFieldException {
 
-    if (this.zk.exists(rootPath, null) == null) {
-      System.out.println("The path " + rootPath + " does not exist.");
+    ZKQueryElement queryElement = policy.getQuery();
+    if (this.zk.exists(queryElement.getRootPath(), null) == null) {
+      System.out.println("The path " + queryElement.getRootPath() + " does not exist.");
       return;
     }
     ZKDefaultQuery zkDefaultQuery = new ZKDefaultQuery();
-    ZKQuery query = zkDefaultQuery.getValueOf(queryName);
-    enforceInnerDry(rootPath, query, queryACLs);
+    ZKQuery query = zkDefaultQuery.getValueOf(queryElement.getName());
+    enforceInnerDry(queryElement.getRootPath(), query, queryElement.getArgs());
   }
 
   /**
    * Enforce policy ACLs provided to every matching node of the requested query.
    * 
-   * @param policies  ACLs to be enforced as policy to each matching node.
-   * @param queryName Query to be recursively executed.
-   * @param rootPath  Path to start recursive traversal from.
-   * @param queryACLs Arguments for the query to be executed.
-   * @param append    Append policies to existing ACL definitions of each matching
-   *                  znode.
+   * @param policy Policy to be enforced
    * @throws NoSuchMethodException
    * @throws SecurityException
    * @throws IllegalAccessException
@@ -62,20 +63,22 @@ public class ZKEnforce {
    * @throws KeeperException
    * @throws NoSuchFieldException
    */
-  public void enforce(List<String> policies, String queryName, String rootPath, List<String> queryACLs, boolean append)
+  public void enforce(ZKEnforcePolicyElement policy)
       throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, InterruptedException, KeeperException, NoSuchFieldException {
 
-    if (this.zk.exists(rootPath, null) == null) {
-      System.out.println("The path " + rootPath + " does not exist.");
+    ZKQueryElement queryElement = policy.getQuery();
+    if (this.zk.exists(queryElement.getRootPath(), null) == null) {
+      System.out.println("The path " + queryElement.getRootPath() + " does not exist.");
       return;
     }
     List<ACL> policiesACL = new ArrayList<ACL>();
-    for (String policyACLString : policies) {
+    for (String policyACLString : policy.getAcls()) {
       policiesACL.add(new ACLAugment(policyACLString).getACL());
     }
-    ZKQuery query = this.zkDefaultQuery.getValueOf(queryName);
-    enforceInner(policiesACL, rootPath, query, queryACLs, append);
+    ZKQuery query = this.zkDefaultQuery.getValueOf(queryElement.getName());
+    enforceInner(policiesACL, queryElement.getRootPath(), query, queryElement.getArgs(), policy.isAppend());
+    this.rollbackSet.exportToYAML();
   }
 
   private void enforceInnerDry(String path, ZKQuery query, List<String> queryACLs)
@@ -134,6 +137,7 @@ public class ZKEnforce {
       }
       // get here -P acls to add
       this.zk.setACL(path, newACLList, -1);
+      rollbackSet.getElements().add(new ZKRollbackElement(path, znodeACLList));
     }
 
     if (path.equals("/")) {

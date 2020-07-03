@@ -1,5 +1,9 @@
 #!/usr/bin/env sh
 
+if [ -e "/opt/zkpolicy/conf/java.env" ]; then
+  . /opt/zkpolicy/conf/java.env
+fi
+
 if [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
     JAVA="$JAVA_HOME/bin/java"
 elif [[ $(type -p java) = *java* ]]; then
@@ -9,4 +13,4 @@ else
     exit 1
 fi
 
-"$JAVA" -jar /opt/zkpolicy/cerndb-sw-zkpolicy.jar "$@"
+"$JAVA" $ZKPOLICY_OPTS $CLIENT_JVMFLAGS -jar /opt/zkpolicy/cerndb-sw-zkpolicy.jar "$@"

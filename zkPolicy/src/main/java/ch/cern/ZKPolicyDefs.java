@@ -93,6 +93,9 @@ public class ZKPolicyDefs {
       static final String ARGS_DESCRIPTION = "Query arguments";
       static final String APPEND_DESCRIPTION = "Append policy ACLs to matching znode's ACL (default: false)";
       static final String DRY_RUN_DESCRIPTION = "Execute enforce in dry-run (show affected nodes without applying changes)";
+      static final String ROLLBACK_EXPORT_DESCRIPTION = "File to save pre-enforce state of altered znodes for rollback "
+          + "(default: /opt/zkpolicy/rollback/ROLLBACK_STATE_<DATETIME>.yml)";
+      static final String SERVICE_POLICY_DESCRIPTION = "Enforce default policy for a specific service. Available services: ${COMPLETION-CANDIDATES}";
     }
 
     static class Export {
@@ -117,6 +120,11 @@ public class ZKPolicyDefs {
     static class Tree {
       static final String DESCRIPTION = "Visualize znode tree";
       static final String ROOT_PATH_DESCRIPTION = "Root path of requested subtree";
+    }
+
+    static class Rollback {
+      static final String DESCRIPTION = "Rollback ACLs to pre enforce state";
+      static final String INPUT_STATE_DESCRIPTION = "File with ZooKeeper tree state before enforcing";
     }
   }
 

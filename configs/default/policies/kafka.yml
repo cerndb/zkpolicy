@@ -1,0 +1,32 @@
+---
+policies:
+  - title: "Kafka, Open for global read, write protected"
+    query:
+      name: "regexMatchPath"
+      rootPath: "/"
+      args:
+        - "/(?:controller|isr_change_notification).*"
+    append: false
+    acls:
+      - "world:anyone:r"
+      - "sasl:kafka:cdrwa"
+
+  - title: "Kafka, Completely open"
+    query:
+      name: "regexMatchPath"
+      rootPath: "/"
+      args:
+        - "/(?:brokers|admin|controller_epoch|consumers|config).*"
+    append: false
+    acls:
+      - "world:anyone:cdrwa"
+
+  - title: "Kafka, No global read, r/w protected"
+    query:
+      name: "regexMatchPath"
+      rootPath: "/"
+      args:
+        - "/kafka-acl.*"
+    append: false
+    acls:
+      - "sasl:kafka:cdrwa"

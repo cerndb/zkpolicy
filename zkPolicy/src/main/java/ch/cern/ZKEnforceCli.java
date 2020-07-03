@@ -2,6 +2,11 @@ package ch.cern;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -22,10 +27,20 @@ public class ZKEnforceCli implements Runnable {
   @ParentCommand
   private ZKPolicyCli parent;
 
+  @Option(names = { "-r", "--rollback-export" }, required = false, description = Enforce.ROLLBACK_EXPORT_DESCRIPTION)
+  File rollbackStateFile;
+
   static class FileEnforceGroup {
     @Option(names = { "-i",
         "--input" }, required = true, description = Enforce.INPUT_DESCRIPTION, defaultValue = Enforce.INPUT_DEFAULT)
     File policiesFile;
+  }
+
+  static class ServiceEnforceGroup {
+    @Option(names = { "-s",
+        "--service-policy" }, required = true, description = Enforce.SERVICE_POLICY_DESCRIPTION,
+        completionCandidates = ZKEnforceCli.DefaultQueryCandidates.class)
+    String servicePolicy;
   }
 
   static class CliEnforceGroup {
@@ -59,15 +74,21 @@ public class ZKEnforceCli implements Runnable {
     @ArgGroup(exclusive = false)
     CliEnforceGroup cliEnforceGroup;
 
+    @ArgGroup(exclusive = false)
+    ServiceEnforceGroup serviceEnforceGroup;
   }
 
   @Override
   public void run() {
     try {
-      if (this.exclusive.fileEnforceGroup == null) {
+      if (this.exclusive.fileEnforceGroup == null && this.exclusive.serviceEnforceGroup == null) {
         this.cliEnforce();
-      } else if (this.exclusive.cliEnforceGroup == null) {
-        this.cliEnforceFromFIle();
+      } else if (this.exclusive.cliEnforceGroup == null && this.exclusive.serviceEnforceGroup == null) {
+        this.cliEnforceFromFile(this.exclusive.fileEnforceGroup.policiesFile);
+      } else if (this.exclusive.cliEnforceGroup == null && this.exclusive.fileEnforceGroup == null) {
+        //construct path for service argument
+        File policiesFile = new File("/opt/zkpolicy/conf/policies/" + this.exclusive.serviceEnforceGroup.servicePolicy + ".yml");
+        this.cliEnforceFromFile(policiesFile);
       }
     } catch (Exception e) {
       System.out.println(e.toString());
@@ -86,15 +107,30 @@ public class ZKEnforceCli implements Runnable {
     ZKConfig config = new ZKConfig(parent.configFile);
 
     try (ZKClient zk = new ZKClient(config)) {
-      ZKEnforce zkEnforce = new ZKEnforce(zk);
+      // Construct query
+      ZKQueryElement query = new ZKQueryElement();
+      query.setName(this.exclusive.cliEnforceGroup.queryName);
+      query.setArgs(this.exclusive.cliEnforceGroup.queryArgs);
+      query.setRootPath(this.exclusive.cliEnforceGroup.rootPath);
+
+      // Construct policy
+      ZKEnforcePolicyElement policy = new ZKEnforcePolicyElement();
+      policy.setQuery(query);
+      policy.setAppend(this.exclusive.cliEnforceGroup.append);
+      policy.setAcls(this.exclusive.cliEnforceGroup.policies);
 
       if (this.dryRun) {
-        zkEnforce.enforceDry(this.exclusive.cliEnforceGroup.queryName, this.exclusive.cliEnforceGroup.rootPath,
-            this.exclusive.cliEnforceGroup.queryArgs);
+        ZKEnforce zkEnforce = new ZKEnforce(zk);
+        zkEnforce.enforceDry(policy);
       } else {
-        zkEnforce.enforce(this.exclusive.cliEnforceGroup.policies, this.exclusive.cliEnforceGroup.queryName,
-            this.exclusive.cliEnforceGroup.rootPath, this.exclusive.cliEnforceGroup.queryArgs,
-            this.exclusive.cliEnforceGroup.append);
+        // check whether rollback file is defined
+        if (this.rollbackStateFile == null) {
+          DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss");
+          LocalDateTime now = LocalDateTime.now();
+          this.rollbackStateFile = new File("/opt/zkpolicy/rollback/ROLLBACK_STATE_" + dtf.format(now) + ".yml");
+        }
+        ZKEnforce zkEnforce = new ZKEnforce(zk, this.rollbackStateFile);
+        zkEnforce.enforce(policy);
       }
     } catch (NoSuchMethodException | NoSuchFieldException e) {
       System.out.println("No such method: " + this.exclusive.cliEnforceGroup.queryName);
@@ -106,37 +142,60 @@ public class ZKEnforceCli implements Runnable {
   }
 
   /**
-   * Enforce policies defined in --input option file path.
+   * Enforce policies defined policies file.
    * 
-   * @throws IOException
-   * @throws JsonMappingException
+   * @param policiesFile Policy definition file
    * @throws JsonParseException
+   * @throws JsonMappingException
+   * @throws IOException
    */
-  private void cliEnforceFromFIle() throws JsonParseException, JsonMappingException, IOException {
+  private void cliEnforceFromFile(File policiesFile) throws JsonParseException, JsonMappingException, IOException {
     ZKConfig config = new ZKConfig(parent.configFile);
 
     try (ZKClient zk = new ZKClient(config)) {
-      ZKEnforce zkEnforce = new ZKEnforce(zk);
-      ZKEnforcePolicySet policySet = new ZKEnforcePolicySet(this.exclusive.fileEnforceGroup.policiesFile);
+      ZKEnforcePolicySet policySet = new ZKEnforcePolicySet(policiesFile);
       List<ZKEnforcePolicyElement> policies = policySet.getPolicies();
 
       // For each of the policies, execute enforce passing each of the parameters
       for (ZKEnforcePolicyElement policy : policies) {
 
         if (this.dryRun) {
+          ZKEnforce zkEnforce = new ZKEnforce(zk);
           System.out.println(policy.getTitle());
-          zkEnforce.enforceDry(policy.getQuery().getName(), policy.getQuery().getRootPath(),
-              policy.getQuery().getArgs());
+          zkEnforce.enforceDry(policy);
           System.out.print("\n");
 
         } else {
-          zkEnforce.enforce(policy.getAcls(), policy.getQuery().getName(), policy.getQuery().getRootPath(),
-              policy.getQuery().getArgs(), policy.isAppend());
+          // check whether rollback file is defined
+          if (this.rollbackStateFile == null) {
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss");
+            LocalDateTime now = LocalDateTime.now();
+            this.rollbackStateFile = new File("/opt/zkpolicy/rollback/ROLLBACK_STATE_" + dtf.format(now) + ".yml");
+          }
+          ZKEnforce zkEnforce = new ZKEnforce(zk, this.rollbackStateFile);
+          zkEnforce.enforce(policy);
         }
       }
     } catch (Exception e) {
       System.out.println(e.toString());
       logger.error("Exception occurred!", e);
+    }
+  }
+
+  static class DefaultQueryCandidates extends ArrayList<String> {
+    private static final long serialVersionUID = 1L;
+
+    DefaultQueryCandidates() {
+      super(Arrays.asList());
+
+      this.add("%n * kafka");
+      this.add("%n * hbase");
+      this.add("%n * hive");
+      this.add("%n * ooozie");
+      this.add("%n * yarn");
+      this.add("%n * hdfs");
+
+      Collections.sort(this);
     }
   }
 }

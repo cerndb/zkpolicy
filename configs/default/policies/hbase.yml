@@ -1,0 +1,22 @@
+---
+policies:
+    - title: "Hbase, Open for global read, write protected"
+      query:
+          name: "regexMatchPath"
+          rootPath: "/hbase"
+          args:
+              - "/hbase(?:|/master|/meta-region-server|/hbaseid|/table|/table/.*|/rs)"
+      append: false
+      acls:
+          - "world:anyone:r"
+          - "sasl:hbase:cdrwa"
+
+    - title: "Hbase, No global read, r/w protected"
+      query:
+          name: "regexMatchPath"
+          rootPath: "/hbase"
+          args:
+              - "/hbase/(?:acl|rs/|namespace|backup-masters|online-snapshot|draining|replication|region-in-transition|splitWAL|table-lock|recovering-regions|running|tokenauth).*"
+      append: false
+      acls:
+          - "sasl:hbase:cdrwa"

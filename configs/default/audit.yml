@@ -39,7 +39,7 @@ checks:
   # HDFS
   - title: "HDFS/WebHDFS Check, No global read, r/w protected"
     rootPath: "/hadoop-ha"
-    pathPattern: "/hadoop-ha.*"
+    pathPattern: "/hadoop-ha"
     negate: false
     acls:
       - "sasl:hdfs:cdrwa"
@@ -99,7 +99,7 @@ checks:
 
   - title: "YARN Check, Open for global read, write protected"
     rootPath: "/"
-    pathPattern: "/(?:yarn-leader-election|rmstore).*"
+    pathPattern: "/(?:yarn-leader-election|rmstore)"
     negate: false
     acls:
       - "world:anyone:r"

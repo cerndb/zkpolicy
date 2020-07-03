@@ -46,7 +46,7 @@ sources:
 	cp zkPolicy/bin/zkpolicy /tmp/$(PKGID)/bin
 
 	# default configuration files
-	cp configs/default/* /tmp/$(PKGID)/conf
+	cp -R configs/default/* /tmp/$(PKGID)/conf
 
 	# create archive
 	cd /tmp ; pwd ; ls -la ; tar -cvzf $(TARFILE) $(PKGID)
