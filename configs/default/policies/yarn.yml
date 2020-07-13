@@ -9,4 +9,4 @@ policies:
     append: false
     acls:
       - "world:anyone:r"
-      - "sasl:rm:cdrwa"
+      - "sasl:yarn:cdrwa"

@@ -101,6 +101,9 @@ rm -rf /var/log/zkpolicy
 %postun -p /bin/sh
 
 %changelog
+* Wed Jun 17 2020 Christos Arvanitis <christos.arvanitis@cern.ch> 1.0.1-7
+- Changed default YARN config for SASL user yarn
+
 * Wed Jun 17 2020 Christos Arvanitis <christos.arvanitis@cern.ch> 1.0.1-3
 - Add support for logical equation of IPv4 subnets and addresses
 

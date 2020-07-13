@@ -103,6 +103,15 @@ zkpolicy -c config.yml enforce -i policies_config.yml
 ```
 An example policies configuration file can be found [here](../configs/examples/policies_example.yml).
 
+##### Enforcing service policy
+In order to enforce a policy for a single service, use the `--service-policy, -s` option as follows:
+
+```bash
+zkpolicy -c config.yml enforce -s <service_name>
+```
+
+zkpolicy ships with default policy definitions for numerous services (e.g. Kafka, Hbase, HDFS). Those can be found [here](../configs/default/policies/).
+
 ##### Dry run execution
 Enforcing policies is a nonreversible operation so an admin has to be sure about the changes to be imposed. For this reason, both execution ways of enforcing can be executed in a `dry-run` mode. For `dry-run`, please append `-d` to the previous commands.
 
