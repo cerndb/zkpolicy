@@ -106,7 +106,6 @@ build:
   image: ${CI_REGISTRY_IMAGE}:mvn-builder
   except:
     - qa
-    - master
   script:
     - mvn --quiet package -DskipTests -Dpmd.skip=true -Dcpd.skip=true -Dcheckstyle.skip=true -Dspotbugs.skip=true
   tags:
