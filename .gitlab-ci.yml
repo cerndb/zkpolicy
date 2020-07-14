@@ -113,7 +113,10 @@ build:
     - docker
   artifacts:
     paths:
-      - target/
+      - ${PROJECT_NAME_DIR}/target/zkpolicy_autocomplete
+      - ${PROJECT_NAME_DIR}/target/*.jar
+      - ${PROJECT_NAME_DIR}/target/generated-picocli-docs
+      - ${PROJECT_NAME_DIR}/target/generated-docs
     expire_in: 8 hour
 
 .koji_deps_template: &koji_deps
