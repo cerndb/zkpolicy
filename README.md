@@ -46,7 +46,7 @@ The project is built using `maven`. In order to build the project:
    mvn package -DskipTests
    ```
 
-This commands generates the wanted `.jar` in the `zkPolicy/target/` directory.
+This command generates the `.jar` artifact at the `zkPolicy/target/` directory.
 
 To test zkpolicy:
 
