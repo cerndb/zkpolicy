@@ -5,7 +5,7 @@ policies:
       name: "regexMatchPath"
       rootPath: "/hadoop-ha"
       args:
-        - "/hadoop-ha.*"
+        - "/hadoop-ha"
     append: false
     acls:
       - "sasl:hdfs:cdrwa"
