@@ -48,6 +48,18 @@ Some valid branch names are: `doc/usage`, `feat/tree_cli` ...
 
 zkpolicy follows the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html).
 
+## Add license header
+
+Every zkpolicy source code file should begin with the following license preamble:
+```
+Copyright © 2020, CERN
+This software is distributed under the terms of the MIT Licence,
+copied verbatim in the file 'LICENSE'. In applying this licence,
+CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.
+```
+
 ## Prepare your commit
 
 ### Submit JUnit test cases for all behaviour changes
