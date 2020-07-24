@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+Copyright © 2020, CERN
+This software is distributed under the terms of the MIT Licence,
+copied verbatim in the file 'LICENSE'. In applying this licence,
+CERN does not waive the privileges and immunities
+granted to it by virtue of its status as an Intergovernmental Organization
+or submit itself to any jurisdiction.
+-->
 <ruleset name="Default Maven PMD Plugin Ruleset"
     xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -68,4 +76,3 @@
     <rule ref="category/java/performance.xml/BooleanInstantiation" />
 
 </ruleset>
-
