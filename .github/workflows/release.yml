@@ -1,0 +1,27 @@
+name: Release
+
+# Run workflow on commits to the `master` branch
+on:
+  release:
+    types: [created]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Install Java and Maven
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+
+      - name: Release Maven package
+        uses: samuelmeuli/action-maven-publish@v1
+        with:
+          directory: ./zkPolicy
+          gpg_private_key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg_passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          nexus_username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          nexus_password: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
