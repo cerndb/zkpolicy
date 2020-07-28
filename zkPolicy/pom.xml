@@ -13,7 +13,7 @@ or submit itself to any jurisdiction.
   <modelVersion>4.0.0</modelVersion>
   <groupId>ch.cern</groupId>
   <artifactId>cerndb-sw-zkpolicy</artifactId>
-  <version>1.0.1-10</version>
+  <version>1.0.1-11</version>
   <name>${project.groupId}:${project.artifactId}</name>
   <description>zkpolicy - ZooKeeper Policy Auditing Tool</description>
   <url>https://github.com/cerndb/zkpolicy</url>
@@ -496,7 +496,7 @@ or submit itself to any jurisdiction.
       </plugin>
     </plugins>
   </build>
-    <profiles>
+  <profiles>
     <!-- Deployment profile (required so these plugins are only used when deploying) -->
     <profile>
       <id>deploy</id>
@@ -534,18 +534,25 @@ or submit itself to any jurisdiction.
 
           <!-- GPG plugin -->
           <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-gpg-plugin</artifactId>
-              <version>1.6</version>
-              <executions>
-                  <execution>
-                      <id>sign-artifacts</id>
-                      <phase>verify</phase>
-                      <goals>
-                          <goal>sign</goal>
-                      </goals>
-                  </execution>
-              </executions>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <!-- Prevent `gpg` from using pinentry programs -->
+              <gpgArguments>
+                <arg>--pinentry-mode</arg>
+                <arg>loopback</arg>
+              </gpgArguments>
+            </configuration>
           </plugin>
         </plugins>
       </build>
