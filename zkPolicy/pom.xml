@@ -13,7 +13,7 @@ or submit itself to any jurisdiction.
   <modelVersion>4.0.0</modelVersion>
   <groupId>ch.cern</groupId>
   <artifactId>cerndb-sw-zkpolicy</artifactId>
-  <version>1.0.1-11</version>
+  <version>1.0.1-12</version>
   <name>${project.groupId}:${project.artifactId}</name>
   <description>zkpolicy - ZooKeeper Policy Auditing Tool</description>
   <url>https://github.com/cerndb/zkpolicy</url>
@@ -316,30 +316,7 @@ or submit itself to any jurisdiction.
           <sourceDirectory>${project.build.directory}/generated-picocli-docs</sourceDirectory>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <finalName>cerndb-sw-zkpolicy-${project.version}-uber</finalName>
-              <archive>
-                <manifest>
-                  <mainClass>ch.cern.ZKPolicy</mainClass>
-                </manifest>
-              </archive>
-              <descriptorRefs>
-                <descriptorRef>jar-with-dependencies</descriptorRef>
-              </descriptorRefs>
-              <appendAssemblyId>false</appendAssemblyId>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+
       <plugin>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok-maven-plugin</artifactId>
@@ -557,5 +534,38 @@ or submit itself to any jurisdiction.
         </plugins>
       </build>
     </profile>
+
+    <profile>
+      <id>uberJar</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+                <configuration>
+                  <finalName>cerndb-sw-zkpolicy-${project.version}-uber</finalName>
+                  <archive>
+                    <manifest>
+                      <mainClass>ch.cern.ZKPolicy</mainClass>
+                    </manifest>
+                  </archive>
+                  <descriptorRefs>
+                    <descriptorRef>jar-with-dependencies</descriptorRef>
+                  </descriptorRefs>
+                  <appendAssemblyId>true</appendAssemblyId>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
   </profiles>
 </project>

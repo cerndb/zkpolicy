@@ -1,4 +1,4 @@
-JARFILE=$(shell find zkPolicy/target/cerndb* -maxdepth 1 -name \*-uber.jar -exec basename {} \;)
+JARFILE=$(shell find zkPolicy/target/cerndb* -maxdepth 1 -name \*-uber-jar-with-dependencies.jar -exec basename {} \;)
 SPECFILE=$(shell find -maxdepth 1 -name \*.spec -exec basename {} \; )
 REPOURL=git+ssh://git@gitlab.cern.ch:7999
 # DB gitlab group
@@ -18,7 +18,7 @@ TARFILE=$(PKGID).tar.gz
 DIST_RPM=hdp7
 
 package:
-	cd zkPolicy ; mvn clean package -DskipTests -Dspotbugs.skip -Dpmd.skip -Dcpd.skip -Dcheckstyle.skip
+	cd zkPolicy ; mvn clean package -PuberJar -DskipTests -Dspotbugs.skip -Dpmd.skip -Dcpd.skip -Dcheckstyle.skip
 
 sources:
 	@echo $(PKGVERSION)

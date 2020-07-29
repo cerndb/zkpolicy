@@ -46,7 +46,7 @@ install -d $RPM_BUILD_ROOT%{_mandir}/man1
 install -d $RPM_BUILD_ROOT%{install_path}/conf
 install -d $RPM_BUILD_ROOT%{install_path}/conf/policies
 
-install %{name}-%{version}-%{_release}-uber.jar $RPM_BUILD_ROOT%{install_path}/%{name}.jar
+install %{name}-%{version}-%{_release}-uber-jar-with-dependencies.jar $RPM_BUILD_ROOT%{install_path}/%{name}.jar
 
 # Wrapper script for jar file
 install bin/zkpolicy $RPM_BUILD_ROOT%{_bindir}
