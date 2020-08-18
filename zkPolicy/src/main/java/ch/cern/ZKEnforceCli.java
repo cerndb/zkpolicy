@@ -48,7 +48,11 @@ public class ZKEnforceCli implements Runnable {
     @Option(names = { "-s",
         "--service-policy" }, required = true, description = Enforce.SERVICE_POLICY_DESCRIPTION,
         completionCandidates = ZKEnforceCli.DefaultQueryCandidates.class)
-    String servicePolicy;
+        List<String> services;
+    @Option(names = { "-D",
+        "--service-policies-dir" }, required = false, description = Enforce.SERVICE_POLICIES_DIR_DESCRIPTION,
+        defaultValue = Enforce.SERVICE_POLICIES_DIR_DEFAULT)
+        File servicePoliciesDir;
   }
 
   static class CliEnforceGroup {
@@ -94,9 +98,11 @@ public class ZKEnforceCli implements Runnable {
       } else if (this.exclusive.cliEnforceGroup == null && this.exclusive.serviceEnforceGroup == null) {
         this.cliEnforceFromFile(this.exclusive.fileEnforceGroup.policiesFile);
       } else if (this.exclusive.cliEnforceGroup == null && this.exclusive.fileEnforceGroup == null) {
-        //construct path for service argument
-        File policiesFile = new File("/opt/zkpolicy/conf/policies/" + this.exclusive.serviceEnforceGroup.servicePolicy + ".yml");
-        this.cliEnforceFromFile(policiesFile);
+        // Multiple service policies can be enforced with a single enforce execution
+        for (String servicePolicy : this.exclusive.serviceEnforceGroup.services) {
+          File policiesFile = new File(this.exclusive.serviceEnforceGroup.servicePoliciesDir.toString() + "/" + servicePolicy + ".yml");
+          this.cliEnforceFromFile(policiesFile);
+        }
       }
     } catch (Exception e) {
       System.out.println(e.toString());

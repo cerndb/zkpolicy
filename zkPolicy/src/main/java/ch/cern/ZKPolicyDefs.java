@@ -104,6 +104,8 @@ public class ZKPolicyDefs {
       static final String ROLLBACK_EXPORT_DESCRIPTION = "File to save pre-enforce state of altered znodes for rollback "
           + "(default: /opt/zkpolicy/rollback/ROLLBACK_STATE_<DATETIME>.yml)";
       static final String SERVICE_POLICY_DESCRIPTION = "Enforce default policy for a specific service. Available services: ${COMPLETION-CANDIDATES}";
+      static final String SERVICE_POLICIES_DIR_DESCRIPTION = "Directory for service policies";
+      static final String SERVICE_POLICIES_DIR_DEFAULT = "/opt/zkpolicy/conf/policies/";
     }
 
     static class Export {
