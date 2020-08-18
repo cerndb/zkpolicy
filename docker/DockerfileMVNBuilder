@@ -5,7 +5,7 @@
 # Based on CERN CentOS 7.
 #
 #
-FROM gitlab-registry.cern.ch/db/cc7-base-koji
+FROM gitlab-registry.cern.ch/db/cerndb-infra-hadoop-conf:base-koji-cc7
 
 MAINTAINER CERN IT department <it-dep-db-sas.cern.ch>
 
