@@ -16,8 +16,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.curator.test.InstanceSpec;
 import org.apache.curator.test.TestingServer;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.ACL;
@@ -51,9 +54,9 @@ public class ZKQueryCliTest {
 
   @BeforeAll
   public void startZookeeper() throws Exception {
-    // Choose an available port
-    zkTestServer = new TestingServer();
-    config = new ZKConfig(zkTestServer.getConnectString(), 2000, "GREEN", "RED", "");
+    InstanceSpec spec = new InstanceSpec(null, -1, -1, -1, true, -1, -1, -1, null);
+    zkTestServer = new TestingServer(spec, true);
+    config = new ZKConfig(spec.getConnectString(), 2000, "GREEN", "RED", "");
     this.zkClient = new ZKClient(config);
 
     // Setup the znode tree for tests
@@ -123,6 +126,7 @@ public class ZKQueryCliTest {
   @AfterAll
   public void stopZookeeper() throws IOException, InterruptedException {
     this.zkClient.close();
+    this.zkTestServer.close();
   }
 
   @Test

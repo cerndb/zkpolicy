@@ -30,6 +30,7 @@ public class ZKClientTest {
     ZKClient zkClient = new ZKClient(config);
     Assertions.assertEquals(States.CONNECTED, zkClient.getState());
     zkClient.close();
+    this.zkTestServer.close();
   }
 
 }

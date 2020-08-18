@@ -90,6 +90,7 @@ public class ZKEnforceTest {
   @AfterAll
   public void stopZookeeper() throws IOException, InterruptedException {
     this.zkClient.close();
+    this.zkTestServer.close();
   }
 
   @BeforeEach
