@@ -16,6 +16,8 @@ import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
+import picocli.CommandLine.Spec;
+import picocli.CommandLine.Model.CommandSpec;
 import ch.cern.ZKPolicyDefs.Cli.ZkPolicy;
 
 
@@ -45,8 +47,13 @@ public class ZKPolicyCli implements Runnable {
       defaultValue = ZkPolicy.CONFIG_DEFAULT)
   public File configFile;
 
+  @Spec
+  CommandSpec spec;
+
   @Override
   public void run() {
+    // if the command was invoked without subcommand, show the usage help
+    spec.commandLine().usage(System.err);
   }
 
   static class PropertiesVersionProvider implements IVersionProvider {
