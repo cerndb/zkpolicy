@@ -47,7 +47,7 @@ public class ZKEnforceCli implements Runnable {
   static class ServiceEnforceGroup {
     @Option(names = { "-s",
         "--service-policy" }, required = true, description = Enforce.SERVICE_POLICY_DESCRIPTION,
-        completionCandidates = ZKEnforceCli.DefaultQueryCandidates.class)
+        completionCandidates = ZKEnforceCli.DefaultQueryCandidates.class, arity = "1..*")
         List<String> services;
     @Option(names = { "-D",
         "--service-policies-dir" }, required = false, description = Enforce.SERVICE_POLICIES_DIR_DESCRIPTION,

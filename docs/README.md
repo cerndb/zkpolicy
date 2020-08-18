@@ -110,10 +110,10 @@ In order to enforce a policy for a single service, use the `--service-policy, -s
 zkpolicy -c config.yml enforce -s <service_name>
 ```
 
-Multiple service policies can be enforced by appending `-s <service_name>` to the previous command:
+Multiple service policies can be enforced by appending service names to the previous command:
 
 ```bash
-zkpolicy -c config.yml enforce -s <service_name_1> -s <service_name_2>
+zkpolicy -c config.yml enforce -s <service_name_1> <service_name_2> ...
 ```
 
 zkpolicy ships with default policy definitions for numerous services (e.g. Kafka, Hbase, HDFS). Those can be found [here](../configs/default/policies/).

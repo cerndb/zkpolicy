@@ -9,14 +9,12 @@
 package ch.cern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -167,9 +165,20 @@ public class ZKEnforceCliTest {
   }
 
   @Test
+  public void testEnforceMultipleServicesDryRunSubCommand() throws IOException, KeeperException, InterruptedException {
+
+    String[] args = { "-c", configPath, "enforce", "-D", testTempDir.toString() , "-s", "serviceOne", "serviceTwo", "--dry-run" };
+
+    new CommandLine(new ZKPolicyCli()).execute(args);
+
+    String expectedResult = "Service One policy\n" +    "/a\n" + "/a/aa\n" + "\n" + "Service Two policy\n" + "/b\n" + "/b/bb\n" + "\n";
+    assertEquals(expectedResult, this.outContent.toString());
+  }
+
+  @Test
   public void testEnforceMultipleServicesSubCommand() throws IOException, KeeperException, InterruptedException {
 
-    String[] args = { "-c", configPath, "enforce", "-D", testTempDir.toString() , "-s", "serviceOne", "-s", "serviceTwo" };
+    String[] args = { "-c", configPath, "enforce", "-D", testTempDir.toString() , "-s", "serviceOne", "serviceTwo" };
 
     new CommandLine(new ZKPolicyCli()).execute(args);
 
