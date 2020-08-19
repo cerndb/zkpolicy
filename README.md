@@ -8,8 +8,9 @@
     * [Requirements](#requirements)
     * [Using the RPM package](#using-the-rpm-package)
     * [Building from source](#building-from-source)
-5. [Using the tool](#using-the-tool)
-6. [Configuration](#configuration)
+5. [Use as Maven dependency](#use-as-maven-dependency)
+6. [Using the tool](#using-the-tool)
+7. [Configuration](#configuration)
 
 ## Overview
 Zookeeper Policy Audit Tool (aka zkPolicy) for checking and enforcing ACLs on ZNodes.
@@ -52,6 +53,27 @@ To test zkpolicy:
 
 ```bash
 mvn test
+```
+
+## Use as code dependency
+
+In order to use zkpolicy as a Java Dependency, consult the corresponding [Sonatype index page](https://search.maven.org/artifact/ch.cern/cerndb-sw-zkpolicy)
+for different dependency managers (e.g. Maven, Gradle). Indicatively:
+
+### Maven
+
+```xml
+<dependency>
+  <groupId>ch.cern</groupId>
+  <artifactId>cerndb-sw-zkpolicy</artifactId>
+  <version>1.0.1-13</version>
+</dependency>
+```
+
+### Gradle
+
+```
+implementation 'ch.cern:cerndb-sw-zkpolicy:1.0.1-13'
 ```
 
 ## Using the tool
