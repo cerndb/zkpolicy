@@ -96,4 +96,35 @@ public class ZKPolicyCliTest {
     assertEquals("/path/to/jaas.conf", java.lang.System.getProperty("java.security.auth.login.config"));
   }
 
+  @Test
+  public void testJaasFromEnv() {
+    String[] args = {"-c", this.configPath, "tree", "-p", "/"};
+
+    System.setProperty("java.security.auth.login.config", "/path/to/env.conf");
+
+    new CommandLine(new ZKPolicyCli()).execute(args);
+
+    assertNotEquals("", outContent.toString());
+    assertEquals("/path/to/env.conf", java.lang.System.getProperty("java.security.auth.login.config"));
+  }
+
+  @Test
+  public void testJaasFromFile() throws IOException {
+    File jaasFile = new File(testTempDir, "jaasTestFile.conf");
+
+    FileWriter fw = new FileWriter(jaasFile);
+    fw.write("---\n");
+    fw.flush();
+    fw.close();
+
+    String[] args = {"-c", this.configPath, "-j", jaasFile.getCanonicalPath(), "tree", "-p", "/"};
+
+    System.setProperty("java.security.auth.login.config", "/path/to/env.conf");
+
+    ZKPolicy.main(args);
+    //new CommandLine(new ZKPolicyCli()).execute(args);
+
+    assertNotEquals("", outContent.toString());
+    assertEquals(jaasFile.getCanonicalPath(), java.lang.System.getProperty("java.security.auth.login.config"));
+  }
 }

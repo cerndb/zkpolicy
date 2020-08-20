@@ -19,6 +19,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.AccessLevel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Class that holds configuration parameters as defined in the config.yaml CLI
@@ -29,6 +31,7 @@ import lombok.AccessLevel;
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ZKConfig {
+  private static Logger logger = LogManager.getLogger(ZKConfig.class);
 
   private String zkServers;
   private int timeout;
@@ -59,11 +62,13 @@ public class ZKConfig {
    */
   public void setPropertyJaas() {
     if (System.getProperty("java.security.auth.login.config") != null && !System.getProperty("java.security.auth.login.config").isEmpty()) {
+      logger.info("JAAS configuration file {} used for ZooKeeper Authentication", System.getProperty("java.security.auth.login.config"));
       return;
     }
     // if jaas is provided in config file then use it
     if (this.jaas != null && !this.jaas.isEmpty()) {
       System.setProperty("java.security.auth.login.config", this.jaas);
+      logger.info("JAAS configuration file {} used for ZooKeeper Authentication", this.jaas);
       return;
     }
   }

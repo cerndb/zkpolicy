@@ -9,6 +9,7 @@
 package ch.cern;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 import lombok.NoArgsConstructor;
 import picocli.CommandLine;
@@ -22,37 +23,20 @@ import picocli.CommandLine.Spec;
 import picocli.CommandLine.Model.CommandSpec;
 import ch.cern.ZKPolicyDefs.Cli.ZkPolicy;
 
-
-@Command(name = "zkpolicy",
-    description = ZkPolicy.DESCRIPTION,
-    versionProvider = ZKPolicyCli.PropertiesVersionProvider.class,
-    subcommands = {
-        ZKQueryCli.class,
-        ZKExportCli.class,
-        ZKTreeCli.class,
-        ZKEnforceCli.class,
-        ZKAuditCli.class,
-        ZKCheckCli.class,
-        ZKRollbackCli.class,
-        HelpCommand.class
-      },
-    mixinStandardHelpOptions = true)
+@Command(name = "zkpolicy", description = ZkPolicy.DESCRIPTION, versionProvider = ZKPolicyCli.PropertiesVersionProvider.class, subcommands = {
+    ZKQueryCli.class, ZKExportCli.class, ZKTreeCli.class, ZKEnforceCli.class, ZKAuditCli.class, ZKCheckCli.class,
+    ZKRollbackCli.class, HelpCommand.class }, mixinStandardHelpOptions = true)
 /**
  * Class that handles CLI arguments for the tool.
  */
 @NoArgsConstructor
 public class ZKPolicyCli implements Runnable {
   @Option(names = { "-c",
-      "--config" }, required = false,
-      description = ZkPolicy.CONFIG_DESCRIPTION,
-      scope = ScopeType.INHERIT,
-      defaultValue = ZkPolicy.CONFIG_DEFAULT)
+      "--config" }, required = false, description = ZkPolicy.CONFIG_DESCRIPTION, scope = ScopeType.INHERIT, defaultValue = ZkPolicy.CONFIG_DEFAULT)
   public File configFile;
 
   @Option(names = { "-j",
-      "--jaas" }, required = false,
-      description = ZkPolicy.JAAS_FILE_DESCRIPTION,
-      scope = ScopeType.INHERIT)
+      "--jaas" }, required = false, description = ZkPolicy.JAAS_FILE_DESCRIPTION, scope = ScopeType.INHERIT)
   public File jaasFile;
 
   @Spec
@@ -64,15 +48,15 @@ public class ZKPolicyCli implements Runnable {
     spec.commandLine().usage(System.err);
   }
 
-  public int executionStrategy(ParseResult parseResult) {
+  public int executionStrategy(ParseResult parseResult) throws IOException {
     init(); // custom initialization to be done before executing any command or subcommand
     return new CommandLine.RunLast().execute(parseResult); // default execution strategy
   }
 
   // Initialize state for parent command here
-  private void init() {
+  private void init() throws IOException {
     if (this.jaasFile != null && this.jaasFile.exists()) {
-      System.setProperty("java.security.auth.login.config", this.jaasFile.getAbsolutePath());
+      System.setProperty("java.security.auth.login.config", this.jaasFile.getCanonicalPath());
     }
   }
 

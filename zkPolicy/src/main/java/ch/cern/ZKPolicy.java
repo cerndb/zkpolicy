@@ -8,6 +8,7 @@
 */
 package ch.cern;
 
+import java.io.IOException;
 import picocli.CommandLine;
 
 public final class ZKPolicy {
@@ -23,7 +24,13 @@ public final class ZKPolicy {
 
     CommandLine commandLine = new CommandLine(zkpcli);
 
-    commandLine.setExecutionStrategy(zkpcli::executionStrategy);
+    commandLine.setExecutionStrategy(parseResult -> {
+      try {
+        return zkpcli.executionStrategy(parseResult);
+      } catch (IOException e) {
+        return -1;
+      }
+    });
     commandLine.execute(args);
 
   }
