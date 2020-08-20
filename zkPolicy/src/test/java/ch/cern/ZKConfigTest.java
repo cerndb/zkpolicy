@@ -17,6 +17,8 @@ import java.io.FileWriter;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.test.TestingServer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -29,6 +31,16 @@ public class ZKConfigTest {
 
   @TempDir
   File testTempDir;
+
+  @BeforeEach
+  public void setUpStreams() {
+    java.lang.System.clearProperty("java.security.auth.login.config");
+  }
+
+  @AfterEach
+  public void restoreStreams() {
+    java.lang.System.clearProperty("java.security.auth.login.config");
+  }
 
   @Test
   public void testZKConfigConstructor() throws Exception {
@@ -61,13 +73,26 @@ public class ZKConfigTest {
   }
 
   @Test
-  public void testSetPropertyJaas() throws Exception {
+  public void testSetPropertyJaasFromConfigFile() throws Exception {
     String matchcolor = "GREEN";
     String mismatchcolor = "RED";
     String jaas = "/path/to/jaas.conf";
     java.lang.System.clearProperty("java.security.auth.login.config");
     ZKConfig zkConfig = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor,
         jaas);
+    zkConfig.setPropertyJaas();
+    assertEquals("/path/to/jaas.conf", java.lang.System.getProperty("java.security.auth.login.config", ""));
+  }
+
+  @Test
+  public void testSetPropertyJaasFromCliOrEnv() throws Exception {
+    String matchcolor = "GREEN";
+    String mismatchcolor = "RED";
+    String jaas = "/path/to/jaas.conf";
+    java.lang.System.clearProperty("java.security.auth.login.config");
+    java.lang.System.setProperty("java.security.auth.login.config", jaas);
+    ZKConfig zkConfig = new ZKConfig("127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181", 2000, matchcolor, mismatchcolor,
+        null);
     zkConfig.setPropertyJaas();
     assertEquals("/path/to/jaas.conf", java.lang.System.getProperty("java.security.auth.login.config", ""));
   }

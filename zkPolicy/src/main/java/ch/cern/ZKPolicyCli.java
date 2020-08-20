@@ -11,10 +11,12 @@ package ch.cern;
 import java.io.File;
 import java.util.Properties;
 import lombok.NoArgsConstructor;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
 import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ParseResult;
 import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 import picocli.CommandLine.Model.CommandSpec;
@@ -47,6 +49,12 @@ public class ZKPolicyCli implements Runnable {
       defaultValue = ZkPolicy.CONFIG_DEFAULT)
   public File configFile;
 
+  @Option(names = { "-j",
+      "--jaas" }, required = false,
+      description = ZkPolicy.JAAS_FILE_DESCRIPTION,
+      scope = ScopeType.INHERIT)
+  public File jaasFile;
+
   @Spec
   CommandSpec spec;
 
@@ -54,6 +62,18 @@ public class ZKPolicyCli implements Runnable {
   public void run() {
     // if the command was invoked without subcommand, show the usage help
     spec.commandLine().usage(System.err);
+  }
+
+  public int executionStrategy(ParseResult parseResult) {
+    init(); // custom initialization to be done before executing any command or subcommand
+    return new CommandLine.RunLast().execute(parseResult); // default execution strategy
+  }
+
+  // Initialize state for parent command here
+  private void init() {
+    if (this.jaasFile != null && this.jaasFile.exists()) {
+      System.setProperty("java.security.auth.login.config", this.jaasFile.getAbsolutePath());
+    }
   }
 
   static class PropertiesVersionProvider implements IVersionProvider {

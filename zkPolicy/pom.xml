@@ -66,6 +66,7 @@ or submit itself to any jurisdiction.
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <lombok.version>1.18.12</lombok.version>
     <lombok.maven.plugin.version>1.18.12.0</lombok.maven.plugin.version>
+    <picocli.version>4.5.0</picocli.version>
   </properties>
   <dependencies>
     <!-- https://mvnrepository.com/artifact/com.github.seancfoley/ipaddress -->
@@ -97,7 +98,7 @@ or submit itself to any jurisdiction.
     <dependency>
       <groupId>info.picocli</groupId>
       <artifactId>picocli</artifactId>
-      <version>4.3.0</version>
+      <version>${picocli.version}</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>

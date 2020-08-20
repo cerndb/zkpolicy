@@ -73,6 +73,7 @@ public class ZKPolicyDefs {
       static final String DESCRIPTION = "ZooKeeper policy auditing tool";
       static final String CONFIG_DESCRIPTION = "YAML configuration file to use (default: ${DEFAULT-VALUE})";
       static final String CONFIG_DEFAULT = "/opt/zkpolicy/conf/config.yml";
+      static final String JAAS_FILE_DESCRIPTION = "JAAS file to be used during ZooKeeper authentication";
     }
 
     static class Audit {

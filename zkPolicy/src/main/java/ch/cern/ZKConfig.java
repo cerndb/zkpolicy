@@ -52,10 +52,19 @@ public class ZKConfig {
 
   /**
    * Set java.security.auth.login.config environment variable
+   * Priority:
+   *   1. CLI option
+   *   2. java.env
+   *   3. config file
    */
   public void setPropertyJaas() {
+    if (System.getProperty("java.security.auth.login.config") != null && !System.getProperty("java.security.auth.login.config").isEmpty()) {
+      return;
+    }
+    // if jaas is provided in config file then use it
     if (this.jaas != null && !this.jaas.isEmpty()) {
       System.setProperty("java.security.auth.login.config", this.jaas);
+      return;
     }
   }
 }

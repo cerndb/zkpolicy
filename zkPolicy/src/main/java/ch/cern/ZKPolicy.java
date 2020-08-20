@@ -9,7 +9,6 @@
 package ch.cern;
 
 import picocli.CommandLine;
-import picocli.CommandLine.RunAll;
 
 public final class ZKPolicy {
   private static ZKPolicyCli zkpcli;
@@ -24,7 +23,8 @@ public final class ZKPolicy {
 
     CommandLine commandLine = new CommandLine(zkpcli);
 
-    commandLine.setExecutionStrategy(new RunAll());
+    commandLine.setExecutionStrategy(zkpcli::executionStrategy);
     commandLine.execute(args);
+
   }
 }
