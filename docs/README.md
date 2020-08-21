@@ -15,6 +15,7 @@ Welcome to zkPolicy documentation!
 3. [Main Concepts](#main-concepts)
 4. [User Guide](#user-guide)
     * [Usage](#usage)
+        * [Authenticating with ZooKeeper](#authenticating-with-zookeeper)
         * [Auditing](#auditing)
         * [Enforcing](#enforcing)
         * [Visualization](#visualization)
@@ -74,6 +75,17 @@ zkPolicy introduces several concepts as described [here](main_concepts/README.md
 ## User Guide
 ### Usage
 In this section we are going to outline the usage of zkPolicy for the main functionality of the tool. For complete information and usage guides for zkPolicy, please consult the tool man pages.
+
+#### Authenticating with ZooKeeper
+zkPolicy uses JAAS (Java Authentication and Authorization Service) for pluggable authentication with ZooKeeper before any subcommand. There are three ways offered to set JAAS prior to execution:
+* Using the CLI option `-j, --jaas <jaas.conf path>`
+* Using the `-Djava.security.auth.login.config=<jaas.conf path>` set in the `/opt/zkpolicy/conf/java.env` file
+* Using the `jaas` field in the configuration file as described in the [Configuration section](#configuration).
+
+In case of multiple JAAS definitions, the following priority is used:
+1. CLI
+2. `java.env`
+3. Configuration file
 
 #### Auditing
 Using the zkPolicy auditing functionality, a user can generate useful reports for the ACLs defined throughout a ZooKeeper instance. Those reports include the results for queries and checks defined at the audit configuration file as well as additional information regarding the ZooKeeper Server (List of ACL definitions for every znode accessible by the tool user, Four Letter Words information and ZooKeeper instance connection details).
