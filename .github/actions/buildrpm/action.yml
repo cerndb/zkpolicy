@@ -1,0 +1,18 @@
+# action.yml
+name: 'Build RPM'
+description: 'Building RPM using spec and Makefile defined in the rootdir input'
+inputs:
+  rootdir:
+    description: 'Root directory where spec file and Makefile are located'
+    required: true
+    default: ''
+outputs:
+  source_rpm_path:
+    description: 'path to Source RPM file'
+  rpm_path:
+    description: 'path to the RPM file'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.rootdir }}

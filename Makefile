@@ -8,7 +8,7 @@ REPONAME=zookeeper-policy-audit-tool
 USERNAME=$(shell klist|grep "principal:"|cut -d ' ' -f 3|cut -d '@' -f 1)
 POMFILE=zkPolicy/pom.xml
 
-# Get all the package info from the corresponding spec file
+# Get all the package info from the corresponding spec and pom file
 PKGVERSION=$(shell sed -nr 's/.*<version>(.*)-(.*)<\/version>/\1/p' $(POMFILE))
 PKGRELEASE=$(shell sed -nr 's/.*<version>(.*)-(.*)<\/version>/\2/p' $(POMFILE))
 PKGNAME=$(shell awk '/^%define name/ { print $$3 }' ${SPECFILE})
@@ -66,7 +66,7 @@ srpm: all spec
 	ls -la /builds/db/zookeeper-policy-audit-tool/; rpmbuild -bs --define '_sourcedir $(PWD)' /tmp/${SPECFILE}
 
 rpm: all spec
-	rpmbuild -ba --define "_release ${PKGRELEASE}" --define '_sourcedir $(PWD)' /tmp/${SPECFILE} 
+	rpmbuild -ba --define "_release ${PKGRELEASE}" --define '_sourcedir $(PWD)' /tmp/${SPECFILE}
 
 scratch:
 	koji build ${DIST_RPM} --nowait --scratch ${REPOURL}${REPOPREFIX}/${REPONAME}.git#$(shell git rev-parse HEAD)
