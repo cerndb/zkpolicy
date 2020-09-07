@@ -7,7 +7,7 @@
 
 ---
 policies:
-  - title: "YARN, Open for global read, write protected"
+  - title: "YARN, No global read, r/w protected"
     query:
       name: "regexMatchPath"
       rootPath: "/"
@@ -15,5 +15,4 @@ policies:
         - "/(?:yarn-leader-election|rmstore)"
     append: false
     acls:
-      - "world:anyone:r"
       - "sasl:yarn:cdrwa"

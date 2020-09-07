@@ -109,5 +109,4 @@ checks:
     pathPattern: "/(?:yarn-leader-election|rmstore)"
     negate: false
     acls:
-      - "world:anyone:r"
       - "sasl:yarn:cdrwa"
