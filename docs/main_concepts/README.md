@@ -4,7 +4,7 @@
 For information regarding ZooKeeper concepts, please consult the [Administrator's Guide](https://zookeeper.apache.org/doc/r3.6.1/zookeeperAdmin.html).
 
 ## ZooKeeper Policy Audit Tool concepts
-The tool is introducing a number of elements that are essential for interacting with the ZNode tree. 
+The tool is introducing a number of elements that are essential for interacting with the ZNode tree.
 
 ### Query
 A query is executed upon a specific subtree of the ZNode tree to answer the following question:
@@ -12,7 +12,7 @@ A query is executed upon a specific subtree of the ZNode tree to answer the foll
 
 In order to execute a query using the CLI, the following command is needed:
 ```bash
-zkpolicy -c <config_file.yml> query [QUERY_NAME] -p [ROOT_PATH] [QUERY ARGS]
+zkpolicy -c <config_file.yml> query [QUERY_NAME] -p [ROOT_PATH] -a [QUERY ARGS]
 ```
 
 The tool defines numerous default queries for commonly requested scenarios. More info on the available queries can be found [here](./queries.md).
@@ -33,4 +33,4 @@ A policy is a structure consisting of a set of ACL elements that should be appli
 
 > Apply a set of ACL elements to all znodes that satisfy a specific requirement.
 
-It is clear that each policy is related to a specific query on the ZNode tree. Policies are enforced using the `enforce` sub-command. 
+It is clear that each policy is related to a specific query on the ZNode tree. Policies are enforced using the `enforce` sub-command.

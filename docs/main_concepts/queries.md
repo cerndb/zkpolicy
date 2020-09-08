@@ -29,7 +29,7 @@ In this section, we will provide example results for each one of the queries on 
 ```
 
 ```
-/ - world:anyone:cdrwa 
+/ - world:anyone:cdrwa
 /a - digest:user1:passw1:cdrwa
 /a/aa - digest:user1:passw1:cdrwa
 /b - digest:user2:passw2:cdrwa, ip:127.0.0.3:rda
@@ -49,17 +49,17 @@ $ zkpolicy -c <config_file> query duplicateACL -p /
 
 WARNING: No READ permission for /b/bb, skipping subtree
 /d
-``` 
+```
 
 Notice that when the user executing the query has no READ permission for a certain subtree (so fetching of children paths and ACl is not possible), a `WARNING` message is shown.
 
 ### exactACL
 ```
-$ zkpolicy -c <config_file> query exactACL -p / -a digest:user2:[passw2 digest]:cdrwa -a ip:127.0.0.3:rda
+$ zkpolicy -c <config_file> query exactACL -p / -a digest:user2:[passw2 digest]:cdrwa ip:127.0.0.3:rda
 
 /b
 WARNING: No READ permission for /b/bb, skipping subtree
-``` 
+```
 
 ### globMatchACL
 In this example, we query for znodes that have at least one ACL entry using the digest schema that allows write permission for data.
@@ -70,7 +70,7 @@ $ zkpolicy -c <config_file> query globMatchACL -p / -a digest:*:*w*
 /a/aa
 /b
 WARNING: No READ permission for /b/bb, skipping subtree
-``` 
+```
 
 ### globMatchPath
 ```
@@ -84,7 +84,7 @@ WARNING: No READ permission for /b/bb, skipping subtree
 
 ### noACL
 ```
-$ zkpolicy -c <config_file> query noACL -p / 
+$ zkpolicy -c <config_file> query noACL -p /
 
 /
 WARNING: No READ permission for /b/bb, skipping subtree
@@ -97,7 +97,7 @@ WARNING: No READ permission for /b/bb, skipping subtree
 
 ### parentYesChildNo
 ```
-$ zkpolicy -c <config_file> query parentYesChildNo -p / 
+$ zkpolicy -c <config_file> query parentYesChildNo -p /
 
 /a
 /b

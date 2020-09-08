@@ -150,4 +150,49 @@ public class ZKQueryCliTest {
 
     assertEquals(expectedOutput, outContent.toString());
   }
+
+  @Test
+  public void testQuerySubCommandMultipleArgs() {
+    String[] args = { "-c", this.configPath, "query", "regexMatchACL", "-p", "/", "-a", "world:anyone:.*a.*",
+        "digest:.*", "-l" };
+    new CommandLine(new ZKPolicyCli()).execute(args);
+
+    String expectedOutput = "/a\n" + "/a/aa\n" + "WARNING: No READ permission for /b, skipping subtree\n"
+        + "WARNING: No READ permission for /c, skipping subtree\n";
+
+    assertEquals(expectedOutput, outContent.toString());
+  }
+
+  @Test
+  public void testQuerySubCommandMultipleArgsDescription() {
+    String[] args = { "-c", this.configPath, "query", "regexMatchACL", "-p", "/", "-a", "world:anyone:.*a.*",
+        "digest:.*", "-l", "-D" };
+    new CommandLine(new ZKPolicyCli()).execute(args);
+
+    String expectedOutput = "Description: Znodes under / that satisfy the regexMatchACL query\n"
+        + " * regexMatchACL: Match znodes with ACL entries matching the passed regular expression arguments\n" + "\n"
+        + "/a\n" + "/a/aa\n" + "WARNING: No READ permission for /b, skipping subtree\n"
+        + "WARNING: No READ permission for /c, skipping subtree\n";
+
+    assertEquals(expectedOutput, outContent.toString());
+  }
+
+  @Test
+  public void testQuerySubCommandMultipleArgsColorDescription() {
+    String[] args = { "-c", this.configPath, "query", "regexMatchACL", "-p", "/a", "-a", "world:anyone:.*a.*",
+        "digest:.*", "--color-description" };
+    new CommandLine(new ZKPolicyCli()).execute(args);
+
+    String matchColorVal = ZKPolicyDefs.Colors.valueOf(zkClient.getZKPConfig().getMatchColor()).getANSIValue();
+    String matchColor = zkClient.getZKPConfig().getMatchColor();
+    String misMatchColorVal = ZKPolicyDefs.Colors.valueOf(zkClient.getZKPConfig().getMismatchColor()).getANSIValue();
+    String misMatchColor = zkClient.getZKPConfig().getMismatchColor();
+    String resetColorVal = ZKPolicyDefs.Colors.RESET.getANSIValue();
+
+    String expectedOutput = "* " + matchColorVal + matchColor + resetColorVal + ": znodes matching the query\n" + "* "
+        + misMatchColorVal + misMatchColor + resetColorVal + ": znodes not matching the query\n" + "\n" + matchColorVal
+        + "/a" + resetColorVal + "\n" + "└─── " + matchColorVal + "/aa" + resetColorVal + "\n";
+
+    assertEquals(expectedOutput, outContent.toString());
+  }
 }

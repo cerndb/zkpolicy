@@ -42,7 +42,7 @@ public class ZKQueryCli implements Runnable {
   @Option(names = { "-p", "--root-path" }, required = true, description = Query.ROOT_PATH_DESCRIPTION)
   String rootPath;
 
-  @Option(names = { "-a", "--args" }, description = Query.ARGS_DESCRIPTION)
+  @Option(names = { "-a", "--args" }, description = Query.ARGS_DESCRIPTION, arity = "1..*")
   List<String> queryArgs;
 
   @Option(names = {"-D", "--description"}, description = Query.DESCR_DESCRIPTION)
