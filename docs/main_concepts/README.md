@@ -23,7 +23,7 @@ A check is executed upon a specific set of znodes that are defined either explic
 
 In order to execute a check using the CLI, the following command is needed:
 ```bash
-zkpolicy -c <config_file.yml> check -e [PATH PATTERN] -p [ROOT_PATH] -a [CHECK ARGS]
+zkpolicy -c <config_file.yml> check -e [PATH PATTERN] -p [ROOT_PATH] -a [CHECK ACLS]
 ```
 
 More info as well as examples of check execution can be found [here](./checks.md).
