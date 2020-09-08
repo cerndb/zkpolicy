@@ -16,18 +16,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.curator.test.InstanceSpec;
-import org.apache.curator.test.TestingCluster;
 import org.apache.curator.test.TestingServer;
-import org.apache.curator.utils.CloseableUtils;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.ACL;
-import org.apache.zookeeper.server.auth.DigestAuthenticationProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -84,7 +79,6 @@ public class ZKEnforceCliTest {
     zkClient.create("/b/bb", "bb".getBytes(), aclListBB, CreateMode.PERSISTENT);
 
     // c subtree
-    // auth scheme ignores the passed id and matches the current authentication
     List<ACL> aclListC = new ArrayList<ACL>();
     aclListC.add(new ACLAugment("world:anyone:cdrwa").getACL());
     zkClient.create("/c", "c".getBytes(), aclListC, CreateMode.PERSISTENT);
@@ -154,7 +148,7 @@ public class ZKEnforceCliTest {
 
   @AfterAll
   public void stopZookeeper() throws IOException, InterruptedException {
-    //this.zkClient.close();
+    // this.zkClient.close();
     this.zkTestServer.close();
   }
 
@@ -167,18 +161,20 @@ public class ZKEnforceCliTest {
   @Test
   public void testEnforceMultipleServicesDryRunSubCommand() throws IOException, KeeperException, InterruptedException {
 
-    String[] args = { "-c", configPath, "enforce", "-D", testTempDir.toString() , "-s", "serviceOne", "serviceTwo", "--dry-run" };
+    String[] args = { "-c", configPath, "enforce", "-D", testTempDir.toString(), "-s", "serviceOne", "serviceTwo",
+        "--dry-run" };
 
     new CommandLine(new ZKPolicyCli()).execute(args);
 
-    String expectedResult = "Service One policy\n" +    "/a\n" + "/a/aa\n" + "\n" + "Service Two policy\n" + "/b\n" + "/b/bb\n" + "\n";
+    String expectedResult = "Service One policy\n" + "/a\n" + "/a/aa\n" + "\n" + "Service Two policy\n" + "/b\n"
+        + "/b/bb\n" + "\n";
     assertEquals(expectedResult, this.outContent.toString());
   }
 
   @Test
   public void testEnforceMultipleServicesSubCommand() throws IOException, KeeperException, InterruptedException {
 
-    String[] args = { "-c", configPath, "enforce", "-D", testTempDir.toString() , "-s", "serviceOne", "serviceTwo" };
+    String[] args = { "-c", configPath, "enforce", "-D", testTempDir.toString(), "-s", "serviceOne", "serviceTwo" };
 
     new CommandLine(new ZKPolicyCli()).execute(args);
 
@@ -190,6 +186,27 @@ public class ZKEnforceCliTest {
     expectedList = new ArrayList<ACL>();
     expectedList.add(new ACLAugment("world:anyone:cdr").getACL());
     alteredList = this.zkClient.getACL("/b", null);
+    assertEquals(expectedList, alteredList);
+  }
+
+  @Test
+  public void testEnforceMultiplePoliciesSubCommand() throws IOException, KeeperException, InterruptedException {
+restoreStreams();
+    String[] args = { "-c", configPath, "enforce", "-P", "world:anyone:cdra", "ip:127.0.0.1:rw", "-q", "exactACL", "-p", "/c",
+        "-a", "world:anyone:cdrwa" };
+
+    new CommandLine(new ZKPolicyCli()).execute(args);
+
+    List<ACL> expectedList = new ArrayList<ACL>();
+    expectedList.add(new ACLAugment("world:anyone:cdra").getACL());
+    expectedList.add(new ACLAugment("ip:127.0.0.1:rw").getACL());
+    List<ACL> alteredList = this.zkClient.getACL("/c", null);
+    assertEquals(expectedList, alteredList);
+
+    expectedList = new ArrayList<ACL>();
+    expectedList.add(new ACLAugment("world:anyone:cdra").getACL());
+    expectedList.add(new ACLAugment("ip:127.0.0.1:rw").getACL());
+    alteredList = this.zkClient.getACL("/c/cc", null);
     assertEquals(expectedList, alteredList);
   }
 }

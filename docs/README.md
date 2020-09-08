@@ -102,7 +102,7 @@ zkPolicy offers policy enforcing functionality. Using its CLI, a user can either
 ##### Enforce a single policy
 Enforce a specific set of ACL elements on every znode matching a specific query:
 ```bash
-zkpolicy -c config.yml enforce -P acl_1 -P acl_2... noACL -p /
+zkpolicy -c config.yml enforce -P acl_1 acl_2... -q noACL -p /
 ```
 
 With the previous command the ACL `[acl_1,acl_2]` is applied recursively to all nodes satisfying the `noACL` query, starting from the zNode tree root.
@@ -128,7 +128,7 @@ Multiple service policies can be enforced by appending service names to the prev
 zkpolicy -c config.yml enforce -s <service_name_1> <service_name_2> ...
 ```
 
-zkpolicy ships with default policy definitions for numerous services (e.g. Kafka, Hbase, HDFS). Those can be found [here](../configs/default/policies/).
+zkpolicy ships with default policy definitions for numerous services (e.g. Kafka, HBase, HDFS). Those can be found [here](../configs/default/policies/).
 
 ##### Dry run execution
 Enforcing policies is a nonreversible operation so an admin has to be sure about the changes to be imposed. For this reason, both execution ways of enforcing can be executed in a `dry-run` mode. For `dry-run`, please append `-d` to the previous commands.

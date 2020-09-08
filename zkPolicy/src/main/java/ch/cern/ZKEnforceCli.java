@@ -23,7 +23,6 @@ import org.apache.logging.log4j.Logger;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ParentCommand;
 import ch.cern.ZKPolicyDefs.Cli.Enforce;
 
@@ -56,17 +55,17 @@ public class ZKEnforceCli implements Runnable {
   }
 
   static class CliEnforceGroup {
-    @Option(names = { "-P", "--policy" }, required = true, description = Enforce.POLICY_DESCRIPTION)
+    @Option(names = { "-P", "--policy" }, required = true, description = Enforce.POLICY_DESCRIPTION, arity = "1..*")
     List<String> policies;
 
-    @Parameters(paramLabel = "[QUERY_NAME]", description = Enforce.QUERY_NAME_DESCRIPTION,
+    @Option(names = { "-q", "--query" }, required = true, description = Enforce.QUERY_NAME_DESCRIPTION,
         completionCandidates = ZKQueryCli.DefaultQueryCandidates.class)
     String queryName;
 
     @Option(names = { "-p", "--root-path" }, required = false, description = Enforce.ROOT_PATH_DESCRIPTION)
     String rootPath;
 
-    @Option(names = { "-a", "--args" }, required = false, description = Enforce.ARGS_DESCRIPTION)
+    @Option(names = { "-a", "--args" }, required = false, description = Enforce.ARGS_DESCRIPTION, arity = "1..*")
     List<String> queryArgs;
 
     @Option(names = { "-A", "--append" }, required = false, description = Enforce.APPEND_DESCRIPTION)
