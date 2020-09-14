@@ -1,0 +1,38 @@
+name: Package & Github Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      # RPM packaging
+      - name: Build artifacts (RPM, JAR)
+        uses: ./.github/actions/buildrpm
+        id: buildrpm
+        with:
+          rootdir: "./"
+
+      - name: Branch information
+        id: branch_name
+        run: |
+          echo ::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}
+          echo ::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
+          echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.branch_name.outputs.SOURCE_TAG }}
+          files: |
+            /home/runner/work/zkpolicy/zkpolicy/zkPolicy/target/cerndb-sw-zkpolicy-*-uber-jar-with-dependencies.jar
+            /home/runner/work/_temp/_github_home/${{ steps.buildrpm.outputs.rpm_path }}/*/*.rpm
+            /home/runner/work/_temp/_github_home/${{ steps.buildrpm.outputs.source_rpm_path }}/*.rpm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
