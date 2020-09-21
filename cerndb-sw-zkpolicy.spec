@@ -64,7 +64,7 @@ cp -a conf/* $RPM_BUILD_ROOT%{install_path}/conf
 %config(noreplace) %dir %attr(0755, root, root) %{install_path}
 %attr(0755, root, root) %{install_path}/%{name}.jar
 %{_bindir}/zkpolicy
-/etc/bash_completion.d/zkpolicy_autocomplete
+%attr(0644, root, root) /etc/bash_completion.d/zkpolicy_autocomplete
 %{_mandir}/man1/zkpolicy*
 %{install_path}/conf/*
 
