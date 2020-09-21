@@ -48,7 +48,7 @@ public class ZKCheckCli implements Runnable {
     try {
       config = new ZKConfig(parent.configFile);
     } catch (Exception e) {
-      System.out.println(e.toString());
+      System.out.println(e.getMessage());
       logger.error("Exception occurred!", e);
     }
 
@@ -85,7 +85,7 @@ public class ZKCheckCli implements Runnable {
         outputBuf.append("\n" + String.join("\n", checksOutput.get(checkElement.hashCode())) + "\n");
         System.out.println(outputBuf.toString());
       } catch (Exception e) {
-        System.out.println(e.toString());
+        System.out.println(e.getMessage());
         logger.error("Exception occurred!", e);
       }
     }

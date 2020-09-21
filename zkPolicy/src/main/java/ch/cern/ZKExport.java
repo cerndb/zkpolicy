@@ -64,7 +64,7 @@ public class ZKExport {
     try {
       this.toTreeStruct(rootPath, root);
     } catch (Exception e) {
-      System.out.println(e.toString());
+      System.out.println(e.getMessage());
       logger.error("Exception occurred!", e);
     }
 
@@ -76,7 +76,7 @@ public class ZKExport {
         mapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, root);
       }
     } catch (Exception e) {
-      System.out.println(e.toString());
+      System.out.println(e.getMessage());
       logger.error("Exception occurred!", e);
     }
   }
@@ -89,7 +89,7 @@ public class ZKExport {
     try {
       this.toTreeStruct(rootPath, root);
     } catch (Exception e) {
-      System.out.println(e.toString());
+      System.out.println(e.getMessage());
       logger.error("Exception occurred!", e);
     }
 
@@ -97,7 +97,7 @@ public class ZKExport {
       ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
       mapper.writeValue(outputFile, root);
     } catch (Exception e) {
-      System.out.println(e.toString());
+      System.out.println(e.getMessage());
       logger.error("Exception occurred!", e);
     }
   }

@@ -38,14 +38,14 @@ public class ZKExportCli implements Runnable {
     try {
       config = new ZKConfig(parent.configFile);
     } catch (Exception e) {
-      System.out.println(e.toString());
+      System.out.println(e.getMessage());
     }
     if (config != null) {
       try (ZKClient zk = new ZKClient(config)) {
         ZKExport zkExport = new ZKExport(zk);
         zkExport.export(rootPath, format, compactMode, outputFile);
       } catch (Exception e) {
-        System.out.println(e.toString());
+        System.out.println(e.getMessage());
       }
     }
   }

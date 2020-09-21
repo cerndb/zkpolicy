@@ -34,7 +34,7 @@ public class ZKRollbackCli implements Runnable {
     try {
       config = new ZKConfig(parent.configFile);
     } catch (IOException e) {
-      System.out.println(e.toString());
+      System.out.println(e.getMessage());
       logger.error("Exception occurred!", e);
     }
 
@@ -44,7 +44,7 @@ public class ZKRollbackCli implements Runnable {
         ZKRollbackSet rollbackSet = new ZKRollbackSet(this.inputStateFile);
         rollbackSet.enforceRollback(zk);
       } catch (Exception e) {
-        System.out.println(e.toString());
+        System.out.println(e.getMessage());
         logger.error("Exception occurred!", e);
       }
     }

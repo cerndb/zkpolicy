@@ -80,7 +80,7 @@ public class ZKAuditCli implements Runnable {
           outputString += zkAudit.getACLOverview();
         }
       } catch (Exception e) {
-        System.out.println(e.toString());
+        System.out.println(e.getMessage());
         logger.error("Exception occurred!", e);
       }
 
@@ -96,7 +96,7 @@ public class ZKAuditCli implements Runnable {
       writer.flush();
       writer.close();
     } catch (Exception e) {
-      System.out.println(e.toString());
+      System.out.println(e.getMessage());
       logger.error("Exception occurred!", e);
     }
   }

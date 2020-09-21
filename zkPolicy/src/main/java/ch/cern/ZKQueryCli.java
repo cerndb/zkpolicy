@@ -74,7 +74,7 @@ public class ZKQueryCli implements Runnable {
     try {
       this.executeQuery();
     } catch (Exception e) {
-      System.out.println(e.toString());
+      System.out.println(e.getMessage());
       logger.error("Exception occurred!", e);
     }
   }
@@ -124,7 +124,7 @@ public class ZKQueryCli implements Runnable {
       System.out.println("No such method: " + this.queryName);
       System.out.println("Please consult the list of default queries using query -h");
     } catch (Exception e) {
-      System.out.println(e.toString());
+      System.out.println(e.getMessage());
       logger.error("Exception occurred!", e);
     }
   }
