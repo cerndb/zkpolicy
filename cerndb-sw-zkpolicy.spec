@@ -101,6 +101,9 @@ rm -rf /var/log/zkpolicy
 %postun -p /bin/sh
 
 %changelog
+* Tue Sep 22 2020 Christos Arvanitis <christos.arvanitis@cern.ch> 1.0.1-18
+- Change bash autocomplete permissions
+
 * Fri Jul 18 2020 Christos Arvanitis <christos.arvanitis@cern.ch> 1.0.1-8
 - Add MIT License
 
