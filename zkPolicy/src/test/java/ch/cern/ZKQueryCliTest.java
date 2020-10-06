@@ -16,9 +16,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.curator.test.InstanceSpec;
 import org.apache.curator.test.TestingServer;

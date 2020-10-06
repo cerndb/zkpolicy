@@ -10,7 +10,6 @@ package ch.cern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

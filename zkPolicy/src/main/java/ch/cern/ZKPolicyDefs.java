@@ -137,6 +137,13 @@ public class ZKPolicyDefs {
       static final String DESCRIPTION = "Rollback ACLs to pre enforce state";
       static final String INPUT_STATE_DESCRIPTION = "File with ZooKeeper tree state before enforcing";
     }
+
+    static class PurgeRollback {
+      static final String DESCRIPTION = "Purge rollback snapshots, retaining a user defined number";
+      static final String RETAIN_CNT_DESCRIPTION = "Number of rollback snapshots to retain after purging";
+      static final String ROLLBACK_DIR_DESCRIPTION = "Rollback snapshots directory";
+      static final String ROLLBACK_DIR_DEFAULT = "/opt/zkpolicy/rollback";
+    }
   }
 
   static class Queries {

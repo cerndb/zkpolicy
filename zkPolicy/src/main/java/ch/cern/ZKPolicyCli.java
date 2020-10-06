@@ -25,7 +25,7 @@ import ch.cern.ZKPolicyDefs.Cli.ZkPolicy;
 
 @Command(name = "zkpolicy", description = ZkPolicy.DESCRIPTION, versionProvider = ZKPolicyCli.PropertiesVersionProvider.class, subcommands = {
     ZKQueryCli.class, ZKExportCli.class, ZKTreeCli.class, ZKEnforceCli.class, ZKAuditCli.class, ZKCheckCli.class,
-    ZKRollbackCli.class, HelpCommand.class }, mixinStandardHelpOptions = true)
+    ZKRollbackCli.class, ZKPurgeRollbackCli.class, HelpCommand.class }, mixinStandardHelpOptions = true)
 /**
  * Class that handles CLI arguments for the tool.
  */
