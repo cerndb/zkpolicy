@@ -1,6 +1,6 @@
-# zkPolicy Documentation
+# zkpolicy Documentation
 
-Welcome to zkPolicy documentation!
+Welcome to zkpolicy documentation!
 
 ### Table of contents
 1. [Features](#features)
@@ -23,7 +23,7 @@ Welcome to zkPolicy documentation!
     * [Configuration](#configuration)
 
 ## Features
-zkPolicy is a ZooKeeper tool that provides:
+zkpolicy is a ZooKeeper tool that provides:
 * Visualization of ZooKeeper zNode tree structure
 * Generation of reports for ZooKeeper security auditing (with sections for Four Letter Words, ACL overview for tree, query and check results)
 * Enforcing ACL policies on znode subtrees
@@ -74,10 +74,10 @@ zkPolicy introduces several concepts as described [here](main_concepts/README.md
 
 ## User Guide
 ### Usage
-In this section we are going to outline the usage of zkPolicy for the main functionality of the tool. For complete information and usage guides for zkPolicy, please consult the tool man pages.
+In this section we are going to outline the usage of zkpolicy for the main functionality of the tool. For complete information and usage guides for zkpolicy, please consult the tool man pages.
 
 #### Authenticating with ZooKeeper
-zkPolicy uses JAAS (Java Authentication and Authorization Service) for pluggable authentication with ZooKeeper before any sub-command. There are three ways offered to set JAAS prior to execution:
+zkpolicy uses JAAS (Java Authentication and Authorization Service) for pluggable authentication with ZooKeeper before any sub-command. There are three ways offered to set JAAS prior to execution:
 * Using the CLI option `-j, --jaas <jaas.conf path>`
 * Using the `-Djava.security.auth.login.config=<jaas.conf path>` set in the `/opt/zkpolicy/conf/java.env` file
 * Using the `jaas` field in the configuration file as described in the [Configuration section](#configuration).
@@ -88,7 +88,7 @@ In case of multiple JAAS definitions, the following priority is used:
 3. Configuration file
 
 #### Auditing
-Using the zkPolicy auditing functionality, a user can generate useful reports for the ACLs defined throughout a ZooKeeper instance. Those reports include the results for queries and checks defined at the audit configuration file as well as additional information regarding the ZooKeeper Server (List of ACL definitions for every znode accessible by the tool user, Four Letter Words information and ZooKeeper instance connection details).
+Using the zkpolicy auditing functionality, a user can generate useful reports for the ACLs defined throughout a ZooKeeper instance. Those reports include the results for queries and checks defined at the audit configuration file as well as additional information regarding the ZooKeeper Server (List of ACL definitions for every znode accessible by the tool user, Four Letter Words information and ZooKeeper instance connection details).
 
 ```bash
 zkpolicy --config config.yml audit -i [audit_config.yml]
@@ -97,7 +97,7 @@ zkpolicy --config config.yml audit -i [audit_config.yml]
 An example audit configuration file can be found [here](../configs/examples/audit_example.yml).
 
 #### Enforcing
-zkPolicy offers policy enforcing functionality. Using its CLI, a user can either enforce a single policy or a series of policies defined in a policies configuration file.
+zkpolicy offers policy enforcing functionality. Using its CLI, a user can either enforce a single policy or a series of policies defined in a policies configuration file.
 
 ##### Enforce a single policy
 Enforce a specific set of ACL elements on every znode matching a specific query:
@@ -150,7 +150,7 @@ Rollback snapshots are saved by default in `/opt/zkpolicy/rollback` directory. C
 `zkpolicy --config config.yml purge-rollback --retain-count N`
 
 #### Visualization
-To get an visual representation of the ZooKeeper tree structure, zkPolicy offers the `tree` sub-command:
+To get an visual representation of the ZooKeeper tree structure, zkpolicy offers the `tree` sub-command:
 
 ```bash
 zkpolicy --config config.yml tree --root-path /root
@@ -165,19 +165,7 @@ zkpolicy --config config.yml export --root-path /root --type json --output expor
 For compact output, append `-C, --compact` to the previous command.
 
 ### Configuration
-The tool execution is configured by the main configuration file that is passed as a parameter to the `-c, --config` flag. This is a `.yml` file of the following format:
-
-```yml
----
-timeout: 2000
-zkServers: "127.0.0.1:2183,127.0.0.1:2182,127.0.0.1:2181"
-
-# colors for tree view output
-# Available colors: RED, GREEN, BLACK, BLUE, YELLOW, MAGENTA, CYAN, WHITE
-matchColor: "GREEN"
-mismatchColor: "RED"
-jaas: "/path/to/jaas.conf"
-```
+zkpolicy is configured by the main `yaml` configuration file set through the `-c, --config` option.
 
 An example configuration file can be found [here](../configs/examples/config_example.yml).
 
