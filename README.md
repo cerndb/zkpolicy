@@ -1,4 +1,4 @@
-# ZooKeeper Policy Audit Tool
+# zkpolicy - ZooKeeper Policy Audit Tool ![GitHub release (latest by date)](https://img.shields.io/github/v/release/cerndb/zkpolicy?label=latest) ![Maven Central](https://img.shields.io/maven-central/v/ch.cern/cerndb-sw-zkpolicy) ![GitHub](https://img.shields.io/github/license/cerndb/zkpolicy)
 
 ### Table of contents
 1. [Overview](#overview)
@@ -13,7 +13,7 @@
 7. [Configuration](#configuration)
 
 ## Overview
-Zookeeper Policy Audit Tool (aka zkPolicy) for checking and enforcing ACLs on ZNodes.
+Zookeeper Policy Audit Tool (aka zkpolicy) for checking and enforcing ACLs on ZNodes.
 
 This repository contains all the source code for the tool, that uses the ZooKeeper Java API, as well as proposed default configuration for auditing and enforcing policies on the ZooKeeper ZNode tree.
 
