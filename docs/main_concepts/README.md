@@ -12,7 +12,7 @@ A query is executed upon a specific subtree of the ZNode tree to answer the foll
 
 In order to execute a query using the CLI, the following command is needed:
 ```bash
-zkpolicy -c <config_file.yml> query [QUERY_NAME] -p [ROOT_PATH] -a [QUERY ARGS]
+zkpolicy --config <config_file.yml> query [QUERY_NAME] --root-path [ROOT_PATH] --args [QUERY ARGS]
 ```
 
 The tool defines numerous default queries for commonly requested scenarios. More info on the available queries can be found [here](./queries.md).
@@ -23,7 +23,7 @@ A check is executed upon a specific set of znodes that are defined either explic
 
 In order to execute a check using the CLI, the following command is needed:
 ```bash
-zkpolicy -c <config_file.yml> check -e [PATH PATTERN] -p [ROOT_PATH] -a [CHECK ACLS]
+zkpolicy --config <config_file.yml> check -path-pattern [PATH PATTERN] --root-path [ROOT_PATH] --acls [CHECK ACLS]
 ```
 
 More info as well as examples of check execution can be found [here](./checks.md).

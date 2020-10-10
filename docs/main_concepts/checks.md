@@ -1,9 +1,8 @@
 # Checks
-
 A `check` is confirming compliance with a specific set of ACL entries on znodes with paths matching a regular expression. In the next section, we include examples for check executions.
 
 ## Examples
-In this section, we will provide check examples on the following ZNode tree state:
+In this section, we will provide check examples on the following znode tree state:
 
 ```
 /
@@ -39,7 +38,7 @@ In this section, we will provide check examples on the following ZNode tree stat
 Check that all znodes under `/hbase-secure` are open for global read while write protected:
 
 ```
-$ zkpolicy -c <config_file> check -p /hbase-secure -e .* -a sasl:hbase:cdrwa world:anyone:r
+$ zkpolicy --config <config_file> check --root-path /hbase-secure --path-pattern .* --acls sasl:hbase:cdrwa world:anyone:r
 
 Check Result: PASS
 
@@ -53,7 +52,7 @@ Check Result: PASS
 Check that all znodes `/llap-sasl/user-*` are not open for global read:
 
 ```
-$ zkpolicy -c <config_file> check -p /llap-sasl -e /llap-sasl/user-.* -a sasl:hive:cdrwa
+$ zkpolicy --config <config_file> check --root-path /llap-sasl --path-pattern /llap-sasl/user-.* --acls sasl:hive:cdrwa
 
 Check Result: FAIL
 

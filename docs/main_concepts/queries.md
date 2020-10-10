@@ -45,7 +45,7 @@ The queries will be executed recursively from the root path `/` and from a user 
 
 ### duplicateACL
 ```
-$ zkpolicy -c <config_file> query duplicateACL -p /
+$ zkpolicy --config <config_file> query duplicateACL --root-path /
 
 WARNING: No READ permission for /b/bb, skipping subtree
 /d
@@ -55,7 +55,7 @@ Notice that when the user executing the query has no READ permission for a certa
 
 ### exactACL
 ```
-$ zkpolicy -c <config_file> query exactACL -p / -a digest:user2:[passw2 digest]:cdrwa ip:127.0.0.3:rda
+$ zkpolicy --config <config_file> query exactACL --root-path / --args digest:user2:[passw2 digest]:cdrwa ip:127.0.0.3:rda
 
 /b
 WARNING: No READ permission for /b/bb, skipping subtree
@@ -64,7 +64,7 @@ WARNING: No READ permission for /b/bb, skipping subtree
 ### globMatchACL
 In this example, we query for znodes that have at least one ACL entry using the digest schema that allows write permission for data.
 ```
-$ zkpolicy -c <config_file> query globMatchACL -p / -a digest:*:*w*
+$ zkpolicy --config <config_file> query globMatchACL --root-path / --args digest:*:*w*
 
 /a
 /a/aa
@@ -74,7 +74,7 @@ WARNING: No READ permission for /b/bb, skipping subtree
 
 ### globMatchPath
 ```
-$ zkpolicy -c <config_file> query globMatchPath -p / -a /*/*
+$ zkpolicy --config <config_file> query globMatchPath --root-path / --args /*/*
 
 /a
 /a/aa
@@ -84,7 +84,7 @@ WARNING: No READ permission for /b/bb, skipping subtree
 
 ### noACL
 ```
-$ zkpolicy -c <config_file> query noACL -p /
+$ zkpolicy --config <config_file> query noACL --root-path /
 
 /
 WARNING: No READ permission for /b/bb, skipping subtree
@@ -97,7 +97,7 @@ WARNING: No READ permission for /b/bb, skipping subtree
 
 ### parentYesChildNo
 ```
-$ zkpolicy -c <config_file> query parentYesChildNo -p /
+$ zkpolicy --config <config_file> query parentYesChildNo --root-path /
 
 /a
 /b
@@ -109,7 +109,7 @@ WARNING: No READ permission for /b/bb, skipping subtree
 
 ### regexMatchACL
 ```
-$ zkpolicy -c <config_file> query regexMatchACL -p / -a digest:.*:.*w.*
+$ zkpolicy --config <config_file> query regexMatchACL --root-path / --args digest:.*:.*w.*
 
 /a
 /a/aa
@@ -119,7 +119,7 @@ WARNING: No READ permission for /b/bb, skipping subtree
 
 ### regexMatchPath
 ```
-$ zkpolicy -c <config_file> query regexMatchPath -p / -a /.*/.*
+$ zkpolicy --config <config_file> query regexMatchPath --root-path / --args /.*/.*
 
 /a
 /a/aa
@@ -129,7 +129,7 @@ WARNING: No READ permission for /b/bb, skipping subtree
 
 ### satisfyACL
 ```
-$ zkpolicy -c <config_file> query satisfyACL -p / -a digest:user1:[passw1 digest]:r
+$ zkpolicy --config <config_file> query satisfyACL --root-path / --args digest:user1:[passw1 digest]:r
 
 /
 /a
