@@ -30,9 +30,11 @@ public class ZKExport {
   private static Logger logger = LogManager.getLogger(ZKExport.class);
 
   private ZKClient zk;
+  private ZKTreeNode znodeRoot;
 
   public ZKExport(ZKClient zk) {
     this.zk = zk;
+    this.znodeRoot = new ZKTreeNode();
   }
 
   /**
@@ -44,12 +46,19 @@ public class ZKExport {
    * @param outputFile  Output file path
    */
   public void export(String rootPath, ZKPolicyDefs.ExportFormats format, boolean compactMode, File outputFile) {
+    try {
+      this.toTreeStruct(rootPath, znodeRoot);
+    } catch (Exception e) {
+      System.out.println(e.toString());
+      logger.error("Exception occurred!", e);
+    }
+
     switch (format) {
       case json:
-        this.exportToJSON(outputFile, rootPath, compactMode);
+        this.exportToJSON(outputFile, compactMode);
         break;
       case yaml:
-        this.exportToYAML(outputFile, rootPath);
+        this.exportToYAML(outputFile);
         break;
       default:
         break;
@@ -59,21 +68,13 @@ public class ZKExport {
   /**
    * Export znode subtree to JSON.
    */
-  private void exportToJSON(File outputFile, String rootPath, boolean compactMode) {
-    ZKTreeNode root = new ZKTreeNode();
-    try {
-      this.toTreeStruct(rootPath, root);
-    } catch (Exception e) {
-      System.out.println(e.toString());
-      logger.error("Exception occurred!", e);
-    }
-
+  private void exportToJSON(File outputFile, boolean compactMode) {
     try {
       ObjectMapper mapper = new ObjectMapper(new JsonFactory());
       if (compactMode) {
-        mapper.writeValue(outputFile, root);
+        mapper.writeValue(outputFile, znodeRoot);
       } else {
-        mapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, root);
+        mapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, znodeRoot);
       }
     } catch (Exception e) {
       System.out.println(e.toString());
@@ -84,18 +85,10 @@ public class ZKExport {
   /**
    * Export znode subtree to YAML.
    */
-  private void exportToYAML(File outputFile, String rootPath) {
-    ZKTreeNode root = new ZKTreeNode();
-    try {
-      this.toTreeStruct(rootPath, root);
-    } catch (Exception e) {
-      System.out.println(e.toString());
-      logger.error("Exception occurred!", e);
-    }
-
+  private void exportToYAML(File outputFile) {
     try {
       ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-      mapper.writeValue(outputFile, root);
+      mapper.writeValue(outputFile, znodeRoot);
     } catch (Exception e) {
       System.out.println(e.toString());
       logger.error("Exception occurred!", e);
@@ -106,7 +99,6 @@ public class ZKExport {
    * Recursive function that constructs the full ZNode tree.
    */
   private void toTreeStruct(String path, ZKTreeNode currentNode) throws KeeperException, InterruptedException {
-
     byte[] data;
     List<ACL> acl;
     Stat stat = new Stat();
