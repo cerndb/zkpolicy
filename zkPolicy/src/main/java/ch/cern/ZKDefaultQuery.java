@@ -139,6 +139,9 @@ public class ZKDefaultQuery {
     }
 
     public boolean query(List<ACL> aclList, List<ACL> parentAclList, String path, ZKClient zk, List<String> queryACLs) {
+      if (aclList == null) {
+        return false;
+      }
       List<ACLAugment> aclListAugment = ACLAugment.generateACLAugmentList(aclList);
 
       // queryACL list
