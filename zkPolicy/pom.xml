@@ -13,7 +13,7 @@ or submit itself to any jurisdiction.
   <modelVersion>4.0.0</modelVersion>
   <groupId>ch.cern</groupId>
   <artifactId>cerndb-sw-zkpolicy</artifactId>
-  <version>1.0.1-19</version>
+  <version>1.0.1-20</version>
   <name>${project.groupId}:${project.artifactId}</name>
   <description>zkpolicy - ZooKeeper Policy Auditing Tool</description>
   <url>https://github.com/cerndb/zkpolicy</url>
@@ -79,12 +79,12 @@ or submit itself to any jurisdiction.
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
-      <version>2.13.2</version>
+      <version>[2.15.0,)</version>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
-      <version>2.13.2</version>
+      <version>[2.15.0,)</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
