@@ -66,14 +66,14 @@ for different dependency managers (e.g. Maven, Gradle). Indicatively:
 <dependency>
   <groupId>ch.cern</groupId>
   <artifactId>cerndb-sw-zkpolicy</artifactId>
-  <version>1.0.1-13</version>
+  <version>1.0.1-21</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```
-implementation 'ch.cern:cerndb-sw-zkpolicy:1.0.1-13'
+implementation 'ch.cern:cerndb-sw-zkpolicy:1.0.1-21'
 ```
 
 ## Using the tool
