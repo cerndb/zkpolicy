@@ -101,6 +101,9 @@ rm -rf /var/log/zkpolicy
 %postun -p /bin/sh
 
 %changelog
+* Fri Apr 29 2020 Emil Kleszcz <emil.kleszcz@cern.ch> 1.0.1-21
+- Patch log4j CVE
+
 * Tue Oct 6 2020 Christos Arvanitis <christos.arvanitis@cern.ch> 1.0.1-18
 - Add rollback snapshot purge feature
 
