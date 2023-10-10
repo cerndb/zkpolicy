@@ -284,6 +284,34 @@ public class ZKAuditTest {
   }
 
   @Test
+  public void testNoNodesFoundForPathPatternCheckNoNegate() throws Exception {
+    File file = new File(testTempDir, "audit_tmp.yml");
+
+    FileWriter fw = new FileWriter(file);
+    fw.write("---\n");
+    fw.write("checks:\n");
+    fw.write("  - title: \"Check 1 title\"\n");
+    fw.write("    rootPath: \"/a\"\n");
+    fw.write("    pathPattern: \"/noexistingpattern\"\n");
+    fw.write("    acls:\n");
+    fw.write("      - \"world:anyone:r\"\n");
+
+    fw.flush();
+    fw.close();
+
+    ZKAudit zkAudit = new ZKAudit(this.zkClient, file);
+    assertNotNull(zkAudit);
+
+    String expectedOutput = String.join("\n", "", "Check: Check 1 title", "Root Path: /a",
+        "Path Pattern: /noexistingpattern", "Arguments:", "- world:anyone:r",
+        "Description: " + String.format(ZKPolicyDefs.Check.DESCRIPTION_FORMAT, "/a", "/noexistingpattern"),
+        "- world:anyone:r", "", "Result: PASS", "No znodes matching the requested path pattern found.",
+        ZKPolicyDefs.TerminalConstants.subSectionSeparator, "", "Overall Check Result: PASS", "");
+
+    assertEquals(expectedOutput, zkAudit.generateChecksSection());
+  }
+
+  @Test
   public void testInvalidRootPathCheck() throws Exception {
     File file = new File(testTempDir, "audit_tmp.yml");
 
