@@ -44,7 +44,7 @@ public class ZKCheckElement {
    */
   public String generateDescription() {
     StringBuffer outputBuf = new StringBuffer();
-    if (this.negate) {
+    if (this.negate != null && this.negate) {
       outputBuf.append(String.format(ZKPolicyDefs.Check.NEGATE_DESCRIPTION_FORMAT, rootPath, pathPattern) + "\n");
     } else {
       outputBuf.append(String.format(ZKPolicyDefs.Check.DESCRIPTION_FORMAT, rootPath, pathPattern) + "\n");

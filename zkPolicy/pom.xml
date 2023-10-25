@@ -85,7 +85,6 @@ or submit itself to any jurisdiction.
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
       <version>[2.15.0,)</version>
-      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
 
